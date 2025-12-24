@@ -157,8 +157,7 @@
   }
 
   .gold-text {
-    @apply bg-clip-text text-transparent;
-    background: var(--gradient-gold);
+    @apply text-primary;
   }
 
   .shimmer {
