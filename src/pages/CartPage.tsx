@@ -274,12 +274,10 @@ function CartContent() {
 
 const CartPage = () => {
   return (
-    <LanguageProvider>
-      <CartProvider>
-        <Header />
-        <CartContent />
-      </CartProvider>
-    </LanguageProvider>
+    <>
+      <Header />
+      <CartContent />
+    </>
   );
 };
 

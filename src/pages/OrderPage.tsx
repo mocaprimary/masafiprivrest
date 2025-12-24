@@ -148,12 +148,10 @@ function OrderContent() {
 
 const OrderPage = () => {
   return (
-    <LanguageProvider>
-      <CartProvider>
-        <Header />
-        <OrderContent />
-      </CartProvider>
-    </LanguageProvider>
+    <>
+      <Header />
+      <OrderContent />
+    </>
   );
 };
 
