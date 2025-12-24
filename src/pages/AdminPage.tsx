@@ -5,6 +5,19 @@ import { useAuth, AuthProvider } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   LayoutDashboard, 
   UtensilsCrossed, 
@@ -20,10 +33,16 @@ import {
   Clock,
   DollarSign,
   ChefHat,
-  UserCheck
+  UserCheck,
+  Eye,
+  Phone,
+  Mail,
+  CalendarDays,
+  Filter
 } from 'lucide-react';
 
 type Tab = 'dashboard' | 'menu' | 'reservations' | 'orders' | 'users' | 'settings';
+type ReservationStatusFilter = 'all' | 'pending' | 'confirmed' | 'arrived' | 'cancelled';
 
 interface Reservation {
   id: string;
@@ -65,6 +84,10 @@ function AdminContent() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<ReservationStatusFilter>('all');
+  const [dateFilter, setDateFilter] = useState<string>('');
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [showReservationModal, setShowReservationModal] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -82,11 +105,11 @@ function AdminContent() {
     }
   }, [user, isStaff, isAdmin]);
 
-  // Real-time orders subscription
+  // Real-time orders and reservations subscription
   useEffect(() => {
     if (!user || !isStaff) return;
 
-    const channel = supabase
+    const ordersChannel = supabase
       .channel('orders-changes')
       .on(
         'postgres_changes',
@@ -97,8 +120,20 @@ function AdminContent() {
       )
       .subscribe();
 
+    const reservationsChannel = supabase
+      .channel('reservations-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'reservations' },
+        () => {
+          fetchReservations();
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(reservationsChannel);
     };
   }, [user, isStaff]);
 
@@ -170,8 +205,45 @@ function AdminContent() {
     } else {
       toast.success('Reservation updated');
       fetchReservations();
+      // Update modal if open
+      if (selectedReservation?.id === id) {
+        setSelectedReservation(prev => prev ? { ...prev, status } : null);
+      }
     }
   };
+
+  const updateDepositStatus = async (id: string, depositStatus: string) => {
+    const { error } = await supabase
+      .from('reservations')
+      .update({ deposit_status: depositStatus })
+      .eq('id', id);
+
+    if (error) {
+      toast.error('Failed to update deposit status');
+    } else {
+      toast.success('Deposit status updated');
+      fetchReservations();
+      // Update modal if open
+      if (selectedReservation?.id === id) {
+        setSelectedReservation(prev => prev ? { ...prev, deposit_status: depositStatus } : null);
+      }
+    }
+  };
+
+  const viewReservationDetails = (reservation: Reservation) => {
+    setSelectedReservation(reservation);
+    setShowReservationModal(true);
+  };
+
+  const filteredReservations = reservations.filter(r => {
+    const matchesSearch = 
+      r.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.reservation_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.phone.includes(searchQuery);
+    const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
+    const matchesDate = !dateFilter || r.reservation_date === dateFilter;
+    return matchesSearch && matchesStatus && matchesDate;
+  });
 
   const updateOrderStatus = async (id: string, status: string) => {
     const { error } = await supabase
@@ -390,17 +462,68 @@ function AdminContent() {
 
         {activeTab === 'reservations' && (
           <div>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
               <h2 className="font-display text-2xl font-bold text-foreground">Reservations</h2>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 input-field w-48"
+                  />
+                </div>
+                <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as ReservationStatusFilter)}>
+                  <SelectTrigger className="w-36">
+                    <Filter className="w-4 h-4 mr-2" />
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="arrived">Arrived</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Input
-                  placeholder="Search reservations..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 input-field w-64"
+                  type="date"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="input-field w-40"
                 />
+                {dateFilter && (
+                  <Button variant="ghost" size="sm" onClick={() => setDateFilter('')}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
+            </div>
+
+            {/* Status Summary Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+              {(['pending', 'confirmed', 'arrived', 'cancelled'] as const).map((status) => {
+                const count = reservations.filter(r => r.status === status).length;
+                const colors = {
+                  pending: 'bg-amber/10 text-amber border-amber/20',
+                  confirmed: 'bg-primary/10 text-primary border-primary/20',
+                  arrived: 'bg-success/10 text-success border-success/20',
+                  cancelled: 'bg-destructive/10 text-destructive border-destructive/20',
+                };
+                return (
+                  <button
+                    key={status}
+                    onClick={() => setStatusFilter(statusFilter === status ? 'all' : status)}
+                    className={`p-3 rounded-lg border transition-all ${
+                      statusFilter === status ? colors[status] + ' ring-2 ring-offset-2' : 'glass-card hover:bg-secondary/50'
+                    }`}
+                  >
+                    <p className="text-2xl font-bold">{count}</p>
+                    <p className="text-sm capitalize">{status}</p>
+                  </button>
+                );
+              })}
             </div>
 
             <div className="glass-card rounded-xl overflow-hidden">
@@ -416,13 +539,8 @@ function AdminContent() {
                   </tr>
                 </thead>
                 <tbody>
-                  {reservations
-                    .filter(r => 
-                      r.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      r.reservation_number.toLowerCase().includes(searchQuery.toLowerCase())
-                    )
-                    .map((reservation) => (
-                    <tr key={reservation.id} className="border-t border-border">
+                  {filteredReservations.map((reservation) => (
+                    <tr key={reservation.id} className="border-t border-border hover:bg-secondary/30 transition-colors">
                       <td className="p-4">
                         <p className="font-medium text-foreground">{reservation.reservation_number}</p>
                         <p className="text-sm text-muted-foreground">{reservation.guests} guests</p>
@@ -455,47 +573,208 @@ function AdminContent() {
                           {reservation.deposit_status}
                         </span>
                       </td>
-                      <td className="p-4 text-right space-x-2">
-                        {reservation.status === 'confirmed' && (
+                      <td className="p-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
                           <Button
                             size="sm"
-                            variant="gold"
-                            onClick={() => updateReservationStatus(reservation.id, 'arrived')}
+                            variant="ghost"
+                            onClick={() => viewReservationDetails(reservation)}
                           >
-                            <Check className="w-4 h-4 mr-1" />
-                            Check In
+                            <Eye className="w-4 h-4" />
                           </Button>
-                        )}
-                        {reservation.status === 'pending' && (
-                          <>
+                          {reservation.status === 'confirmed' && (
                             <Button
                               size="sm"
-                              variant="outline"
-                              onClick={() => updateReservationStatus(reservation.id, 'confirmed')}
+                              variant="gold"
+                              onClick={() => updateReservationStatus(reservation.id, 'arrived')}
                             >
-                              Confirm
+                              <Check className="w-4 h-4 mr-1" />
+                              Check In
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-destructive"
-                              onClick={() => updateReservationStatus(reservation.id, 'cancelled')}
-                            >
-                              Cancel
-                            </Button>
-                          </>
-                        )}
+                          )}
+                          {reservation.status === 'pending' && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateReservationStatus(reservation.id, 'confirmed')}
+                              >
+                                Confirm
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-destructive"
+                                onClick={() => updateReservationStatus(reservation.id, 'cancelled')}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {reservations.length === 0 && (
+              {filteredReservations.length === 0 && (
                 <div className="p-8 text-center text-muted-foreground">
                   No reservations found
                 </div>
               )}
             </div>
+
+            {/* Reservation Detail Modal */}
+            <Dialog open={showReservationModal} onOpenChange={setShowReservationModal}>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-primary" />
+                    Reservation Details
+                  </DialogTitle>
+                </DialogHeader>
+                {selectedReservation && (
+                  <div className="space-y-6">
+                    {/* Reservation Number & Status */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Reservation #</p>
+                        <p className="font-bold text-lg">{selectedReservation.reservation_number}</p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        selectedReservation.status === 'arrived' ? 'bg-success/20 text-success' :
+                        selectedReservation.status === 'confirmed' ? 'bg-primary/20 text-primary' :
+                        selectedReservation.status === 'cancelled' ? 'bg-destructive/20 text-destructive' :
+                        'bg-amber/20 text-amber'
+                      }`}>
+                        {selectedReservation.status}
+                      </span>
+                    </div>
+
+                    {/* Guest Info */}
+                    <div className="glass-card rounded-lg p-4 space-y-3">
+                      <h4 className="font-semibold text-foreground">Guest Information</h4>
+                      <div className="grid gap-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Users className="w-4 h-4 text-muted-foreground" />
+                          <span className="font-medium">{selectedReservation.full_name}</span>
+                          <span className="text-muted-foreground">({selectedReservation.guests} guests)</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Phone className="w-4 h-4 text-muted-foreground" />
+                          <a href={`tel:${selectedReservation.phone}`} className="text-primary hover:underline">
+                            {selectedReservation.phone}
+                          </a>
+                        </div>
+                        {selectedReservation.email && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Mail className="w-4 h-4 text-muted-foreground" />
+                            <a href={`mailto:${selectedReservation.email}`} className="text-primary hover:underline">
+                              {selectedReservation.email}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Date & Time */}
+                    <div className="glass-card rounded-lg p-4 space-y-3">
+                      <h4 className="font-semibold text-foreground">Date & Time</h4>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <CalendarDays className="w-4 h-4 text-muted-foreground" />
+                          <span>{selectedReservation.reservation_date}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Clock className="w-4 h-4 text-muted-foreground" />
+                          <span>{selectedReservation.reservation_time}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Deposit Info */}
+                    <div className="glass-card rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-foreground">Deposit</h4>
+                        <span className="font-bold text-lg">{selectedReservation.deposit_amount} AED</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Status:</span>
+                        <Select 
+                          value={selectedReservation.deposit_status} 
+                          onValueChange={(v) => updateDepositStatus(selectedReservation.id, v)}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="paid">Paid</SelectItem>
+                            <SelectItem value="refunded">Refunded</SelectItem>
+                            <SelectItem value="forfeited">Forfeited</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2 pt-2">
+                      {selectedReservation.status === 'pending' && (
+                        <>
+                          <Button 
+                            variant="gold" 
+                            className="flex-1"
+                            onClick={() => {
+                              updateReservationStatus(selectedReservation.id, 'confirmed');
+                              setShowReservationModal(false);
+                            }}
+                          >
+                            <Check className="w-4 h-4 mr-2" />
+                            Confirm Reservation
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="text-destructive"
+                            onClick={() => {
+                              updateReservationStatus(selectedReservation.id, 'cancelled');
+                              setShowReservationModal(false);
+                            }}
+                          >
+                            <X className="w-4 h-4 mr-2" />
+                            Cancel
+                          </Button>
+                        </>
+                      )}
+                      {selectedReservation.status === 'confirmed' && (
+                        <Button 
+                          variant="gold" 
+                          className="flex-1"
+                          onClick={() => {
+                            updateReservationStatus(selectedReservation.id, 'arrived');
+                            setShowReservationModal(false);
+                          }}
+                        >
+                          <UserCheck className="w-4 h-4 mr-2" />
+                          Check In Guest
+                        </Button>
+                      )}
+                      {selectedReservation.status === 'arrived' && (
+                        <p className="text-sm text-success flex items-center gap-2">
+                          <Check className="w-4 h-4" />
+                          Guest has checked in
+                        </p>
+                      )}
+                      {selectedReservation.status === 'cancelled' && (
+                        <p className="text-sm text-destructive flex items-center gap-2">
+                          <X className="w-4 h-4" />
+                          This reservation was cancelled
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
           </div>
         )}
 
