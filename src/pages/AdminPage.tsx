@@ -5,6 +5,7 @@ import { useAuth, AuthProvider } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { AdminMenuManagement } from '@/components/admin/AdminMenuManagement';
 import {
   Dialog,
   DialogContent,
@@ -26,7 +27,6 @@ import {
   Users, 
   Settings,
   LogOut,
-  Plus,
   Search,
   Check,
   X,
@@ -923,18 +923,7 @@ function AdminContent() {
         )}
 
         {activeTab === 'menu' && isAdmin && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-display text-2xl font-bold text-foreground">Menu Management</h2>
-              <Button variant="gold">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Item
-              </Button>
-            </div>
-            <div className="glass-card rounded-xl p-8 text-center">
-              <p className="text-muted-foreground">Menu management coming soon</p>
-            </div>
-          </div>
+          <AdminMenuManagement />
         )}
 
         {activeTab === 'settings' && isAdmin && (
