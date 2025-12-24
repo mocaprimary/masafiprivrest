@@ -203,12 +203,12 @@ function AdminContent() {
     }
   };
 
-  const removeRole = async (userId: string, role: string) => {
+  const removeRole = async (userId: string, role: 'admin' | 'staff') => {
     const { error } = await supabase
       .from('user_roles')
       .delete()
       .eq('user_id', userId)
-      .eq('role', role);
+      .eq('role', role as 'admin' | 'staff');
 
     if (error) {
       toast.error('Failed to remove role');
