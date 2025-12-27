@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       menu_items: {
         Row: {
           allergens: string[] | null
@@ -325,6 +358,26 @@ export type Database = {
         Returns: boolean
       }
       is_staff_or_admin: { Args: { _user_id: string }; Returns: boolean }
+      log_admin_action: {
+        Args: {
+          p_action: string
+          p_details?: Json
+          p_entity_id?: string
+          p_entity_type: string
+        }
+        Returns: string
+      }
+      validate_reservation_input: {
+        Args: {
+          p_date: string
+          p_email: string
+          p_full_name: string
+          p_guests: number
+          p_phone: string
+          p_time: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "staff"

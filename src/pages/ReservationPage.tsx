@@ -9,12 +9,39 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar, Clock, Users, CreditCard, Shield, ArrowLeft, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { z } from 'zod';
 
 const DEPOSIT_AMOUNT = 100; // AED - configurable
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
+// Client-side validation schema
+const reservationSchema = z.object({
+  fullName: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name too long'),
+  phone: z.string().regex(/^\+?[0-9\s\-]{8,15}$/, 'Invalid phone number'),
+  email: z.string().email('Invalid email').optional().or(z.literal('')),
+  guests: z.number().min(1, 'At least 1 guest').max(20, 'Maximum 20 guests'),
+  date: z.string().min(1, 'Date is required'),
+  time: z.string().min(1, 'Time is required'),
+  requests: z.string().max(500, 'Special requests too long').optional(),
+});
+
+interface ReservationResponse {
+  success: boolean;
+  reservation?: {
+    id: string;
+    reservationNumber: string;
+    depositAmount: number;
+  };
+  error?: string;
+  details?: string[];
+}
 
 function ReservationContent() {
   const { t } = useLanguage();
   const [step, setStep] = useState<'form' | 'payment' | 'success'>('form');
+  const [reservationNumber, setReservationNumber] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -25,22 +52,70 @@ function ReservationContent() {
     requests: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.phone || !formData.date || !formData.time) {
-      toast.error('Please fill in all required fields');
+    
+    // Client-side validation first
+    const validation = reservationSchema.safeParse({
+      ...formData,
+      guests: Number(formData.guests)
+    });
+
+    if (!validation.success) {
+      const errors = validation.error.errors.map(e => e.message);
+      toast.error(errors[0]);
       return;
     }
+
+    // Validate date/time is in future
+    const now = new Date();
+    const reservationDateTime = new Date(`${formData.date}T${formData.time}`);
+    if (reservationDateTime <= now) {
+      toast.error('Reservation must be in the future');
+      return;
+    }
+
     setStep('payment');
   };
 
-  const handlePayment = () => {
-    // Simulate payment processing
-    toast.loading('Processing payment...');
-    setTimeout(() => {
+  const handlePayment = async () => {
+    setIsSubmitting(true);
+    toast.loading('Processing reservation...');
+
+    try {
+      // Call edge function for server-side validation and creation
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/create-reservation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName.trim(),
+          phone: formData.phone.trim(),
+          email: formData.email.trim() || undefined,
+          guests: Number(formData.guests),
+          date: formData.date,
+          time: formData.time,
+          specialRequests: formData.requests.trim() || undefined,
+          depositAmount: DEPOSIT_AMOUNT,
+        }),
+      });
+
+      const data: ReservationResponse = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.details?.[0] || data.error || 'Failed to create reservation');
+      }
+
       toast.dismiss();
+      setReservationNumber(data.reservation?.reservationNumber || 'CONFIRMED');
       setStep('success');
-    }, 2000);
+    } catch (error) {
+      toast.dismiss();
+      toast.error(error instanceof Error ? error.message : 'Failed to create reservation');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (step === 'success') {
@@ -55,7 +130,7 @@ function ReservationContent() {
               {t('success')}
             </h1>
             <p className="text-muted-foreground mb-6">
-              Thank you! Your reservation #OAS-2024-1234 is confirmed.
+              Thank you! Your reservation #{reservationNumber} is confirmed.
             </p>
             
             <div className="glass-card rounded-xl p-6 mb-6">
@@ -140,8 +215,8 @@ function ReservationContent() {
             </div>
           </div>
 
-          <Button variant="gold" size="xl" className="w-full" onClick={handlePayment}>
-            Pay {DEPOSIT_AMOUNT} {t('currency')} Deposit
+          <Button variant="gold" size="xl" className="w-full" onClick={handlePayment} disabled={isSubmitting}>
+            {isSubmitting ? 'Processing...' : `Pay ${DEPOSIT_AMOUNT} ${t('currency')} Deposit`}
           </Button>
         </div>
       </div>
