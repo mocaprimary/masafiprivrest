@@ -6,6 +6,7 @@ import { MenuItemCard } from '@/components/MenuItemCard';
 import { MenuItemModal } from '@/components/MenuItemModal';
 import { ReservationCTA } from '@/components/ReservationCTA';
 import { ReviewsSection } from '@/components/ReviewsSection';
+import { MenuChatbot } from '@/components/MenuChatbot';
 import { menuItems, MenuItem } from '@/data/menuData';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { CartProvider } from '@/contexts/CartContext';
@@ -103,6 +104,8 @@ function MenuContent() {
         open={!!selectedItem}
         onClose={() => setSelectedItem(null)}
       />
+
+      <MenuChatbot />
     </div>
   );
 }

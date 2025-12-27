@@ -8,3 +8,6 @@ verify_jwt = true
 
 [functions.generate-description]
 verify_jwt = true
+
+[functions.menu-chat]
+verify_jwt = false
