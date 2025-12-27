@@ -91,13 +91,6 @@ function validateReservation(data: ReservationRequest): { valid: boolean; errors
   return { valid: errors.length === 0, errors }
 }
 
-function generateReservationNumber(): string {
-  const now = new Date()
-  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '')
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0')
-  return `RES-${dateStr}-${random}`
-}
-
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -108,7 +101,7 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     
-    // Use service role key for inserting reservations (bypasses RLS for inserts)
+    // Use service role key for secure reservation creation
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     if (req.method !== 'POST') {
@@ -120,58 +113,53 @@ Deno.serve(async (req) => {
 
     const body: ReservationRequest = await req.json()
 
-    // Server-side validation
+    // Server-side validation (edge function level)
     const validation = validateReservation(body)
     if (!validation.valid) {
-      console.log('Validation failed:', validation.errors)
+      console.log('Edge validation failed:', validation.errors)
       return new Response(
         JSON.stringify({ error: 'Validation failed', details: validation.errors }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Generate reservation number
-    const reservationNumber = generateReservationNumber()
-
-    // Sanitize input data
-    const sanitizedData = {
-      reservation_number: reservationNumber,
-      full_name: body.fullName.trim().slice(0, MAX_NAME_LENGTH),
-      phone: body.phone.trim().replace(/[^\d+\-\s]/g, ''),
-      email: body.email?.trim().toLowerCase() || null,
-      guests: Math.min(Math.max(body.guests, MIN_GUESTS), MAX_GUESTS),
-      reservation_date: body.date,
-      reservation_time: body.time,
-      special_requests: body.specialRequests?.trim().slice(0, MAX_REQUESTS_LENGTH) || null,
-      deposit_amount: body.depositAmount || 100,
-      deposit_status: 'pending',
-      status: 'pending'
-    }
-
-    // Insert reservation
-    const { data: reservation, error } = await supabase
-      .from('reservations')
-      .insert(sanitizedData)
-      .select()
-      .single()
+    // Call the secure database function for reservation creation
+    const { data: result, error } = await supabase.rpc('create_reservation_secure', {
+      p_full_name: body.fullName.trim().slice(0, MAX_NAME_LENGTH),
+      p_phone: body.phone.trim().replace(/[^\d+\-\s]/g, ''),
+      p_email: body.email?.trim().toLowerCase() || null,
+      p_guests: Math.min(Math.max(body.guests, MIN_GUESTS), MAX_GUESTS),
+      p_reservation_date: body.date,
+      p_reservation_time: body.time,
+      p_special_requests: body.specialRequests?.trim().slice(0, MAX_REQUESTS_LENGTH) || null
+    })
 
     if (error) {
-      console.error('Database error:', error)
+      console.error('Database function error:', error)
       return new Response(
         JSON.stringify({ error: 'Failed to create reservation' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log('Reservation created:', reservation.reservation_number)
+    // Check if the database function returned an error
+    if (!result.success) {
+      console.log('Reservation creation failed:', result.errors)
+      return new Response(
+        JSON.stringify({ error: 'Validation failed', details: result.errors }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    console.log('Reservation created securely:', result.reservation.reservation_number)
 
     return new Response(
       JSON.stringify({
         success: true,
         reservation: {
-          id: reservation.id,
-          reservationNumber: reservation.reservation_number,
-          depositAmount: reservation.deposit_amount
+          id: result.reservation.id,
+          reservationNumber: result.reservation.reservation_number,
+          depositAmount: result.reservation.deposit_amount
         }
       }),
       { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

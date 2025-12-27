@@ -251,6 +251,8 @@ export type Database = {
           id: string
           phone: string
           qr_code: string | null
+          qr_expires_at: string | null
+          qr_used_at: string | null
           reservation_date: string
           reservation_number: string
           reservation_time: string
@@ -270,6 +272,8 @@ export type Database = {
           id?: string
           phone: string
           qr_code?: string | null
+          qr_expires_at?: string | null
+          qr_used_at?: string | null
           reservation_date: string
           reservation_number: string
           reservation_time: string
@@ -289,6 +293,8 @@ export type Database = {
           id?: string
           phone?: string
           qr_code?: string | null
+          qr_expires_at?: string | null
+          qr_used_at?: string | null
           reservation_date?: string
           reservation_number?: string
           reservation_time?: string
@@ -348,6 +354,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_reservation_secure: {
+        Args: {
+          p_email: string
+          p_full_name: string
+          p_guests: number
+          p_phone: string
+          p_reservation_date: string
+          p_reservation_time: string
+          p_special_requests?: string
+        }
+        Returns: Json
+      }
       generate_order_number: { Args: never; Returns: string }
       generate_reservation_number: { Args: never; Returns: string }
       has_role: {
@@ -366,6 +384,10 @@ export type Database = {
           p_entity_type: string
         }
         Returns: string
+      }
+      validate_and_use_qr: {
+        Args: { p_qr_code: string; p_reservation_number?: string }
+        Returns: Json
       }
       validate_reservation_input: {
         Args: {
