@@ -28,14 +28,14 @@ serve(async (req) => {
 
     const { data: menuItems, error: menuError } = await supabase
       .from("menu_items")
-      .select("name, name_ar, description, category, price, is_vegan, is_vegetarian, is_gluten_free, is_spicy, ingredients, allergens, calories")
+      .select("id, name, name_ar, description, category, price, is_vegan, is_vegetarian, is_gluten_free, is_spicy, ingredients, allergens, calories")
       .eq("is_available", true);
 
     if (menuError) {
       console.error("Error fetching menu:", menuError);
     }
 
-    // Build menu context
+    // Build menu context with IDs for navigation
     const menuContext = menuItems?.map(item => {
       const dietary: string[] = [];
       if (item.is_vegan) dietary.push("vegan");
@@ -43,13 +43,21 @@ serve(async (req) => {
       if (item.is_gluten_free) dietary.push("gluten-free");
       if (item.is_spicy) dietary.push("spicy");
       
-      return `- ${item.name} (${item.name_ar}): ${item.description || 'No description'}. Category: ${item.category}. Price: ${item.price} AED. ${dietary.length ? `Dietary: ${dietary.join(", ")}.` : ""} ${item.ingredients?.length ? `Ingredients: ${item.ingredients.join(", ")}.` : ""} ${item.allergens?.length ? `Allergens: ${item.allergens.join(", ")}.` : ""} ${item.calories ? `Calories: ${item.calories}` : ""}`;
+      return `- ID: "${item.id}" | ${item.name} (${item.name_ar}): ${item.description || 'No description'}. Category: ${item.category}. Price: ${item.price} AED. ${dietary.length ? `Dietary: ${dietary.join(", ")}.` : ""} ${item.ingredients?.length ? `Ingredients: ${item.ingredients.join(", ")}.` : ""} ${item.allergens?.length ? `Allergens: ${item.allergens.join(", ")}.` : ""} ${item.calories ? `Calories: ${item.calories}` : ""}`;
     }).join("\n") || "No menu items available.";
+
+    // Build a simple ID to name mapping for the AI
+    const itemMapping = menuItems?.map(item => `"${item.id}": "${item.name}"`).join(", ") || "";
 
     const systemPrompt = `You are a friendly and knowledgeable menu assistant for an upscale Middle Eastern restaurant. Your role is to help customers explore the menu, make recommendations, and answer questions about dishes.
 
 CURRENT MENU:
 ${menuContext}
+
+ITEM ID MAPPING:
+{${itemMapping}}
+
+AVAILABLE CATEGORIES: starters, main, desserts, drinks, specials
 
 GUIDELINES:
 - Be warm, helpful, and enthusiastic about the food
@@ -61,10 +69,58 @@ GUIDELINES:
 - You can suggest wine pairings or complementary dishes when appropriate
 - If someone asks in Arabic, respond in Arabic
 
+NAVIGATION:
+- When you mention or recommend specific dishes, USE THE show_menu_item TOOL to show the dish details
+- When discussing a category (like starters or desserts), USE THE navigate_to_category TOOL to scroll there
+- Always use tools proactively when discussing specific dishes or categories to enhance the experience
+
 IMPORTANT:
 - Only recommend dishes that are actually on the menu
 - Be accurate about prices, ingredients, and dietary information
-- If you don't know something, say so rather than making it up`;
+- If you don't know something, say so rather than making it up
+- ALWAYS use navigation tools when discussing specific items or categories`;
+
+    const tools = [
+      {
+        type: "function",
+        function: {
+          name: "show_menu_item",
+          description: "Show details of a specific menu item to the customer. Use this when recommending or discussing a specific dish.",
+          parameters: {
+            type: "object",
+            properties: {
+              item_id: {
+                type: "string",
+                description: "The UUID of the menu item to show"
+              },
+              item_name: {
+                type: "string", 
+                description: "The name of the menu item (for display purposes)"
+              }
+            },
+            required: ["item_id", "item_name"]
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "navigate_to_category",
+          description: "Navigate to a menu category section. Use this when discussing or recommending items from a specific category.",
+          parameters: {
+            type: "object",
+            properties: {
+              category: {
+                type: "string",
+                enum: ["all", "starters", "main", "desserts", "drinks", "specials"],
+                description: "The category to navigate to"
+              }
+            },
+            required: ["category"]
+          }
+        }
+      }
+    ];
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -78,6 +134,8 @@ IMPORTANT:
           { role: "system", content: systemPrompt },
           ...messages,
         ],
+        tools,
+        tool_choice: "auto",
         stream: true,
       }),
     });
