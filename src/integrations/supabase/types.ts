@@ -368,6 +368,7 @@ export type Database = {
       }
       generate_order_number: { Args: never; Returns: string }
       generate_reservation_number: { Args: never; Returns: string }
+      get_current_user_email: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
