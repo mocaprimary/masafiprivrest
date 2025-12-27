@@ -29,7 +29,9 @@ import {
   Flame, 
   WheatOff,
   Eye,
-  EyeOff
+  EyeOff,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 
 interface MenuItem {
@@ -91,6 +93,49 @@ export function AdminMenuManagement() {
   const [ingredientsArInput, setIngredientsArInput] = useState('');
   const [allergensInput, setAllergensInput] = useState('');
   const [saving, setSaving] = useState(false);
+  const [generatingDescription, setGeneratingDescription] = useState(false);
+
+  const generateAIDescription = async () => {
+    if (!formData.name) {
+      toast.error('Please enter a dish name first');
+      return;
+    }
+
+    setGeneratingDescription(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-description', {
+        body: {
+          name: formData.name,
+          category: formData.category,
+          ingredients: ingredientsInput.split(',').map(s => s.trim()).filter(Boolean),
+          isVegan: formData.is_vegan,
+          isSpicy: formData.is_spicy,
+          isGlutenFree: formData.is_gluten_free,
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      if (data.description) {
+        setFormData(prev => ({
+          ...prev,
+          description: data.description,
+          description_ar: data.description_ar || prev.description_ar,
+        }));
+        toast.success('Description generated successfully');
+      }
+    } catch (err) {
+      console.error('Error generating description:', err);
+      toast.error('Failed to generate description');
+    } finally {
+      setGeneratingDescription(false);
+    }
+  };
 
   useEffect(() => {
     fetchMenuItems();
@@ -417,7 +462,29 @@ export function AdminMenuManagement() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description (English)</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="description">Description (English)</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={generateAIDescription}
+                  disabled={generatingDescription || !formData.name}
+                  className="gap-2"
+                >
+                  {generatingDescription ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3 h-3" />
+                      Generate with AI
+                    </>
+                  )}
+                </Button>
+              </div>
               <Textarea
                 id="description"
                 value={formData.description || ''}
