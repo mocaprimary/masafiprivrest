@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth, AuthProvider } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -38,11 +38,19 @@ import {
   Phone,
   Mail,
   CalendarDays,
-  Filter
+  Filter,
+  ScanLine,
+  TrendingUp,
+  AlertCircle,
+  RefreshCw,
+  UserPlus,
+  Shield,
+  Briefcase
 } from 'lucide-react';
 
-type Tab = 'dashboard' | 'menu' | 'reservations' | 'orders' | 'users' | 'settings';
+type Tab = 'dashboard' | 'menu' | 'reservations' | 'orders' | 'users' | 'settings' | 'checkin';
 type ReservationStatusFilter = 'all' | 'pending' | 'confirmed' | 'arrived' | 'cancelled';
+type AppRole = 'admin' | 'manager' | 'staff';
 
 interface Reservation {
   id: string;
@@ -56,6 +64,8 @@ interface Reservation {
   status: string;
   deposit_status: string;
   deposit_amount: number;
+  special_requests: string | null;
+  created_at: string;
 }
 
 interface Order {
@@ -77,7 +87,7 @@ interface UserWithRole {
 }
 
 function AdminContent() {
-  const { user, isAdmin, isStaff, loading, signOut } = useAuth();
+  const { user, isAdmin, isManager, isStaff, loading, signOut, roles } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -88,6 +98,7 @@ function AdminContent() {
   const [dateFilter, setDateFilter] = useState<string>('');
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
   const [showReservationModal, setShowReservationModal] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -105,7 +116,7 @@ function AdminContent() {
     }
   }, [user, isStaff, isAdmin]);
 
-  // Real-time orders and reservations subscription
+  // Real-time subscriptions
   useEffect(() => {
     if (!user || !isStaff) return;
 
@@ -114,9 +125,7 @@ function AdminContent() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'orders' },
-        () => {
-          fetchOrders();
-        }
+        () => fetchOrders()
       )
       .subscribe();
 
@@ -125,9 +134,7 @@ function AdminContent() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'reservations' },
-        () => {
-          fetchReservations();
-        }
+        () => fetchReservations()
       )
       .subscribe();
 
@@ -188,6 +195,13 @@ function AdminContent() {
     setUsers(usersWithRoles);
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.all([fetchReservations(), fetchOrders()]);
+    setIsRefreshing(false);
+    toast.success('Data refreshed');
+  };
+
   const updateReservationStatus = async (id: string, status: string) => {
     const updateData: Record<string, unknown> = { status };
     if (status === 'arrived') {
@@ -205,7 +219,6 @@ function AdminContent() {
     } else {
       toast.success('Reservation updated');
       fetchReservations();
-      // Update modal if open
       if (selectedReservation?.id === id) {
         setSelectedReservation(prev => prev ? { ...prev, status } : null);
       }
@@ -223,27 +236,11 @@ function AdminContent() {
     } else {
       toast.success('Deposit status updated');
       fetchReservations();
-      // Update modal if open
       if (selectedReservation?.id === id) {
         setSelectedReservation(prev => prev ? { ...prev, deposit_status: depositStatus } : null);
       }
     }
   };
-
-  const viewReservationDetails = (reservation: Reservation) => {
-    setSelectedReservation(reservation);
-    setShowReservationModal(true);
-  };
-
-  const filteredReservations = reservations.filter(r => {
-    const matchesSearch = 
-      r.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.reservation_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.phone.includes(searchQuery);
-    const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
-    const matchesDate = !dateFilter || r.reservation_date === dateFilter;
-    return matchesSearch && matchesStatus && matchesDate;
-  });
 
   const updateOrderStatus = async (id: string, status: string) => {
     const { error } = await supabase
@@ -258,7 +255,7 @@ function AdminContent() {
     }
   };
 
-  const assignRole = async (userId: string, role: 'admin' | 'staff') => {
+  const assignRole = async (userId: string, role: AppRole) => {
     const { error } = await supabase
       .from('user_roles')
       .insert({ user_id: userId, role });
@@ -275,12 +272,12 @@ function AdminContent() {
     }
   };
 
-  const removeRole = async (userId: string, role: 'admin' | 'staff') => {
+  const removeRole = async (userId: string, role: AppRole) => {
     const { error } = await supabase
       .from('user_roles')
       .delete()
       .eq('user_id', userId)
-      .eq('role', role as 'admin' | 'staff');
+      .eq('role', role);
 
     if (error) {
       toast.error('Failed to remove role');
@@ -294,6 +291,16 @@ function AdminContent() {
     await signOut();
     navigate('/auth');
   };
+
+  const filteredReservations = reservations.filter(r => {
+    const matchesSearch = 
+      r.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.reservation_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.phone.includes(searchQuery);
+    const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
+    const matchesDate = !dateFilter || r.reservation_date === dateFilter;
+    return matchesSearch && matchesStatus && matchesDate;
+  });
 
   if (loading) {
     return (
@@ -315,23 +322,49 @@ function AdminContent() {
     );
   }
 
+  const today = new Date().toISOString().split('T')[0];
+  const todayReservations = reservations.filter(r => r.reservation_date === today);
+  const upcomingReservations = reservations.filter(r => r.reservation_date >= today && r.status !== 'cancelled');
+  
   const stats = {
-    todayReservations: reservations.filter(r => r.reservation_date === new Date().toISOString().split('T')[0]).length,
+    todayReservations: todayReservations.length,
+    todayGuests: todayReservations.reduce((sum, r) => sum + r.guests, 0),
+    pendingReservations: reservations.filter(r => r.status === 'pending').length,
     pendingOrders: orders.filter(o => ['placed', 'preparing'].includes(o.status)).length,
     totalRevenue: orders.filter(o => o.payment_status === 'paid').reduce((sum, o) => sum + Number(o.total), 0),
-    arrivedToday: reservations.filter(r => r.status === 'arrived' && r.reservation_date === new Date().toISOString().split('T')[0]).length,
+    arrivedToday: todayReservations.filter(r => r.status === 'arrived').length,
+    confirmedToday: todayReservations.filter(r => r.status === 'confirmed').length,
+    activeOrders: orders.filter(o => !['served', 'cancelled'].includes(o.status)).length,
   };
 
+  const getRoleLabel = () => {
+    if (isAdmin) return 'Admin';
+    if (isManager) return 'Manager';
+    return 'Staff';
+  };
+
+  const getRoleIcon = () => {
+    if (isAdmin) return Shield;
+    if (isManager) return Briefcase;
+    return UserCheck;
+  };
+
+  const RoleIcon = getRoleIcon();
+
+  // Define tabs based on role
   const tabs = [
-    { id: 'dashboard' as Tab, label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'reservations' as Tab, label: 'Reservations', icon: Calendar },
-    { id: 'orders' as Tab, label: 'Orders', icon: ShoppingBag },
-    ...(isAdmin ? [
-      { id: 'menu' as Tab, label: 'Menu', icon: UtensilsCrossed },
-      { id: 'users' as Tab, label: 'Users', icon: Users },
-      { id: 'settings' as Tab, label: 'Settings', icon: Settings },
-    ] : []),
-  ];
+    { id: 'dashboard' as Tab, label: 'Dashboard', icon: LayoutDashboard, roles: ['staff', 'manager', 'admin'] },
+    { id: 'reservations' as Tab, label: 'Reservations', icon: Calendar, roles: ['staff', 'manager', 'admin'] },
+    { id: 'orders' as Tab, label: 'Orders', icon: ShoppingBag, roles: ['staff', 'manager', 'admin'] },
+    { id: 'checkin' as Tab, label: 'Check-In', icon: ScanLine, roles: ['staff', 'manager', 'admin'] },
+    { id: 'menu' as Tab, label: 'Menu', icon: UtensilsCrossed, roles: ['manager', 'admin'] },
+    { id: 'users' as Tab, label: 'Users', icon: Users, roles: ['admin'] },
+    { id: 'settings' as Tab, label: 'Settings', icon: Settings, roles: ['admin'] },
+  ].filter(tab => {
+    if (isAdmin) return true;
+    if (isManager) return tab.roles.includes('manager');
+    return tab.roles.includes('staff');
+  });
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -343,7 +376,10 @@ function AdminContent() {
           </div>
           <div>
             <h1 className="font-display font-bold text-foreground">The Oasis</h1>
-            <p className="text-xs text-muted-foreground">{isAdmin ? 'Admin' : 'Staff'} Panel</p>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <RoleIcon className="w-3 h-3" />
+              {getRoleLabel()} Panel
+            </div>
           </div>
         </div>
 
@@ -364,102 +400,264 @@ function AdminContent() {
           ))}
         </nav>
 
-        <button
-          onClick={handleSignOut}
-          className="flex items-center gap-3 px-3 py-2 text-muted-foreground hover:text-destructive transition-colors"
-        >
-          <LogOut className="w-5 h-5" />
-          Sign Out
-        </button>
+        <div className="pt-4 border-t border-border space-y-2">
+          <Link to="/" className="flex items-center gap-3 px-3 py-2 text-muted-foreground hover:text-foreground transition-colors w-full">
+            <Eye className="w-5 h-5" />
+            View Restaurant
+          </Link>
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-3 px-3 py-2 text-muted-foreground hover:text-destructive transition-colors w-full"
+          >
+            <LogOut className="w-5 h-5" />
+            Sign Out
+          </button>
+        </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-auto">
+        {/* Dashboard */}
         {activeTab === 'dashboard' && (
           <div>
-            <h2 className="font-display text-2xl font-bold text-foreground mb-6">Dashboard</h2>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="font-display text-2xl font-bold text-foreground">Dashboard</h2>
+                <p className="text-muted-foreground">Welcome back! Here's what's happening today.</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
             
+            {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div className="glass-card rounded-xl p-6">
-                <div className="flex items-center gap-4">
+              <div className="glass-card rounded-xl p-6 border-l-4 border-l-primary">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Today's Reservations</p>
+                    <p className="text-3xl font-bold text-foreground">{stats.todayReservations}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{stats.todayGuests} total guests</p>
+                  </div>
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                     <Calendar className="w-6 h-6 text-primary" />
                   </div>
+                </div>
+              </div>
+
+              <div className="glass-card rounded-xl p-6 border-l-4 border-l-amber-500">
+                <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.todayReservations}</p>
-                    <p className="text-sm text-muted-foreground">Today's Reservations</p>
+                    <p className="text-sm text-muted-foreground mb-1">Active Orders</p>
+                    <p className="text-3xl font-bold text-foreground">{stats.activeOrders}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{stats.pendingOrders} preparing</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+                    <ChefHat className="w-6 h-6 text-amber-500" />
                   </div>
                 </div>
               </div>
 
-              <div className="glass-card rounded-xl p-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-amber/10 flex items-center justify-center">
-                    <Clock className="w-6 h-6 text-amber" />
-                  </div>
+              <div className="glass-card rounded-xl p-6 border-l-4 border-l-green-500">
+                <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.pendingOrders}</p>
-                    <p className="text-sm text-muted-foreground">Pending Orders</p>
+                    <p className="text-sm text-muted-foreground mb-1">Checked In Today</p>
+                    <p className="text-3xl font-bold text-foreground">{stats.arrivedToday}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{stats.confirmedToday} awaiting</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                    <UserCheck className="w-6 h-6 text-green-500" />
                   </div>
                 </div>
               </div>
 
-              <div className="glass-card rounded-xl p-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center">
-                    <DollarSign className="w-6 h-6 text-success" />
-                  </div>
+              <div className="glass-card rounded-xl p-6 border-l-4 border-l-blue-500">
+                <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.totalRevenue} AED</p>
-                    <p className="text-sm text-muted-foreground">Total Revenue</p>
+                    <p className="text-sm text-muted-foreground mb-1">Total Revenue</p>
+                    <p className="text-3xl font-bold text-foreground">{stats.totalRevenue}</p>
+                    <p className="text-xs text-muted-foreground mt-1">AED from paid orders</p>
                   </div>
-                </div>
-              </div>
-
-              <div className="glass-card rounded-xl p-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <UserCheck className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.arrivedToday}</p>
-                    <p className="text-sm text-muted-foreground">Checked In Today</p>
+                  <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-blue-500" />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Recent Orders */}
-            <div className="glass-card rounded-xl p-6">
-              <h3 className="font-semibold text-foreground mb-4">Recent Orders</h3>
-              {orders.length === 0 ? (
-                <p className="text-muted-foreground">No orders yet</p>
-              ) : (
-                <div className="space-y-3">
-                  {orders.slice(0, 5).map((order) => (
-                    <div key={order.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-foreground">{order.order_number}</p>
-                        <p className="text-sm text-muted-foreground">Table {order.table_number}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium text-foreground">{order.total} AED</p>
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          order.status === 'ready' ? 'bg-success/20 text-success' :
-                          order.status === 'preparing' ? 'bg-amber/20 text-amber' :
-                          'bg-primary/20 text-primary'
-                        }`}>
-                          {order.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+            {/* Alerts Section */}
+            {stats.pendingReservations > 0 && (
+              <div className="glass-card rounded-xl p-4 mb-6 border border-amber-500/30 bg-amber-500/5">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-amber-500" />
+                  <div>
+                    <p className="font-medium text-foreground">Action Required</p>
+                    <p className="text-sm text-muted-foreground">
+                      You have {stats.pendingReservations} pending reservation{stats.pendingReservations > 1 ? 's' : ''} to confirm.
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="ml-auto"
+                    onClick={() => {
+                      setActiveTab('reservations');
+                      setStatusFilter('pending');
+                    }}
+                  >
+                    View Pending
+                  </Button>
                 </div>
-              )}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Upcoming Reservations */}
+              <div className="glass-card rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-foreground">Today's Reservations</h3>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('reservations')}>
+                    View All
+                  </Button>
+                </div>
+                {todayReservations.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No reservations today</p>
+                ) : (
+                  <div className="space-y-3 max-h-[400px] overflow-auto">
+                    {todayReservations.slice(0, 8).map((res) => (
+                      <div key={res.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span className="text-sm font-bold text-primary">{res.guests}</span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">{res.full_name}</p>
+                            <p className="text-sm text-muted-foreground">{res.reservation_time}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            res.status === 'arrived' ? 'bg-green-500/20 text-green-500' :
+                            res.status === 'confirmed' ? 'bg-primary/20 text-primary' :
+                            res.status === 'cancelled' ? 'bg-destructive/20 text-destructive' :
+                            'bg-amber-500/20 text-amber-500'
+                          }`}>
+                            {res.status}
+                          </span>
+                          {res.status === 'confirmed' && (
+                            <Button
+                              size="sm"
+                              variant="gold"
+                              onClick={() => updateReservationStatus(res.id, 'arrived')}
+                            >
+                              <Check className="w-3 h-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Active Orders */}
+              <div className="glass-card rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-foreground">Active Orders</h3>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('orders')}>
+                    View Kitchen
+                  </Button>
+                </div>
+                {orders.filter(o => !['served', 'cancelled'].includes(o.status)).length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No active orders</p>
+                ) : (
+                  <div className="space-y-3 max-h-[400px] overflow-auto">
+                    {orders
+                      .filter(o => !['served', 'cancelled'].includes(o.status))
+                      .slice(0, 8)
+                      .map((order) => (
+                        <div key={order.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-foreground">{order.order_number}</p>
+                            <p className="text-sm text-muted-foreground">Table {order.table_number} • {order.total} AED</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              order.status === 'ready' ? 'bg-green-500/20 text-green-500' :
+                              order.status === 'preparing' ? 'bg-amber-500/20 text-amber-500' :
+                              'bg-primary/20 text-primary'
+                            }`}>
+                              {order.status}
+                            </span>
+                            {order.status !== 'ready' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateOrderStatus(
+                                  order.id,
+                                  order.status === 'placed' ? 'preparing' : 'ready'
+                                )}
+                              >
+                                {order.status === 'placed' ? 'Start' : 'Ready'}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
 
+        {/* Check-In Tab */}
+        {activeTab === 'checkin' && (
+          <div className="max-w-xl mx-auto">
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full gold-gradient flex items-center justify-center">
+                <ScanLine className="w-10 h-10 text-primary-foreground" />
+              </div>
+              <h2 className="font-display text-2xl font-bold text-foreground mb-2">Quick Check-In</h2>
+              <p className="text-muted-foreground">Verify guest reservations by number</p>
+            </div>
+
+            <div className="glass-card rounded-xl p-6">
+              <CheckInWidget onCheckin={() => fetchReservations()} />
+            </div>
+
+            {/* Today's Awaiting Check-ins */}
+            <div className="mt-8">
+              <h3 className="font-semibold text-foreground mb-4">Awaiting Check-in Today</h3>
+              <div className="space-y-2">
+                {todayReservations
+                  .filter(r => r.status === 'confirmed')
+                  .map(res => (
+                    <div key={res.id} className="glass-card rounded-lg p-4 flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-foreground">{res.full_name}</p>
+                        <p className="text-sm text-muted-foreground">{res.reservation_time} • {res.guests} guests</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="gold"
+                        onClick={() => updateReservationStatus(res.id, 'arrived')}
+                      >
+                        <Check className="w-4 h-4 mr-1" />
+                        Check In
+                      </Button>
+                    </div>
+                  ))}
+                {todayReservations.filter(r => r.status === 'confirmed').length === 0 && (
+                  <p className="text-muted-foreground text-center py-4">No guests awaiting check-in</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Reservations Tab */}
         {activeTab === 'reservations' && (
           <div>
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
@@ -501,21 +699,21 @@ function AdminContent() {
               </div>
             </div>
 
-            {/* Status Summary Cards */}
+            {/* Status Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
               {(['pending', 'confirmed', 'arrived', 'cancelled'] as const).map((status) => {
                 const count = reservations.filter(r => r.status === status).length;
                 const colors = {
-                  pending: 'bg-amber/10 text-amber border-amber/20',
-                  confirmed: 'bg-primary/10 text-primary border-primary/20',
-                  arrived: 'bg-success/10 text-success border-success/20',
-                  cancelled: 'bg-destructive/10 text-destructive border-destructive/20',
+                  pending: 'border-amber-500/30 bg-amber-500/5 text-amber-500',
+                  confirmed: 'border-primary/30 bg-primary/5 text-primary',
+                  arrived: 'border-green-500/30 bg-green-500/5 text-green-500',
+                  cancelled: 'border-destructive/30 bg-destructive/5 text-destructive',
                 };
                 return (
                   <button
                     key={status}
                     onClick={() => setStatusFilter(statusFilter === status ? 'all' : status)}
-                    className={`p-3 rounded-lg border transition-all ${
+                    className={`p-4 rounded-xl border transition-all ${
                       statusFilter === status ? colors[status] + ' ring-2 ring-offset-2' : 'glass-card hover:bg-secondary/50'
                     }`}
                   >
@@ -526,6 +724,7 @@ function AdminContent() {
               })}
             </div>
 
+            {/* Reservations Table */}
             <div className="glass-card rounded-xl overflow-hidden">
               <table className="w-full">
                 <thead className="bg-secondary/50">
@@ -555,10 +754,10 @@ function AdminContent() {
                       </td>
                       <td className="p-4">
                         <span className={`text-xs px-2 py-1 rounded-full ${
-                          reservation.status === 'arrived' ? 'bg-success/20 text-success' :
+                          reservation.status === 'arrived' ? 'bg-green-500/20 text-green-500' :
                           reservation.status === 'confirmed' ? 'bg-primary/20 text-primary' :
                           reservation.status === 'cancelled' ? 'bg-destructive/20 text-destructive' :
-                          'bg-amber/20 text-amber'
+                          'bg-amber-500/20 text-amber-500'
                         }`}>
                           {reservation.status}
                         </span>
@@ -566,7 +765,7 @@ function AdminContent() {
                       <td className="p-4">
                         <p className="font-medium text-foreground">{reservation.deposit_amount} AED</p>
                         <span className={`text-xs ${
-                          reservation.deposit_status === 'paid' ? 'text-success' :
+                          reservation.deposit_status === 'paid' ? 'text-green-500' :
                           reservation.deposit_status === 'refunded' ? 'text-primary' :
                           'text-muted-foreground'
                         }`}>
@@ -578,7 +777,10 @@ function AdminContent() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => viewReservationDetails(reservation)}
+                            onClick={() => {
+                              setSelectedReservation(reservation);
+                              setShowReservationModal(true);
+                            }}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -635,23 +837,21 @@ function AdminContent() {
                 </DialogHeader>
                 {selectedReservation && (
                   <div className="space-y-6">
-                    {/* Reservation Number & Status */}
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">Reservation #</p>
                         <p className="font-bold text-lg">{selectedReservation.reservation_number}</p>
                       </div>
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        selectedReservation.status === 'arrived' ? 'bg-success/20 text-success' :
+                        selectedReservation.status === 'arrived' ? 'bg-green-500/20 text-green-500' :
                         selectedReservation.status === 'confirmed' ? 'bg-primary/20 text-primary' :
                         selectedReservation.status === 'cancelled' ? 'bg-destructive/20 text-destructive' :
-                        'bg-amber/20 text-amber'
+                        'bg-amber-500/20 text-amber-500'
                       }`}>
                         {selectedReservation.status}
                       </span>
                     </div>
 
-                    {/* Guest Info */}
                     <div className="glass-card rounded-lg p-4 space-y-3">
                       <h4 className="font-semibold text-foreground">Guest Information</h4>
                       <div className="grid gap-2">
@@ -677,7 +877,6 @@ function AdminContent() {
                       </div>
                     </div>
 
-                    {/* Date & Time */}
                     <div className="glass-card rounded-lg p-4 space-y-3">
                       <h4 className="font-semibold text-foreground">Date & Time</h4>
                       <div className="flex items-center gap-4">
@@ -692,7 +891,13 @@ function AdminContent() {
                       </div>
                     </div>
 
-                    {/* Deposit Info */}
+                    {selectedReservation.special_requests && (
+                      <div className="glass-card rounded-lg p-4 space-y-2">
+                        <h4 className="font-semibold text-foreground">Special Requests</h4>
+                        <p className="text-sm text-muted-foreground">{selectedReservation.special_requests}</p>
+                      </div>
+                    )}
+
                     <div className="glass-card rounded-lg p-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <h4 className="font-semibold text-foreground">Deposit</h4>
@@ -717,7 +922,6 @@ function AdminContent() {
                       </div>
                     </div>
 
-                    {/* Actions */}
                     <div className="flex gap-2 pt-2">
                       {selectedReservation.status === 'pending' && (
                         <>
@@ -730,7 +934,7 @@ function AdminContent() {
                             }}
                           >
                             <Check className="w-4 h-4 mr-2" />
-                            Confirm Reservation
+                            Confirm
                           </Button>
                           <Button 
                             variant="outline" 
@@ -758,18 +962,6 @@ function AdminContent() {
                           Check In Guest
                         </Button>
                       )}
-                      {selectedReservation.status === 'arrived' && (
-                        <p className="text-sm text-success flex items-center gap-2">
-                          <Check className="w-4 h-4" />
-                          Guest has checked in
-                        </p>
-                      )}
-                      {selectedReservation.status === 'cancelled' && (
-                        <p className="text-sm text-destructive flex items-center gap-2">
-                          <X className="w-4 h-4" />
-                          This reservation was cancelled
-                        </p>
-                      )}
                     </div>
                   </div>
                 )}
@@ -778,6 +970,7 @@ function AdminContent() {
           </div>
         )}
 
+        {/* Orders Tab */}
         {activeTab === 'orders' && (
           <div>
             <h2 className="font-display text-2xl font-bold text-foreground mb-6">Kitchen Orders</h2>
@@ -787,8 +980,8 @@ function AdminContent() {
                 <div key={status} className="glass-card rounded-xl p-4">
                   <h3 className="font-semibold text-foreground mb-4 capitalize flex items-center gap-2">
                     {status === 'placed' && <ShoppingBag className="w-5 h-5 text-primary" />}
-                    {status === 'preparing' && <ChefHat className="w-5 h-5 text-amber" />}
-                    {status === 'ready' && <Check className="w-5 h-5 text-success" />}
+                    {status === 'preparing' && <ChefHat className="w-5 h-5 text-amber-500" />}
+                    {status === 'ready' && <Check className="w-5 h-5 text-green-500" />}
                     {status}
                     <span className="ml-auto text-sm text-muted-foreground">
                       {orders.filter(o => o.status === status).length}
@@ -841,6 +1034,12 @@ function AdminContent() {
           </div>
         )}
 
+        {/* Menu Tab (Manager + Admin) */}
+        {activeTab === 'menu' && isManager && (
+          <AdminMenuManagement />
+        )}
+
+        {/* Users Tab (Admin Only) */}
         {activeTab === 'users' && isAdmin && (
           <div>
             <h2 className="font-display text-2xl font-bold text-foreground mb-6">User Management</h2>
@@ -850,87 +1049,82 @@ function AdminContent() {
                 <thead className="bg-secondary/50">
                   <tr>
                     <th className="text-left p-4 text-sm font-medium text-muted-foreground">User</th>
-                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Roles</th>
                     <th className="text-left p-4 text-sm font-medium text-muted-foreground">Joined</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Roles</th>
                     <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((u) => (
-                    <tr key={u.id} className="border-t border-border">
+                    <tr key={u.id} className="border-t border-border hover:bg-secondary/30">
                       <td className="p-4">
-                        <p className="font-medium text-foreground">{u.full_name || 'Unknown'}</p>
-                        <p className="text-sm text-muted-foreground">{u.id.slice(0, 8)}...</p>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex gap-2">
-                          {u.roles.length === 0 ? (
-                            <span className="text-sm text-muted-foreground">No roles</span>
-                          ) : (
-                            u.roles.map((role) => (
-                              <span
-                                key={role}
-                                className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
-                                  role === 'admin' ? 'bg-primary/20 text-primary' : 'bg-secondary text-foreground'
-                                }`}
-                              >
-                                {role}
-                                <button
-                                  onClick={() => removeRole(u.id, role as 'admin' | 'staff')}
-                                  className="hover:text-destructive"
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
-                              </span>
-                            ))
-                          )}
-                        </div>
+                        <p className="font-medium text-foreground">{u.full_name || 'No name'}</p>
+                        <p className="text-xs text-muted-foreground font-mono">{u.id.slice(0, 8)}...</p>
                       </td>
                       <td className="p-4 text-sm text-muted-foreground">
                         {new Date(u.created_at).toLocaleDateString()}
                       </td>
-                      <td className="p-4 text-right space-x-2">
-                        {!u.roles.includes('staff') && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => assignRole(u.id, 'staff')}
-                          >
-                            Make Staff
-                          </Button>
-                        )}
-                        {!u.roles.includes('admin') && (
-                          <Button
-                            size="sm"
-                            variant="gold"
-                            onClick={() => assignRole(u.id, 'admin')}
-                          >
-                            Make Admin
-                          </Button>
-                        )}
+                      <td className="p-4">
+                        <div className="flex flex-wrap gap-1">
+                          {u.roles.length === 0 && (
+                            <span className="text-xs text-muted-foreground">Customer</span>
+                          )}
+                          {u.roles.map(role => (
+                            <span 
+                              key={role}
+                              className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
+                                role === 'admin' ? 'bg-destructive/20 text-destructive' :
+                                role === 'manager' ? 'bg-primary/20 text-primary' :
+                                'bg-amber-500/20 text-amber-500'
+                              }`}
+                            >
+                              {role}
+                              <button
+                                onClick={() => removeRole(u.id, role as AppRole)}
+                                className="hover:opacity-70"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="p-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {!u.roles.includes('staff') && (
+                            <Button size="sm" variant="outline" onClick={() => assignRole(u.id, 'staff')}>
+                              <UserPlus className="w-4 h-4 mr-1" />
+                              Staff
+                            </Button>
+                          )}
+                          {!u.roles.includes('manager') && (
+                            <Button size="sm" variant="outline" onClick={() => assignRole(u.id, 'manager')}>
+                              <Briefcase className="w-4 h-4 mr-1" />
+                              Manager
+                            </Button>
+                          )}
+                          {!u.roles.includes('admin') && (
+                            <Button size="sm" variant="outline" onClick={() => assignRole(u.id, 'admin')}>
+                              <Shield className="w-4 h-4 mr-1" />
+                              Admin
+                            </Button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {users.length === 0 && (
-                <div className="p-8 text-center text-muted-foreground">
-                  No users found
-                </div>
-              )}
             </div>
           </div>
         )}
 
-        {activeTab === 'menu' && isAdmin && (
-          <AdminMenuManagement />
-        )}
-
+        {/* Settings Tab (Admin Only) */}
         {activeTab === 'settings' && isAdmin && (
           <div>
             <h2 className="font-display text-2xl font-bold text-foreground mb-6">Settings</h2>
-            <div className="glass-card rounded-xl p-8 text-center">
-              <p className="text-muted-foreground">Settings coming soon</p>
+            <div className="glass-card rounded-xl p-6">
+              <p className="text-muted-foreground">Restaurant settings coming soon...</p>
             </div>
           </div>
         )}
@@ -939,10 +1133,83 @@ function AdminContent() {
   );
 }
 
-export default function AdminPage() {
+// Check-In Widget Component
+function CheckInWidget({ onCheckin }: { onCheckin: () => void }) {
+  const [code, setCode] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{ success: boolean; message: string; guest?: string } | null>(null);
+
+  const handleVerify = async () => {
+    if (!code.trim()) {
+      toast.error('Please enter a reservation number');
+      return;
+    }
+
+    setLoading(true);
+    setResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-qr', {
+        body: { reservationNumber: code.trim().toUpperCase() }
+      });
+
+      if (error) throw new Error(error.message);
+
+      if (data.success) {
+        setResult({ 
+          success: true, 
+          message: 'Guest checked in successfully!',
+          guest: data.reservation?.full_name 
+        });
+        toast.success('Guest checked in!');
+        onCheckin();
+        setCode('');
+      } else {
+        setResult({ success: false, message: data.error || 'Verification failed' });
+      }
+    } catch (err) {
+      setResult({ success: false, message: err instanceof Error ? err.message : 'Failed' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <Input
+          placeholder="Enter reservation number (e.g., RES-20241227-1234)"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          className="input-field"
+          onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
+        />
+        <Button variant="gold" onClick={handleVerify} disabled={loading}>
+          {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+        </Button>
+      </div>
+      
+      {result && (
+        <div className={`p-4 rounded-lg flex items-center gap-3 ${
+          result.success ? 'bg-green-500/10 text-green-500' : 'bg-destructive/10 text-destructive'
+        }`}>
+          {result.success ? <Check className="w-5 h-5" /> : <X className="w-5 h-5" />}
+          <div>
+            <p className="font-medium">{result.message}</p>
+            {result.guest && <p className="text-sm opacity-80">Welcome, {result.guest}!</p>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const AdminPage = () => {
   return (
     <AuthProvider>
       <AdminContent />
     </AuthProvider>
   );
-}
+};
+
+export default AdminPage;
