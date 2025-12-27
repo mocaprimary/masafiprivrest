@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
+import { QRCodeSVG } from 'qrcode.react';
 
 const DEPOSIT_AMOUNT = 100; // AED - configurable
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -134,8 +135,13 @@ function ReservationContent() {
             </p>
             
             <div className="glass-card rounded-xl p-6 mb-6">
-              <div className="w-32 h-32 mx-auto mb-4 bg-foreground/10 rounded-lg flex items-center justify-center">
-                <span className="text-muted-foreground text-sm">QR Code</span>
+              <div className="w-40 h-40 mx-auto mb-4 bg-white rounded-lg p-3 flex items-center justify-center">
+                <QRCodeSVG 
+                  value={reservationNumber} 
+                  size={136}
+                  level="H"
+                  includeMargin={false}
+                />
               </div>
               <p className="text-sm text-muted-foreground">
                 Show this QR code at the entrance
