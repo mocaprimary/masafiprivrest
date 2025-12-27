@@ -1,14 +1,30 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Globe, ShoppingBag } from 'lucide-react';
+import { Globe, ShoppingBag, Receipt, User } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Link, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
 export function Header() {
   const { language, setLanguage, t } = useLanguage();
   const { totalItems } = useCart();
   const location = useLocation();
   const isOrderPage = location.pathname.startsWith('/order');
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-border/30">
@@ -26,6 +42,15 @@ export function Header() {
         </Link>
 
         <div className="flex items-center gap-2">
+          {user && (
+            <Link to="/my-orders">
+              <Button variant="ghost" size="sm" className="gap-2">
+                <Receipt className="w-4 h-4" />
+                <span className="hidden sm:inline text-sm">My Orders</span>
+              </Button>
+            </Link>
+          )}
+
           <Button
             variant="ghost"
             size="sm"
