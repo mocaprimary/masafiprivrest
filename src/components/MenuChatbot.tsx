@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Sparkles, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Message {
@@ -10,16 +10,27 @@ interface Message {
   content: string;
 }
 
-export function MenuChatbot() {
+interface ToolCall {
+  name: string;
+  arguments: Record<string, unknown>;
+}
+
+interface MenuChatbotProps {
+  onNavigateToCategory?: (category: string) => void;
+  onShowMenuItem?: (itemId: string) => void;
+}
+
+export function MenuChatbot({ onNavigateToCategory, onShowMenuItem }: MenuChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: "Welcome! I'm your menu assistant. Ask me about our dishes, ingredients, dietary options, or get personalized recommendations. How can I help you today?",
+      content: "Welcome! I'm your menu assistant. Ask me about our dishes, ingredients, dietary options, or get personalized recommendations. I can also show you specific items or navigate to different menu sections!",
     },
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [pendingActions, setPendingActions] = useState<ToolCall[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -35,6 +46,37 @@ export function MenuChatbot() {
     }
   }, [isOpen]);
 
+  // Execute pending actions after message is complete
+  useEffect(() => {
+    if (!isLoading && pendingActions.length > 0) {
+      pendingActions.forEach(action => {
+        executeToolCall(action);
+      });
+      setPendingActions([]);
+    }
+  }, [isLoading, pendingActions]);
+
+  const executeToolCall = (toolCall: ToolCall) => {
+    console.log('Executing tool call:', toolCall);
+    
+    if (toolCall.name === 'show_menu_item' && onShowMenuItem) {
+      const itemId = toolCall.arguments.item_id as string;
+      if (itemId) {
+        // Small delay so user can read the message first
+        setTimeout(() => {
+          onShowMenuItem(itemId);
+        }, 500);
+      }
+    } else if (toolCall.name === 'navigate_to_category' && onNavigateToCategory) {
+      const category = toolCall.arguments.category as string;
+      if (category) {
+        setTimeout(() => {
+          onNavigateToCategory(category);
+        }, 300);
+      }
+    }
+  };
+
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -43,8 +85,11 @@ export function MenuChatbot() {
     setMessages(newMessages);
     setInput('');
     setIsLoading(true);
+    setPendingActions([]);
 
     let assistantContent = '';
+    const collectedToolCalls: ToolCall[] = [];
+    let currentToolCall: { name?: string; arguments?: string } = {};
 
     try {
       const response = await fetch(
@@ -96,14 +141,45 @@ export function MenuChatbot() {
 
           try {
             const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              assistantContent += content;
+            const delta = parsed.choices?.[0]?.delta;
+            
+            // Handle text content
+            if (delta?.content) {
+              assistantContent += delta.content;
               setMessages(prev => {
                 const updated = [...prev];
                 updated[updated.length - 1] = { role: 'assistant', content: assistantContent };
                 return updated;
               });
+            }
+            
+            // Handle tool calls
+            if (delta?.tool_calls) {
+              for (const toolCallDelta of delta.tool_calls) {
+                if (toolCallDelta.function?.name) {
+                  currentToolCall.name = toolCallDelta.function.name;
+                  currentToolCall.arguments = '';
+                }
+                if (toolCallDelta.function?.arguments) {
+                  currentToolCall.arguments = (currentToolCall.arguments || '') + toolCallDelta.function.arguments;
+                }
+              }
+            }
+
+            // Check if tool call is complete (finish_reason)
+            const finishReason = parsed.choices?.[0]?.finish_reason;
+            if (finishReason === 'tool_calls' && currentToolCall.name) {
+              try {
+                const args = JSON.parse(currentToolCall.arguments || '{}');
+                collectedToolCalls.push({
+                  name: currentToolCall.name,
+                  arguments: args
+                });
+                console.log('Tool call collected:', currentToolCall.name, args);
+              } catch (e) {
+                console.error('Failed to parse tool arguments:', e);
+              }
+              currentToolCall = {};
             }
           } catch {
             // Incomplete JSON, put back and wait for more
@@ -122,19 +198,50 @@ export function MenuChatbot() {
           if (jsonStr === '[DONE]') continue;
           try {
             const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              assistantContent += content;
+            const delta = parsed.choices?.[0]?.delta;
+            if (delta?.content) {
+              assistantContent += delta.content;
               setMessages(prev => {
                 const updated = [...prev];
                 updated[updated.length - 1] = { role: 'assistant', content: assistantContent };
                 return updated;
               });
             }
+            
+            // Handle any remaining tool calls
+            if (delta?.tool_calls) {
+              for (const toolCallDelta of delta.tool_calls) {
+                if (toolCallDelta.function?.name) {
+                  currentToolCall.name = toolCallDelta.function.name;
+                  currentToolCall.arguments = '';
+                }
+                if (toolCallDelta.function?.arguments) {
+                  currentToolCall.arguments = (currentToolCall.arguments || '') + toolCallDelta.function.arguments;
+                }
+              }
+            }
+
+            const finishReason = parsed.choices?.[0]?.finish_reason;
+            if ((finishReason === 'tool_calls' || finishReason === 'stop') && currentToolCall.name) {
+              try {
+                const args = JSON.parse(currentToolCall.arguments || '{}');
+                collectedToolCalls.push({
+                  name: currentToolCall.name,
+                  arguments: args
+                });
+              } catch (e) {
+                console.error('Failed to parse tool arguments:', e);
+              }
+            }
           } catch {
             // ignore
           }
         }
+      }
+
+      // Queue tool calls to execute after loading completes
+      if (collectedToolCalls.length > 0) {
+        setPendingActions(collectedToolCalls);
       }
 
     } catch (error) {
@@ -157,6 +264,12 @@ export function MenuChatbot() {
       sendMessage();
     }
   };
+
+  const quickActions = [
+    { label: "What's popular?", query: "What are your most popular dishes?" },
+    { label: "Vegan options", query: "Show me vegan dishes" },
+    { label: "Desserts", query: "What desserts do you have?" },
+  ];
 
   return (
     <>
@@ -187,7 +300,7 @@ export function MenuChatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 z-50 w-[360px] max-w-[calc(100vw-48px)] overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+            className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-48px)] overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between bg-primary px-4 py-3">
@@ -235,8 +348,34 @@ export function MenuChatbot() {
                     </div>
                   </div>
                 )}
+
+                {/* Quick actions for new conversations */}
+                {messages.length === 1 && !isLoading && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {quickActions.map((action, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setInput(action.query);
+                          setTimeout(() => sendMessage(), 100);
+                        }}
+                        className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                      >
+                        {action.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </ScrollArea>
+
+            {/* Pending action indicator */}
+            {pendingActions.length > 0 && (
+              <div className="px-4 py-2 bg-primary/5 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
+                <ExternalLink className="h-3 w-3" />
+                Opening menu item...
+              </div>
+            )}
 
             {/* Input */}
             <div className="border-t border-border p-3">

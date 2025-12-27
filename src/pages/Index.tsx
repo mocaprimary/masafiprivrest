@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { CategoryTabs } from '@/components/CategoryTabs';
@@ -10,6 +10,7 @@ import { MenuChatbot } from '@/components/MenuChatbot';
 import { menuItems, MenuItem } from '@/data/menuData';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { CartProvider } from '@/contexts/CartContext';
+import { supabase } from '@/integrations/supabase/client';
 
 // Import menu images
 import hummusTrio from '@/assets/menu/hummus-trio.jpg';
@@ -53,9 +54,33 @@ const imageMap: Record<string, string> = {
   'special-2': wholeOuzi,
 };
 
+// Map database categories to local categories
+const categoryMap: Record<string, string> = {
+  'starters': 'starters',
+  'main': 'main',
+  'desserts': 'desserts', 
+  'drinks': 'drinks',
+  'specials': 'specials',
+};
+
 function MenuContent() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [dbMenuItems, setDbMenuItems] = useState<Array<{ id: string; name: string; category: string }>>([]);
+
+  // Fetch database menu items for ID lookup
+  useEffect(() => {
+    const fetchDbMenuItems = async () => {
+      const { data } = await supabase
+        .from('menu_items')
+        .select('id, name, category')
+        .eq('is_available', true);
+      if (data) {
+        setDbMenuItems(data);
+      }
+    };
+    fetchDbMenuItems();
+  }, []);
 
   const filteredItems = activeCategory === 'all'
     ? menuItems
@@ -66,6 +91,49 @@ function MenuContent() {
     ...item,
     image: imageMap[item.id] || item.image,
   }));
+
+  // Handle chatbot navigation to category
+  const handleNavigateToCategory = useCallback((category: string) => {
+    setActiveCategory(category);
+    // Scroll to menu section
+    const menuSection = document.querySelector('section.container');
+    if (menuSection) {
+      menuSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
+
+  // Handle chatbot showing a specific menu item
+  const handleShowMenuItem = useCallback((itemId: string) => {
+    // First try to find in local menu items
+    const localItem = menuItems.find(item => item.id === itemId);
+    if (localItem) {
+      setSelectedItem({
+        ...localItem,
+        image: imageMap[localItem.id] || localItem.image,
+      });
+      return;
+    }
+
+    // Try to find by database ID and match by name
+    const dbItem = dbMenuItems.find(item => item.id === itemId);
+    if (dbItem) {
+      // Find matching local item by name (case-insensitive)
+      const matchingLocal = menuItems.find(
+        item => item.name.toLowerCase() === dbItem.name.toLowerCase()
+      );
+      if (matchingLocal) {
+        setSelectedItem({
+          ...matchingLocal,
+          image: imageMap[matchingLocal.id] || matchingLocal.image,
+        });
+        return;
+      }
+      
+      // Navigate to the category if we can't show the item
+      const category = categoryMap[dbItem.category] || dbItem.category;
+      handleNavigateToCategory(category);
+    }
+  }, [dbMenuItems, handleNavigateToCategory]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -105,7 +173,10 @@ function MenuContent() {
         onClose={() => setSelectedItem(null)}
       />
 
-      <MenuChatbot />
+      <MenuChatbot 
+        onNavigateToCategory={handleNavigateToCategory}
+        onShowMenuItem={handleShowMenuItem}
+      />
     </div>
   );
 }
