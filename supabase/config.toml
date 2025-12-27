@@ -1,1 +1,7 @@
 project_id = "lrhefsrcvleluprpwhkj"
+
+[functions.create-reservation]
+verify_jwt = false
+
+[functions.admin-action]
+verify_jwt = true
