@@ -1,59 +1,109 @@
 import { useState } from 'react';
 import { useLanguage, LanguageProvider } from '@/contexts/LanguageContext';
 import { CartProvider } from '@/contexts/CartContext';
+import { AuthProvider, useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScanLine, Check, AlertTriangle, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ScanLine, Check, AlertTriangle, ArrowLeft, Loader2, Shield } from 'lucide-react';
+import { Link, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+
+interface ReservationInfo {
+  id: string;
+  reservation_number: string;
+  full_name: string;
+  guests: number;
+  reservation_date: string;
+  reservation_time: string;
+  special_requests?: string;
+}
 
 function CheckinContent() {
   const { t } = useLanguage();
+  const { user, isStaff, isAdmin, loading: authLoading } = useAuth();
   const [reservationCode, setReservationCode] = useState('');
-  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [guestInfo, setGuestInfo] = useState<{
-    name: string;
-    guests: number;
-    deposit: number;
-  } | null>(null);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [error, setError] = useState<string>('');
+  const [reservationInfo, setReservationInfo] = useState<ReservationInfo | null>(null);
 
-  const handleVerify = () => {
+  // Redirect non-staff users
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (!isStaff && !isAdmin) {
+    return (
+      <div className="min-h-screen bg-background pt-20 pb-8">
+        <div className="container mx-auto px-4 max-w-md text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive/20 flex items-center justify-center">
+            <Shield className="w-8 h-8 text-destructive" />
+          </div>
+          <h1 className="font-display text-2xl font-bold text-foreground mb-2">
+            Access Denied
+          </h1>
+          <p className="text-muted-foreground mb-6">
+            Only staff members can access the check-in system.
+          </p>
+          <Link to="/">
+            <Button variant="gold">Return to Home</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const handleVerify = async () => {
     if (!reservationCode.trim()) {
       toast.error('Please enter a reservation number');
       return;
     }
 
-    toast.loading('Verifying reservation...');
+    setStatus('loading');
+    setError('');
     
-    setTimeout(() => {
-      toast.dismiss();
-      
-      // Simulate verification
-      if (reservationCode.toUpperCase().startsWith('OAS')) {
-        setStatus('success');
-        setGuestInfo({
-          name: 'John Doe',
-          guests: 4,
-          deposit: 100,
-        });
-        toast.success('Reservation verified!');
-      } else {
-        setStatus('error');
-        toast.error('Reservation not found');
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('validate-qr', {
+        body: { reservationNumber: reservationCode.trim().toUpperCase() }
+      });
+
+      if (fnError) {
+        throw new Error(fnError.message || 'Verification failed');
       }
-    }, 1500);
+
+      if (!data.success) {
+        setStatus('error');
+        setError(data.error || 'Reservation not found');
+        toast.error(data.error || 'Reservation not found');
+        return;
+      }
+
+      setStatus('success');
+      setReservationInfo(data.reservation);
+      toast.success('Guest checked in successfully!');
+
+    } catch (err) {
+      console.error('Verification error:', err);
+      setStatus('error');
+      setError(err instanceof Error ? err.message : 'Verification failed');
+      toast.error(err instanceof Error ? err.message : 'Verification failed');
+    }
   };
 
-  const handleCheckin = () => {
-    toast.loading('Checking in guest...');
-    setTimeout(() => {
-      toast.dismiss();
-      toast.success('Guest checked in successfully!');
-      setReservationCode('');
-      setStatus('idle');
-      setGuestInfo(null);
-    }, 1000);
+  const handleReset = () => {
+    setStatus('idle');
+    setReservationInfo(null);
+    setReservationCode('');
+    setError('');
   };
 
   return (
@@ -77,88 +127,85 @@ function CheckinContent() {
         </div>
 
         {status === 'idle' && (
-          <>
-            <div className="glass-card rounded-xl p-6 mb-6">
-              <div className="w-full aspect-square bg-secondary rounded-lg flex items-center justify-center mb-6">
-                <div className="text-center">
-                  <ScanLine className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">{t('checkin.scan')}</p>
-                </div>
-              </div>
-
-              <div className="relative flex items-center my-6">
-                <div className="flex-1 border-t border-border"></div>
-                <span className="px-4 text-sm text-muted-foreground">{t('checkin.or')}</span>
-                <div className="flex-1 border-t border-border"></div>
-              </div>
-
-              <div className="space-y-4">
-                <Input
-                  placeholder="OAS-2024-1234"
-                  value={reservationCode}
-                  onChange={(e) => setReservationCode(e.target.value)}
-                  className="input-field text-center text-lg"
-                />
-                <Button variant="gold" size="lg" className="w-full" onClick={handleVerify}>
-                  {t('checkin.verify')}
-                </Button>
+          <div className="glass-card rounded-xl p-6 mb-6">
+            <div className="w-full aspect-square bg-secondary rounded-lg flex items-center justify-center mb-6">
+              <div className="text-center">
+                <ScanLine className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">{t('checkin.scan')}</p>
               </div>
             </div>
-          </>
+
+            <div className="relative flex items-center my-6">
+              <div className="flex-1 border-t border-border"></div>
+              <span className="px-4 text-sm text-muted-foreground">{t('checkin.or')}</span>
+              <div className="flex-1 border-t border-border"></div>
+            </div>
+
+            <div className="space-y-4">
+              <Input
+                placeholder="RES-20241227-1234"
+                value={reservationCode}
+                onChange={(e) => setReservationCode(e.target.value)}
+                className="input-field text-center text-lg"
+                onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
+              />
+              <Button variant="gold" size="lg" className="w-full" onClick={handleVerify}>
+                {t('checkin.verify')}
+              </Button>
+            </div>
+          </div>
         )}
 
-        {status === 'success' && guestInfo && (
+        {status === 'loading' && (
+          <div className="glass-card rounded-xl p-6 text-center">
+            <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-muted-foreground">Verifying reservation...</p>
+          </div>
+        )}
+
+        {status === 'success' && reservationInfo && (
           <div className="glass-card rounded-xl p-6 animate-scale-in">
             <div className="text-center mb-6">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success/20 flex items-center justify-center">
                 <Check className="w-8 h-8 text-success" />
               </div>
               <h2 className="font-display text-2xl font-bold text-foreground">
-                Reservation Found
+                Guest Checked In
               </h2>
             </div>
 
             <div className="space-y-4 mb-6">
               <div className="flex justify-between py-3 border-b border-border/50">
                 <span className="text-muted-foreground">Guest Name</span>
-                <span className="font-medium text-foreground">{guestInfo.name}</span>
+                <span className="font-medium text-foreground">{reservationInfo.full_name}</span>
               </div>
               <div className="flex justify-between py-3 border-b border-border/50">
                 <span className="text-muted-foreground">Party Size</span>
-                <span className="font-medium text-foreground">{guestInfo.guests} guests</span>
+                <span className="font-medium text-foreground">{reservationInfo.guests} guests</span>
               </div>
               <div className="flex justify-between py-3 border-b border-border/50">
-                <span className="text-muted-foreground">Deposit Paid</span>
-                <span className="font-medium text-success">{guestInfo.deposit} AED</span>
+                <span className="text-muted-foreground">Date</span>
+                <span className="font-medium text-foreground">{reservationInfo.reservation_date}</span>
+              </div>
+              <div className="flex justify-between py-3 border-b border-border/50">
+                <span className="text-muted-foreground">Time</span>
+                <span className="font-medium text-foreground">{reservationInfo.reservation_time}</span>
               </div>
               <div className="flex justify-between py-3">
                 <span className="text-muted-foreground">Reservation #</span>
-                <span className="font-medium text-foreground">{reservationCode.toUpperCase()}</span>
+                <span className="font-medium text-foreground">{reservationInfo.reservation_number}</span>
               </div>
+              {reservationInfo.special_requests && (
+                <div className="py-3 border-t border-border/50">
+                  <span className="text-muted-foreground block mb-2">Special Requests</span>
+                  <span className="text-foreground">{reservationInfo.special_requests}</span>
+                </div>
+              )}
             </div>
 
-            <div className="bg-amber/10 border border-amber/30 rounded-lg p-4 mb-6">
-              <p className="text-sm text-foreground">
-                {t('checkin.depositNote')}
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => {
-                  setStatus('idle');
-                  setGuestInfo(null);
-                  setReservationCode('');
-                }}
-              >
-                Cancel
-              </Button>
-              <Button variant="gold" className="flex-1" onClick={handleCheckin}>
-                Check In Guest
-              </Button>
-            </div>
+            <Button variant="gold" className="w-full" onClick={handleReset}>
+              Check In Another Guest
+            </Button>
           </div>
         )}
 
@@ -169,20 +216,17 @@ function CheckinContent() {
                 <AlertTriangle className="w-8 h-8 text-destructive" />
               </div>
               <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                Reservation Not Found
+                Check-in Failed
               </h2>
               <p className="text-muted-foreground">
-                The code "{reservationCode}" doesn't match any active reservation.
+                {error}
               </p>
             </div>
 
             <Button
               variant="gold"
               className="w-full"
-              onClick={() => {
-                setStatus('idle');
-                setReservationCode('');
-              }}
+              onClick={handleReset}
             >
               Try Again
             </Button>
@@ -195,12 +239,14 @@ function CheckinContent() {
 
 const CheckinPage = () => {
   return (
-    <LanguageProvider>
-      <CartProvider>
-        <Header />
-        <CheckinContent />
-      </CartProvider>
-    </LanguageProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <CartProvider>
+          <Header />
+          <CheckinContent />
+        </CartProvider>
+      </LanguageProvider>
+    </AuthProvider>
   );
 };
 
