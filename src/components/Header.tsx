@@ -61,6 +61,25 @@ export function Header() {
             <span className="text-sm font-medium">{language === 'en' ? 'عربي' : 'EN'}</span>
           </Button>
 
+          {user ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => supabase.auth.signOut()}
+              className="gap-2"
+            >
+              <User className="w-4 h-4" />
+              <span className="hidden sm:inline text-sm">Logout</span>
+            </Button>
+          ) : (
+            <Link to="/auth">
+              <Button variant="ghost" size="sm" className="gap-2">
+                <User className="w-4 h-4" />
+                <span className="hidden sm:inline text-sm">Login</span>
+              </Button>
+            </Link>
+          )}
+
           {isOrderPage && totalItems > 0 && (
             <Link to="/order/cart">
               <Button variant="gold" size="sm" className="relative">
