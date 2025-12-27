@@ -325,16 +325,26 @@ function AdminContent() {
   const today = new Date().toISOString().split('T')[0];
   const todayReservations = reservations.filter(r => r.reservation_date === today);
   const upcomingReservations = reservations.filter(r => r.reservation_date >= today && r.status !== 'cancelled');
+  const nextWeek = new Date();
+  nextWeek.setDate(nextWeek.getDate() + 7);
+  const nextWeekStr = nextWeek.toISOString().split('T')[0];
+  const thisWeekReservations = reservations.filter(r => r.reservation_date >= today && r.reservation_date <= nextWeekStr && r.status !== 'cancelled');
   
   const stats = {
+    totalReservations: reservations.length,
+    upcomingReservations: upcomingReservations.length,
+    upcomingGuests: upcomingReservations.reduce((sum, r) => sum + r.guests, 0),
     todayReservations: todayReservations.length,
     todayGuests: todayReservations.reduce((sum, r) => sum + r.guests, 0),
     pendingReservations: reservations.filter(r => r.status === 'pending').length,
+    confirmedReservations: reservations.filter(r => r.status === 'confirmed').length,
+    arrivedReservations: reservations.filter(r => r.status === 'arrived').length,
     pendingOrders: orders.filter(o => ['placed', 'preparing'].includes(o.status)).length,
     totalRevenue: orders.filter(o => o.payment_status === 'paid').reduce((sum, o) => sum + Number(o.total), 0),
     arrivedToday: todayReservations.filter(r => r.status === 'arrived').length,
     confirmedToday: todayReservations.filter(r => r.status === 'confirmed').length,
     activeOrders: orders.filter(o => !['served', 'cancelled'].includes(o.status)).length,
+    thisWeekGuests: thisWeekReservations.reduce((sum, r) => sum + r.guests, 0),
   };
 
   const getRoleLabel = () => {
@@ -419,11 +429,12 @@ function AdminContent() {
       <main className="flex-1 p-8 overflow-auto">
         {/* Dashboard */}
         {activeTab === 'dashboard' && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
+          <div className="space-y-6 animate-fade-in">
+            {/* Header */}
+            <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-display text-2xl font-bold text-foreground">Dashboard</h2>
-                <p className="text-muted-foreground">Welcome back! Here's what's happening today.</p>
+                <h2 className="font-display text-3xl font-bold text-foreground">Dashboard</h2>
+                <p className="text-muted-foreground">Overview of your restaurant operations</p>
               </div>
               <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
                 <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -431,181 +442,281 @@ function AdminContent() {
               </Button>
             </div>
             
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div className="glass-card rounded-xl p-6 border-l-4 border-l-primary">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Today's Reservations</p>
-                    <p className="text-3xl font-bold text-foreground">{stats.todayReservations}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{stats.todayGuests} total guests</p>
+            {/* Main Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 p-6">
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 text-primary mb-2">
+                    <Calendar className="w-5 h-5" />
+                    <span className="text-sm font-medium">Total Reservations</span>
                   </div>
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Calendar className="w-6 h-6 text-primary" />
-                  </div>
+                  <p className="text-4xl font-bold text-foreground">{stats.totalReservations}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {stats.upcomingReservations} upcoming
+                  </p>
                 </div>
+                <Calendar className="absolute -right-4 -bottom-4 w-24 h-24 text-primary/10" />
               </div>
 
-              <div className="glass-card rounded-xl p-6 border-l-4 border-l-amber-500">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Active Orders</p>
-                    <p className="text-3xl font-bold text-foreground">{stats.activeOrders}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{stats.pendingOrders} preparing</p>
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-green-500/20 to-green-500/5 border border-green-500/20 p-6">
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 text-green-500 mb-2">
+                    <UserCheck className="w-5 h-5" />
+                    <span className="text-sm font-medium">Guests Expected</span>
                   </div>
-                  <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">
-                    <ChefHat className="w-6 h-6 text-amber-500" />
-                  </div>
+                  <p className="text-4xl font-bold text-foreground">{stats.upcomingGuests}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {stats.thisWeekGuests} this week
+                  </p>
                 </div>
+                <Users className="absolute -right-4 -bottom-4 w-24 h-24 text-green-500/10" />
               </div>
 
-              <div className="glass-card rounded-xl p-6 border-l-4 border-l-green-500">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Checked In Today</p>
-                    <p className="text-3xl font-bold text-foreground">{stats.arrivedToday}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{stats.confirmedToday} awaiting</p>
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-500/5 border border-amber-500/20 p-6">
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 text-amber-500 mb-2">
+                    <Clock className="w-5 h-5" />
+                    <span className="text-sm font-medium">Pending Actions</span>
                   </div>
-                  <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                    <UserCheck className="w-6 h-6 text-green-500" />
-                  </div>
+                  <p className="text-4xl font-bold text-foreground">{stats.pendingReservations}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    reservations to confirm
+                  </p>
                 </div>
+                <AlertCircle className="absolute -right-4 -bottom-4 w-24 h-24 text-amber-500/10" />
               </div>
 
-              <div className="glass-card rounded-xl p-6 border-l-4 border-l-blue-500">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Total Revenue</p>
-                    <p className="text-3xl font-bold text-foreground">{stats.totalRevenue}</p>
-                    <p className="text-xs text-muted-foreground mt-1">AED from paid orders</p>
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 border border-blue-500/20 p-6">
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 text-blue-500 mb-2">
+                    <ChefHat className="w-5 h-5" />
+                    <span className="text-sm font-medium">Active Orders</span>
                   </div>
-                  <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                    <DollarSign className="w-6 h-6 text-blue-500" />
-                  </div>
+                  <p className="text-4xl font-bold text-foreground">{stats.activeOrders}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {stats.pendingOrders} in kitchen
+                  </p>
                 </div>
+                <ShoppingBag className="absolute -right-4 -bottom-4 w-24 h-24 text-blue-500/10" />
+              </div>
+            </div>
+
+            {/* Status Overview */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="glass-card rounded-xl p-4 text-center">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-amber-500/20 flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-amber-500" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{stats.pendingReservations}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Pending</p>
+              </div>
+              <div className="glass-card rounded-xl p-4 text-center">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Check className="w-5 h-5 text-primary" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{stats.confirmedReservations}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Confirmed</p>
+              </div>
+              <div className="glass-card rounded-xl p-4 text-center">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <UserCheck className="w-5 h-5 text-green-500" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{stats.arrivedReservations}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Arrived</p>
+              </div>
+              <div className="glass-card rounded-xl p-4 text-center">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-blue-500/20 flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-blue-500" />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{stats.totalRevenue}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Revenue (AED)</p>
               </div>
             </div>
 
             {/* Alerts Section */}
             {stats.pendingReservations > 0 && (
-              <div className="glass-card rounded-xl p-4 mb-6 border border-amber-500/30 bg-amber-500/5">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-amber-500" />
-                  <div>
-                    <p className="font-medium text-foreground">Action Required</p>
-                    <p className="text-sm text-muted-foreground">
-                      You have {stats.pendingReservations} pending reservation{stats.pendingReservations > 1 ? 's' : ''} to confirm.
-                    </p>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="ml-auto"
-                    onClick={() => {
-                      setActiveTab('reservations');
-                      setStatusFilter('pending');
-                    }}
-                  >
-                    View Pending
-                  </Button>
+              <div className="rounded-xl p-4 border border-amber-500/30 bg-amber-500/10 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
+                  <AlertCircle className="w-6 h-6 text-amber-500" />
                 </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-foreground">Action Required</p>
+                  <p className="text-sm text-muted-foreground">
+                    You have {stats.pendingReservations} pending reservation{stats.pendingReservations > 1 ? 's' : ''} awaiting confirmation
+                  </p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="border-amber-500/50 text-amber-500 hover:bg-amber-500/10"
+                  onClick={() => {
+                    setActiveTab('reservations');
+                    setStatusFilter('pending');
+                  }}
+                >
+                  Review Now
+                </Button>
               </div>
             )}
 
+            {/* Two Column Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Upcoming Reservations */}
-              <div className="glass-card rounded-xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-foreground">Today's Reservations</h3>
+              <div className="glass-card rounded-xl overflow-hidden">
+                <div className="p-4 border-b border-border flex items-center justify-between bg-secondary/30">
+                  <h3 className="font-semibold text-foreground flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-primary" />
+                    Upcoming Reservations
+                  </h3>
                   <Button variant="ghost" size="sm" onClick={() => setActiveTab('reservations')}>
                     View All
                   </Button>
                 </div>
-                {todayReservations.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No reservations today</p>
-                ) : (
-                  <div className="space-y-3 max-h-[400px] overflow-auto">
-                    {todayReservations.slice(0, 8).map((res) => (
-                      <div key={res.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                            <span className="text-sm font-bold text-primary">{res.guests}</span>
-                          </div>
-                          <div>
-                            <p className="font-medium text-foreground">{res.full_name}</p>
-                            <p className="text-sm text-muted-foreground">{res.reservation_time}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            res.status === 'arrived' ? 'bg-green-500/20 text-green-500' :
-                            res.status === 'confirmed' ? 'bg-primary/20 text-primary' :
-                            res.status === 'cancelled' ? 'bg-destructive/20 text-destructive' :
-                            'bg-amber-500/20 text-amber-500'
-                          }`}>
-                            {res.status}
-                          </span>
-                          {res.status === 'confirmed' && (
-                            <Button
-                              size="sm"
-                              variant="gold"
-                              onClick={() => updateReservationStatus(res.id, 'arrived')}
-                            >
-                              <Check className="w-3 h-3" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Active Orders */}
-              <div className="glass-card rounded-xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-foreground">Active Orders</h3>
-                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('orders')}>
-                    View Kitchen
-                  </Button>
-                </div>
-                {orders.filter(o => !['served', 'cancelled'].includes(o.status)).length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No active orders</p>
-                ) : (
-                  <div className="space-y-3 max-h-[400px] overflow-auto">
-                    {orders
-                      .filter(o => !['served', 'cancelled'].includes(o.status))
-                      .slice(0, 8)
-                      .map((order) => (
-                        <div key={order.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
-                          <div>
-                            <p className="font-medium text-foreground">{order.order_number}</p>
-                            <p className="text-sm text-muted-foreground">Table {order.table_number} • {order.total} AED</p>
+                <div className="p-4">
+                  {upcomingReservations.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Calendar className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+                      <p className="text-muted-foreground">No upcoming reservations</p>
+                      <p className="text-sm text-muted-foreground/70">New bookings will appear here</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {upcomingReservations.slice(0, 6).map((res) => (
+                        <div key={res.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                              <span className="text-sm font-bold text-primary">{res.guests}</span>
+                            </div>
+                            <div>
+                              <p className="font-medium text-foreground">{res.full_name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {new Date(res.reservation_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} • {res.reservation_time}
+                              </p>
+                            </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              order.status === 'ready' ? 'bg-green-500/20 text-green-500' :
-                              order.status === 'preparing' ? 'bg-amber-500/20 text-amber-500' :
-                              'bg-primary/20 text-primary'
+                            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                              res.status === 'arrived' ? 'bg-green-500/20 text-green-500' :
+                              res.status === 'confirmed' ? 'bg-primary/20 text-primary' :
+                              res.status === 'cancelled' ? 'bg-destructive/20 text-destructive' :
+                              'bg-amber-500/20 text-amber-500'
                             }`}>
-                              {order.status}
+                              {res.status}
                             </span>
-                            {order.status !== 'ready' && (
+                            {res.status === 'pending' && (
                               <Button
                                 size="sm"
-                                variant="outline"
-                                onClick={() => updateOrderStatus(
-                                  order.id,
-                                  order.status === 'placed' ? 'preparing' : 'ready'
-                                )}
+                                variant="ghost"
+                                className="h-8 w-8 p-0 text-green-500 hover:bg-green-500/10"
+                                onClick={() => updateReservationStatus(res.id, 'confirmed')}
                               >
-                                {order.status === 'placed' ? 'Start' : 'Ready'}
+                                <Check className="w-4 h-4" />
                               </Button>
                             )}
                           </div>
                         </div>
                       ))}
-                  </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Active Orders / Quick Actions */}
+              <div className="glass-card rounded-xl overflow-hidden">
+                <div className="p-4 border-b border-border flex items-center justify-between bg-secondary/30">
+                  <h3 className="font-semibold text-foreground flex items-center gap-2">
+                    <ChefHat className="w-4 h-4 text-amber-500" />
+                    Active Orders
+                  </h3>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('orders')}>
+                    View Kitchen
+                  </Button>
+                </div>
+                <div className="p-4">
+                  {orders.filter(o => !['served', 'cancelled'].includes(o.status)).length === 0 ? (
+                    <div className="text-center py-12">
+                      <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+                      <p className="text-muted-foreground">No active orders</p>
+                      <p className="text-sm text-muted-foreground/70">Orders will appear here when placed</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {orders
+                        .filter(o => !['served', 'cancelled'].includes(o.status))
+                        .slice(0, 6)
+                        .map((order) => (
+                          <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                            <div>
+                              <p className="font-medium text-foreground">{order.order_number}</p>
+                              <p className="text-sm text-muted-foreground">Table {order.table_number} • {order.total} AED</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                                order.status === 'ready' ? 'bg-green-500/20 text-green-500' :
+                                order.status === 'preparing' ? 'bg-amber-500/20 text-amber-500' :
+                                'bg-primary/20 text-primary'
+                              }`}>
+                                {order.status}
+                              </span>
+                              {order.status !== 'ready' && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-8 px-3"
+                                  onClick={() => updateOrderStatus(
+                                    order.id,
+                                    order.status === 'placed' ? 'preparing' : 'ready'
+                                  )}
+                                >
+                                  {order.status === 'placed' ? 'Start' : 'Ready'}
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="glass-card rounded-xl p-6">
+              <h3 className="font-semibold text-foreground mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex-col gap-2"
+                  onClick={() => setActiveTab('checkin')}
+                >
+                  <ScanLine className="w-6 h-6 text-primary" />
+                  <span>Check-In Guest</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex-col gap-2"
+                  onClick={() => setActiveTab('reservations')}
+                >
+                  <Calendar className="w-6 h-6 text-green-500" />
+                  <span>View Reservations</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex-col gap-2"
+                  onClick={() => setActiveTab('orders')}
+                >
+                  <ShoppingBag className="w-6 h-6 text-amber-500" />
+                  <span>Manage Orders</span>
+                </Button>
+                {(isManager || isAdmin) && (
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex-col gap-2"
+                    onClick={() => setActiveTab('menu')}
+                  >
+                    <UtensilsCrossed className="w-6 h-6 text-blue-500" />
+                    <span>Edit Menu</span>
+                  </Button>
                 )}
               </div>
             </div>
