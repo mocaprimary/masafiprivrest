@@ -1170,8 +1170,33 @@ function AdminContent() {
 
         {/* Users Tab (Admin Only) */}
         {activeTab === 'users' && isAdmin && (
-          <div>
-            <h2 className="font-display text-2xl font-bold text-foreground mb-6">User Management</h2>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-display text-2xl font-bold text-foreground">User Management</h2>
+                <p className="text-muted-foreground">Manage staff roles and permissions</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={fetchUsers}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+
+            {/* Role Legend */}
+            <div className="flex flex-wrap gap-4 p-4 bg-secondary/30 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-destructive" />
+                <span className="text-sm"><strong>Admin:</strong> Full access to all features</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-primary" />
+                <span className="text-sm"><strong>Manager:</strong> Menu, tables, reservations, orders</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <UserCheck className="w-4 h-4 text-amber-500" />
+                <span className="text-sm"><strong>Staff:</strong> Check-in, reservations, orders</span>
+              </div>
+            </div>
 
             <div className="glass-card rounded-xl overflow-hidden">
               <table className="w-full">
@@ -1179,15 +1204,15 @@ function AdminContent() {
                   <tr>
                     <th className="text-left p-4 text-sm font-medium text-muted-foreground">User</th>
                     <th className="text-left p-4 text-sm font-medium text-muted-foreground">Joined</th>
-                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Roles</th>
-                    <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Current Roles</th>
+                    <th className="text-right p-4 text-sm font-medium text-muted-foreground">Assign Role</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((u) => (
                     <tr key={u.id} className="border-t border-border hover:bg-secondary/30">
                       <td className="p-4">
-                        <p className="font-medium text-foreground">{u.full_name || 'No name'}</p>
+                        <p className="font-medium text-foreground">{u.full_name || 'No name set'}</p>
                         <p className="text-xs text-muted-foreground font-mono">{u.id.slice(0, 8)}...</p>
                       </td>
                       <td className="p-4 text-sm text-muted-foreground">
@@ -1196,7 +1221,7 @@ function AdminContent() {
                       <td className="p-4">
                         <div className="flex flex-wrap gap-1">
                           {u.roles.length === 0 && (
-                            <span className="text-xs text-muted-foreground">Customer</span>
+                            <span className="text-xs text-muted-foreground bg-secondary/50 px-2 py-1 rounded-full">Customer (no roles)</span>
                           )}
                           {u.roles.map(role => (
                             <span 
@@ -1207,10 +1232,14 @@ function AdminContent() {
                                 'bg-amber-500/20 text-amber-500'
                               }`}
                             >
+                              {role === 'admin' && <Shield className="w-3 h-3" />}
+                              {role === 'manager' && <Briefcase className="w-3 h-3" />}
+                              {role === 'staff' && <UserCheck className="w-3 h-3" />}
                               {role}
                               <button
                                 onClick={() => removeRole(u.id, role as AppRole)}
-                                className="hover:opacity-70"
+                                className="hover:opacity-70 ml-1"
+                                title={`Remove ${role} role`}
                               >
                                 <X className="w-3 h-3" />
                               </button>
@@ -1219,31 +1248,50 @@ function AdminContent() {
                         </div>
                       </td>
                       <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {!u.roles.includes('staff') && (
-                            <Button size="sm" variant="outline" onClick={() => assignRole(u.id, 'staff')}>
-                              <UserPlus className="w-4 h-4 mr-1" />
-                              Staff
-                            </Button>
-                          )}
-                          {!u.roles.includes('manager') && (
-                            <Button size="sm" variant="outline" onClick={() => assignRole(u.id, 'manager')}>
-                              <Briefcase className="w-4 h-4 mr-1" />
-                              Manager
-                            </Button>
-                          )}
-                          {!u.roles.includes('admin') && (
-                            <Button size="sm" variant="outline" onClick={() => assignRole(u.id, 'admin')}>
-                              <Shield className="w-4 h-4 mr-1" />
-                              Admin
-                            </Button>
-                          )}
-                        </div>
+                        <Select onValueChange={(role) => assignRole(u.id, role as AppRole)}>
+                          <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Add role..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {!u.roles.includes('staff') && (
+                              <SelectItem value="staff">
+                                <div className="flex items-center gap-2">
+                                  <UserCheck className="w-4 h-4 text-amber-500" />
+                                  Staff
+                                </div>
+                              </SelectItem>
+                            )}
+                            {!u.roles.includes('manager') && (
+                              <SelectItem value="manager">
+                                <div className="flex items-center gap-2">
+                                  <Briefcase className="w-4 h-4 text-primary" />
+                                  Manager
+                                </div>
+                              </SelectItem>
+                            )}
+                            {!u.roles.includes('admin') && (
+                              <SelectItem value="admin">
+                                <div className="flex items-center gap-2">
+                                  <Shield className="w-4 h-4 text-destructive" />
+                                  Admin
+                                </div>
+                              </SelectItem>
+                            )}
+                            {u.roles.length === 3 && (
+                              <SelectItem value="" disabled>All roles assigned</SelectItem>
+                            )}
+                          </SelectContent>
+                        </Select>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              {users.length === 0 && (
+                <div className="p-8 text-center text-muted-foreground">
+                  No users found. Users appear here after they sign up.
+                </div>
+              )}
             </div>
           </div>
         )}
