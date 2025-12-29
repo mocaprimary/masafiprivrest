@@ -58,17 +58,21 @@ type AppRole = 'admin' | 'manager' | 'staff';
 interface Reservation {
   id: string;
   reservation_number: string;
-  full_name: string;
-  phone: string;
-  email: string | null;
   guests: number;
   reservation_date: string;
   reservation_time: string;
   status: string;
   deposit_status: string;
   deposit_amount: number;
-  special_requests: string | null;
   created_at: string;
+  reservation_code: string | null;
+  // PII from joined table
+  private_details?: {
+    full_name: string;
+    phone: string;
+    email: string | null;
+    special_requests: string | null;
+  };
 }
 
 interface Order {
@@ -150,12 +154,22 @@ function AdminContent() {
   const fetchReservations = async () => {
     const { data, error } = await supabase
       .from('reservations')
-      .select('*')
+      .select(`
+        id, reservation_number, reservation_code, guests, 
+        reservation_date, reservation_time, status, 
+        deposit_status, deposit_amount, created_at,
+        reservation_private_details(full_name, phone, email, special_requests)
+      `)
       .order('reservation_date', { ascending: true })
       .order('reservation_time', { ascending: true });
     
     if (!error && data) {
-      setReservations(data);
+      // Transform to match interface
+      const transformed = data.map((r: any) => ({
+        ...r,
+        private_details: r.reservation_private_details
+      }));
+      setReservations(transformed);
     }
   };
 
@@ -296,10 +310,12 @@ function AdminContent() {
   };
 
   const filteredReservations = reservations.filter(r => {
+    const fullName = r.private_details?.full_name || '';
+    const phone = r.private_details?.phone || '';
     const matchesSearch = 
-      r.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.reservation_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.phone.includes(searchQuery);
+      phone.includes(searchQuery);
     const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
     const matchesDate = !dateFilter || r.reservation_date === dateFilter;
     return matchesSearch && matchesStatus && matchesDate;
@@ -592,7 +608,7 @@ function AdminContent() {
                               <span className="text-sm font-bold text-primary">{res.guests}</span>
                             </div>
                             <div>
-                              <p className="font-medium text-foreground">{res.full_name}</p>
+                              <p className="font-medium text-foreground">{res.private_details?.full_name || 'Guest'}</p>
                               <p className="text-sm text-muted-foreground">
                                 {new Date(res.reservation_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} • {res.reservation_time}
                               </p>
@@ -686,8 +702,8 @@ function AdminContent() {
 
             {/* Weekly Calendar */}
             <WeeklyCalendar 
-              reservations={reservations} 
-              onReservationClick={(res) => {
+              reservations={reservations as any} 
+              onReservationClick={(res: any) => {
                 setSelectedReservation(res as Reservation);
                 setShowReservationModal(true);
               }}
@@ -760,7 +776,7 @@ function AdminContent() {
                   .map(res => (
                     <div key={res.id} className="glass-card rounded-lg p-4 flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-foreground">{res.full_name}</p>
+                        <p className="font-medium text-foreground">{res.private_details?.full_name || 'Guest'}</p>
                         <p className="text-sm text-muted-foreground">{res.reservation_time} • {res.guests} guests</p>
                       </div>
                       <Button
@@ -874,8 +890,8 @@ function AdminContent() {
                         <p className="text-sm text-muted-foreground">{reservation.guests} guests</p>
                       </td>
                       <td className="p-4">
-                        <p className="font-medium text-foreground">{reservation.full_name}</p>
-                        <p className="text-sm text-muted-foreground">{reservation.phone}</p>
+                        <p className="font-medium text-foreground">{reservation.private_details?.full_name || 'Guest'}</p>
+                        <p className="text-sm text-muted-foreground">{reservation.private_details?.phone || '-'}</p>
                       </td>
                       <td className="p-4">
                         <p className="font-medium text-foreground">{reservation.reservation_date}</p>
@@ -986,20 +1002,22 @@ function AdminContent() {
                       <div className="grid gap-2">
                         <div className="flex items-center gap-2 text-sm">
                           <Users className="w-4 h-4 text-muted-foreground" />
-                          <span className="font-medium">{selectedReservation.full_name}</span>
+                          <span className="font-medium">{selectedReservation.private_details?.full_name || 'Guest'}</span>
                           <span className="text-muted-foreground">({selectedReservation.guests} guests)</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Phone className="w-4 h-4 text-muted-foreground" />
-                          <a href={`tel:${selectedReservation.phone}`} className="text-primary hover:underline">
-                            {selectedReservation.phone}
-                          </a>
-                        </div>
-                        {selectedReservation.email && (
+                        {selectedReservation.private_details?.phone && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Phone className="w-4 h-4 text-muted-foreground" />
+                            <a href={`tel:${selectedReservation.private_details.phone}`} className="text-primary hover:underline">
+                              {selectedReservation.private_details.phone}
+                            </a>
+                          </div>
+                        )}
+                        {selectedReservation.private_details?.email && (
                           <div className="flex items-center gap-2 text-sm">
                             <Mail className="w-4 h-4 text-muted-foreground" />
-                            <a href={`mailto:${selectedReservation.email}`} className="text-primary hover:underline">
-                              {selectedReservation.email}
+                            <a href={`mailto:${selectedReservation.private_details.email}`} className="text-primary hover:underline">
+                              {selectedReservation.private_details.email}
                             </a>
                           </div>
                         )}
@@ -1020,10 +1038,10 @@ function AdminContent() {
                       </div>
                     </div>
 
-                    {selectedReservation.special_requests && (
+                    {selectedReservation.private_details?.special_requests && (
                       <div className="glass-card rounded-lg p-4 space-y-2">
                         <h4 className="font-semibold text-foreground">Special Requests</h4>
-                        <p className="text-sm text-muted-foreground">{selectedReservation.special_requests}</p>
+                        <p className="text-sm text-muted-foreground">{selectedReservation.private_details.special_requests}</p>
                       </div>
                     )}
 

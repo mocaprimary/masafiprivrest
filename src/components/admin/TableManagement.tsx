@@ -43,10 +43,14 @@ interface Table {
 interface Reservation {
   id: string;
   table_id: string | null;
-  full_name: string;
   reservation_date: string;
   reservation_time: string;
   status: string;
+  guests: number;
+  reservation_number: string;
+  private_details?: {
+    full_name: string;
+  };
 }
 
 export function TableManagement() {
@@ -70,13 +74,23 @@ export function TableManagement() {
     const [tablesRes, reservationsRes] = await Promise.all([
       supabase.from('tables').select('*').order('table_number'),
       supabase.from('reservations')
-        .select('id, table_id, full_name, reservation_date, reservation_time, status')
+        .select(`
+          id, table_id, reservation_date, reservation_time, status, guests, reservation_number,
+          reservation_private_details(full_name)
+        `)
         .gte('reservation_date', new Date().toISOString().split('T')[0])
         .not('status', 'eq', 'cancelled')
     ]);
 
     if (tablesRes.data) setTables(tablesRes.data);
-    if (reservationsRes.data) setReservations(reservationsRes.data);
+    if (reservationsRes.data) {
+      // Transform to match interface
+      const transformed = reservationsRes.data.map((r: any) => ({
+        ...r,
+        private_details: r.reservation_private_details
+      }));
+      setReservations(transformed);
+    }
     setLoading(false);
   };
 
@@ -339,10 +353,10 @@ export function TableManagement() {
                   {isOccupied && (
                     <div className="mt-2 pt-2 border-t border-border">
                       <p className="text-xs font-medium text-amber-500 truncate">
-                        {reservation.full_name}
+                        {reservation?.private_details?.full_name || 'Guest'}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {reservation.reservation_time}
+                        {reservation?.reservation_time}
                       </p>
                     </div>
                   )}
