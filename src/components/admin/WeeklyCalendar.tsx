@@ -6,11 +6,13 @@ import { cn } from '@/lib/utils';
 interface Reservation {
   id: string;
   reservation_number: string;
-  full_name: string;
   guests: number;
   reservation_date: string;
   reservation_time: string;
   status: string;
+  private_details?: {
+    full_name: string;
+  };
 }
 
 interface WeeklyCalendarProps {
@@ -126,7 +128,7 @@ export function WeeklyCalendar({ reservations, onReservationClick }: WeeklyCalen
                             getStatusColor(res.status)
                           )}
                         >
-                          <div className="font-medium truncate">{res.full_name}</div>
+                          <div className="font-medium truncate">{res.private_details?.full_name || 'Guest'}</div>
                           <div className="flex items-center gap-1 opacity-80">
                             <Users className="w-3 h-3" />
                             <span>{res.guests}</span>

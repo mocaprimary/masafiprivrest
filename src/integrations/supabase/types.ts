@@ -244,6 +244,44 @@ export type Database = {
         }
         Relationships: []
       }
+      reservation_private_details: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          phone: string
+          reservation_id: string
+          special_requests: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          phone: string
+          reservation_id: string
+          special_requests?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          phone?: string
+          reservation_id?: string
+          special_requests?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_reservation"
+            columns: ["reservation_id"]
+            isOneToOne: true
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reservations: {
         Row: {
           checked_in_at: string | null
@@ -252,18 +290,15 @@ export type Database = {
           customer_user_id: string | null
           deposit_amount: number | null
           deposit_status: string | null
-          email: string | null
-          full_name: string
           guests: number
           id: string
-          phone: string
           qr_code: string | null
           qr_expires_at: string | null
           qr_used_at: string | null
+          reservation_code: string | null
           reservation_date: string
           reservation_number: string
           reservation_time: string
-          special_requests: string | null
           status: string
           table_id: string | null
           updated_at: string
@@ -275,18 +310,15 @@ export type Database = {
           customer_user_id?: string | null
           deposit_amount?: number | null
           deposit_status?: string | null
-          email?: string | null
-          full_name: string
           guests?: number
           id?: string
-          phone: string
           qr_code?: string | null
           qr_expires_at?: string | null
           qr_used_at?: string | null
+          reservation_code?: string | null
           reservation_date: string
           reservation_number: string
           reservation_time: string
-          special_requests?: string | null
           status?: string
           table_id?: string | null
           updated_at?: string
@@ -298,18 +330,15 @@ export type Database = {
           customer_user_id?: string | null
           deposit_amount?: number | null
           deposit_status?: string | null
-          email?: string | null
-          full_name?: string
           guests?: number
           id?: string
-          phone?: string
           qr_code?: string | null
           qr_expires_at?: string | null
           qr_used_at?: string | null
+          reservation_code?: string | null
           reservation_date?: string
           reservation_number?: string
           reservation_time?: string
-          special_requests?: string | null
           status?: string
           table_id?: string | null
           updated_at?: string
@@ -453,6 +482,10 @@ export type Database = {
         }
       }
       get_current_user_email: { Args: never; Returns: string }
+      get_reservation_with_details: {
+        Args: { p_reservation_id: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
