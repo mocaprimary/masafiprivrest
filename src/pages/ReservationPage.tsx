@@ -17,7 +17,7 @@ import { AnimatedTablePreview } from '@/components/AnimatedTablePreview';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-const DEPOSIT_AMOUNT = 100; // AED - configurable
+const DEPOSIT_AMOUNT = 100; // AED - configurable deposit amount
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 // Client-side validation schema
