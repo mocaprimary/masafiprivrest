@@ -15,6 +15,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { TableLayoutVisual } from '@/components/TableLayoutVisual';
 import { AnimatedTablePreview } from '@/components/AnimatedTablePreview';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 const DEPOSIT_AMOUNT = 100; // AED - configurable
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -296,9 +297,9 @@ function ReservationContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-20 pb-8 overflow-hidden">
-      {/* Background decorations */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+    <div className="min-h-screen bg-background pt-16 sm:pt-20 pb-6 sm:pb-8 overflow-hidden">
+      {/* Background decorations - hidden on mobile for performance */}
+      <div className="hidden sm:block fixed inset-0 pointer-events-none overflow-hidden">
         <motion.div
           className="absolute top-20 -left-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl"
           animate={{
@@ -317,42 +318,284 @@ function ReservationContent() {
         />
       </div>
 
-      <div className="container mx-auto px-4 max-w-4xl relative">
-        <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors">
+      <div className="container mx-auto px-3 sm:px-4 max-w-4xl relative">
+        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 sm:mb-6 transition-colors text-sm">
           <ArrowLeft className="w-4 h-4" />
           Back to Menu
         </Link>
 
+        {/* Header - Compact on mobile */}
         <motion.div 
-          className="text-center mb-8"
+          className="text-center mb-4 sm:mb-8"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           <motion.div
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-4"
+            className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/10 border border-primary/20 mb-2 sm:mb-4"
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm text-primary font-medium">Reserve Your Experience</span>
+            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+            <span className="text-xs sm:text-sm text-primary font-medium">Reserve Your Experience</span>
           </motion.div>
-          <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">
+          <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1 sm:mb-2">
             {t('reservation.title')}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             {t('reservation.subtitle')}
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left side - Animated Table Preview */}
+        {/* Mobile: Inline compact table preview with form */}
+        {/* Desktop: Side by side layout */}
+        <div className="flex flex-col lg:grid lg:grid-cols-2 lg:gap-8">
+          
+          {/* Form Section - Always first on mobile */}
           <motion.div
-            className="order-2 lg:order-1"
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
+            className="order-1"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+              
+              {/* Mobile: Compact inline table preview */}
+              <motion.div 
+                className="lg:hidden glass-card rounded-xl p-3 sm:p-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex-shrink-0">
+                    <AnimatedTablePreview 
+                      guests={formData.guests}
+                      compact={true}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-display text-base font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <Table className="w-4 h-4 text-primary" />
+                      Your Booking
+                    </h3>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Users className="w-3.5 h-3.5 text-primary" />
+                        <span className="text-foreground font-medium">{formData.guests} Guest{formData.guests !== 1 ? 's' : ''}</span>
+                      </div>
+                      {formData.date && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="w-3.5 h-3.5 text-primary" />
+                          <span>{formData.date}</span>
+                        </div>
+                      )}
+                      {formData.time && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Clock className="w-3.5 h-3.5 text-primary" />
+                          <span>{formData.time}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Personal Details */}
+              <motion.div 
+                className="glass-card rounded-xl p-4 sm:p-6 space-y-3 sm:space-y-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <h3 className="font-display text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-4 flex items-center gap-2">
+                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] sm:text-xs text-primary font-bold">1</span>
+                  Personal Details
+                </h3>
+                <div>
+                  <Label htmlFor="fullName" className="text-sm">{t('reservation.fullName')} *</Label>
+                  <Input
+                    id="fullName"
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    className="input-field mt-1 h-11"
+                    placeholder="John Doe"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="phone" className="text-sm">{t('reservation.phone')} *</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="input-field mt-1 h-11"
+                    placeholder="+971 50 123 4567"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="email" className="text-sm">{t('reservation.email')}</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="input-field mt-1 h-11"
+                    placeholder="john@example.com"
+                  />
+                </div>
+              </motion.div>
+
+              {/* Reservation Details */}
+              <motion.div 
+                className="glass-card rounded-xl p-4 sm:p-6 space-y-3 sm:space-y-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <h3 className="font-display text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-4 flex items-center gap-2">
+                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] sm:text-xs text-primary font-bold">2</span>
+                  Reservation Details
+                </h3>
+                
+                {/* Guest selector - bigger touch targets */}
+                <div>
+                  <Label className="flex items-center gap-2 text-sm mb-2">
+                    <Users className="w-4 h-4 text-primary" />
+                    {t('reservation.guests')} *
+                  </Label>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {[1, 2, 3, 4, 5, 6].map((num) => (
+                      <motion.button
+                        key={num}
+                        type="button"
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setFormData({ ...formData, guests: num })}
+                        className={cn(
+                          "w-11 h-11 sm:w-10 sm:h-10 rounded-full font-bold transition-all text-sm",
+                          formData.guests === num
+                            ? 'bg-primary text-primary-foreground shadow-lg'
+                            : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                        )}
+                      >
+                        {num}
+                      </motion.button>
+                    ))}
+                    <Input
+                      id="guests"
+                      type="number"
+                      min={7}
+                      max={20}
+                      value={formData.guests > 6 ? formData.guests : ''}
+                      onChange={(e) => setFormData({ ...formData, guests: parseInt(e.target.value) || 1 })}
+                      className="input-field w-16 h-11 text-center"
+                      placeholder="7+"
+                    />
+                  </div>
+                </div>
+
+                {/* Date & Time - Full width on mobile */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <Label htmlFor="date" className="flex items-center gap-2 text-sm">
+                      <Calendar className="w-4 h-4 text-primary" />
+                      {t('reservation.date')} *
+                    </Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      className="input-field mt-1 h-11"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="time" className="flex items-center gap-2 text-sm">
+                      <Clock className="w-4 h-4 text-primary" />
+                      {t('reservation.time')} *
+                    </Label>
+                    <Input
+                      id="time"
+                      type="time"
+                      value={formData.time}
+                      onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                      className="input-field mt-1 h-11"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="requests" className="text-sm">{t('reservation.requests')}</Label>
+                  <Textarea
+                    id="requests"
+                    value={formData.requests}
+                    onChange={(e) => setFormData({ ...formData, requests: e.target.value })}
+                    className="input-field mt-1 min-h-[70px] sm:min-h-[80px]"
+                    placeholder="Any dietary requirements or special occasions?"
+                  />
+                </div>
+              </motion.div>
+
+              {/* Policy - Collapsible style on mobile */}
+              <motion.div 
+                className="glass-card rounded-xl p-3 sm:p-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <h3 className="font-semibold text-foreground mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
+                  <Shield className="w-4 h-4 text-primary" />
+                  {t('reservation.policy')}
+                </h3>
+                <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-success">✓</span>
+                    <span className="line-clamp-2">{t('reservation.policyCancel')}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-destructive">✗</span>
+                    <span className="line-clamp-2">{t('reservation.policyNoShow')}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-destructive">✗</span>
+                    <span className="line-clamp-2">{t('reservation.policyNoPurchase')}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-success">✓</span>
+                    <span className="line-clamp-2">{t('reservation.policyPurchase')}</span>
+                  </li>
+                </ul>
+              </motion.div>
+
+              {/* Submit section - Fixed on mobile for easy access */}
+              <motion.div 
+                className="glass-card rounded-xl p-4 sm:sticky sm:bottom-0"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{t('reservation.deposit')}</p>
+                    <p className="text-xl sm:text-2xl font-bold gold-text">{DEPOSIT_AMOUNT} {t('currency')}</p>
+                  </div>
+                  <Button type="submit" variant="gold" size="lg" className="shadow-lg h-12 px-6 sm:px-8 text-sm sm:text-base">
+                    {t('reservation.confirm')}
+                  </Button>
+                </div>
+              </motion.div>
+            </form>
+          </motion.div>
+
+          {/* Desktop: Full Table Preview - Hidden on mobile */}
+          <motion.div
+            className="hidden lg:block order-2"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
           >
             <div className="glass-card rounded-2xl p-6 sticky top-24 overflow-hidden">
               <div className="text-center mb-4">
@@ -399,195 +642,6 @@ function ReservationContent() {
                 </motion.div>
               </div>
             </div>
-          </motion.div>
-
-          {/* Right side - Form */}
-          <motion.div
-            className="order-1 lg:order-2"
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <motion.div 
-                className="glass-card rounded-xl p-6 space-y-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <h3 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary font-bold">1</span>
-                  Personal Details
-                </h3>
-                <div>
-                  <Label htmlFor="fullName">{t('reservation.fullName')} *</Label>
-                  <Input
-                    id="fullName"
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    className="input-field mt-1"
-                    placeholder="John Doe"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="phone">{t('reservation.phone')} *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="input-field mt-1"
-                    placeholder="+971 50 123 4567"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="email">{t('reservation.email')}</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="input-field mt-1"
-                    placeholder="john@example.com"
-                  />
-                </div>
-              </motion.div>
-
-              <motion.div 
-                className="glass-card rounded-xl p-6 space-y-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-              >
-                <h3 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary font-bold">2</span>
-                  Reservation Details
-                </h3>
-                <div>
-                  <Label htmlFor="guests" className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-primary" />
-                    {t('reservation.guests')} *
-                  </Label>
-                  <div className="mt-2">
-                    <div className="flex items-center gap-2">
-                      {[1, 2, 3, 4, 5, 6].map((num) => (
-                        <motion.button
-                          key={num}
-                          type="button"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => setFormData({ ...formData, guests: num })}
-                          className={`w-10 h-10 rounded-full font-bold transition-all ${
-                            formData.guests === num
-                              ? 'bg-primary text-primary-foreground shadow-lg'
-                              : 'bg-muted hover:bg-muted/80 text-muted-foreground'
-                          }`}
-                        >
-                          {num}
-                        </motion.button>
-                      ))}
-                      <Input
-                        id="guests"
-                        type="number"
-                        min={7}
-                        max={20}
-                        value={formData.guests > 6 ? formData.guests : ''}
-                        onChange={(e) => setFormData({ ...formData, guests: parseInt(e.target.value) || 1 })}
-                        className="input-field w-20"
-                        placeholder="7+"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="date" className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-primary" />
-                      {t('reservation.date')} *
-                    </Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="input-field mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="time" className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-primary" />
-                      {t('reservation.time')} *
-                    </Label>
-                    <Input
-                      id="time"
-                      type="time"
-                      value={formData.time}
-                      onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                      className="input-field mt-1"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="requests">{t('reservation.requests')}</Label>
-                  <Textarea
-                    id="requests"
-                    value={formData.requests}
-                    onChange={(e) => setFormData({ ...formData, requests: e.target.value })}
-                    className="input-field mt-1 min-h-[80px]"
-                    placeholder="Any dietary requirements or special occasions?"
-                  />
-                </div>
-              </motion.div>
-
-              <motion.div 
-                className="glass-card rounded-xl p-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-              >
-                <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-primary" />
-                  {t('reservation.policy')}
-                </h3>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <span className="text-success">✓</span>
-                    {t('reservation.policyCancel')}
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-destructive">✗</span>
-                    {t('reservation.policyNoShow')}
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-destructive">✗</span>
-                    {t('reservation.policyNoPurchase')}
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-success">✓</span>
-                    {t('reservation.policyPurchase')}
-                  </li>
-                </ul>
-              </motion.div>
-
-              <motion.div 
-                className="flex items-center justify-between p-4 glass-card rounded-xl"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
-              >
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('reservation.deposit')}</p>
-                  <p className="text-2xl font-bold gold-text">{DEPOSIT_AMOUNT} {t('currency')}</p>
-                </div>
-                <Button type="submit" variant="gold" size="lg" className="shadow-lg">
-                  {t('reservation.confirm')}
-                </Button>
-              </motion.div>
-            </form>
           </motion.div>
         </div>
       </div>
