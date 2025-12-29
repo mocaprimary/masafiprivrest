@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { AdminMenuManagement } from '@/components/admin/AdminMenuManagement';
+import { WeeklyCalendar } from '@/components/admin/WeeklyCalendar';
 import {
   Dialog,
   DialogContent,
@@ -679,6 +680,15 @@ function AdminContent() {
                 </div>
               </div>
             </div>
+
+            {/* Weekly Calendar */}
+            <WeeklyCalendar 
+              reservations={reservations} 
+              onReservationClick={(res) => {
+                setSelectedReservation(res as Reservation);
+                setShowReservationModal(true);
+              }}
+            />
 
             {/* Quick Actions */}
             <div className="glass-card rounded-xl p-6">
