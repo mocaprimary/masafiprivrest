@@ -5,10 +5,12 @@ import { AuthProvider, useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScanLine, Check, AlertTriangle, ArrowLeft, Loader2, Shield } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScanLine, Check, AlertTriangle, ArrowLeft, Loader2, Shield, Camera, Keyboard } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { QRScanner } from '@/components/QRScanner';
 
 interface ReservationInfo {
   id: string;
@@ -62,8 +64,9 @@ function CheckinContent() {
     );
   }
 
-  const handleVerify = async () => {
-    if (!reservationCode.trim()) {
+  const handleVerify = async (codeOrQr: string, isQrCode = false) => {
+    const code = codeOrQr.trim();
+    if (!code) {
       toast.error('Please enter a reservation number');
       return;
     }
@@ -72,8 +75,12 @@ function CheckinContent() {
     setError('');
     
     try {
+      const body = isQrCode 
+        ? { qrCode: code }
+        : { reservationNumber: code.toUpperCase() };
+
       const { data, error: fnError } = await supabase.functions.invoke('validate-qr', {
-        body: { reservationNumber: reservationCode.trim().toUpperCase() }
+        body
       });
 
       if (fnError) {
@@ -97,6 +104,14 @@ function CheckinContent() {
       setError(err instanceof Error ? err.message : 'Verification failed');
       toast.error(err instanceof Error ? err.message : 'Verification failed');
     }
+  };
+
+  const handleQRScan = (data: string) => {
+    handleVerify(data, true);
+  };
+
+  const handleManualVerify = () => {
+    handleVerify(reservationCode, false);
   };
 
   const handleReset = () => {
@@ -128,31 +143,40 @@ function CheckinContent() {
 
         {status === 'idle' && (
           <div className="glass-card rounded-xl p-6 mb-6">
-            <div className="w-full aspect-square bg-secondary rounded-lg flex items-center justify-center mb-6">
-              <div className="text-center">
-                <ScanLine className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">{t('checkin.scan')}</p>
-              </div>
-            </div>
+            <Tabs defaultValue="scan" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="scan" className="flex items-center gap-2">
+                  <Camera className="w-4 h-4" />
+                  Scan QR
+                </TabsTrigger>
+                <TabsTrigger value="manual" className="flex items-center gap-2">
+                  <Keyboard className="w-4 h-4" />
+                  Enter Code
+                </TabsTrigger>
+              </TabsList>
 
-            <div className="relative flex items-center my-6">
-              <div className="flex-1 border-t border-border"></div>
-              <span className="px-4 text-sm text-muted-foreground">{t('checkin.or')}</span>
-              <div className="flex-1 border-t border-border"></div>
-            </div>
+              <TabsContent value="scan">
+                <QRScanner 
+                  onScan={handleQRScan}
+                  onError={(err) => toast.error(err)}
+                />
+              </TabsContent>
 
-            <div className="space-y-4">
-              <Input
-                placeholder="RES-20241227-1234"
-                value={reservationCode}
-                onChange={(e) => setReservationCode(e.target.value)}
-                className="input-field text-center text-lg"
-                onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
-              />
-              <Button variant="gold" size="lg" className="w-full" onClick={handleVerify}>
-                {t('checkin.verify')}
-              </Button>
-            </div>
+              <TabsContent value="manual">
+                <div className="space-y-4">
+                  <Input
+                    placeholder="RES-20241227-1234"
+                    value={reservationCode}
+                    onChange={(e) => setReservationCode(e.target.value)}
+                    className="input-field text-center text-lg"
+                    onKeyDown={(e) => e.key === 'Enter' && handleManualVerify()}
+                  />
+                  <Button variant="gold" size="lg" className="w-full" onClick={handleManualVerify}>
+                    {t('checkin.verify')}
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         )}
 
