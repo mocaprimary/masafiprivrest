@@ -167,6 +167,8 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          created_via: string | null
+          customer_user_id: string | null
           deposit_applied: number | null
           id: string
           order_number: string
@@ -180,6 +182,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_via?: string | null
+          customer_user_id?: string | null
           deposit_applied?: number | null
           id?: string
           order_number: string
@@ -193,6 +197,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_via?: string | null
+          customer_user_id?: string | null
           deposit_applied?: number | null
           id?: string
           order_number?: string
@@ -243,6 +249,7 @@ export type Database = {
           checked_in_at: string | null
           checked_in_by: string | null
           created_at: string
+          customer_user_id: string | null
           deposit_amount: number | null
           deposit_status: string | null
           email: string | null
@@ -265,6 +272,7 @@ export type Database = {
           checked_in_at?: string | null
           checked_in_by?: string | null
           created_at?: string
+          customer_user_id?: string | null
           deposit_amount?: number | null
           deposit_status?: string | null
           email?: string | null
@@ -287,6 +295,7 @@ export type Database = {
           checked_in_at?: string | null
           checked_in_by?: string | null
           created_at?: string
+          customer_user_id?: string | null
           deposit_amount?: number | null
           deposit_status?: string | null
           email?: string | null
@@ -401,6 +410,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_order_secure: {
+        Args: {
+          p_items?: Json
+          p_reservation_id?: string
+          p_table_number: number
+        }
+        Returns: Json
+      }
       create_reservation_secure: {
         Args: {
           p_email: string
@@ -454,6 +471,15 @@ export type Database = {
         }
         Returns: string
       }
+      log_payment: {
+        Args: {
+          p_amount: number
+          p_method?: string
+          p_order_id: string
+          p_status: string
+        }
+        Returns: Json
+      }
       validate_and_use_qr: {
         Args: { p_qr_code: string; p_reservation_number?: string }
         Returns: Json
@@ -472,6 +498,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "staff" | "manager"
+      order_creation_method: "reservation" | "walk_in" | "qr_table"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -600,6 +627,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "staff", "manager"],
+      order_creation_method: ["reservation", "walk_in", "qr_table"],
     },
   },
 } as const
