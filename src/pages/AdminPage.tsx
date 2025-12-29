@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { AdminMenuManagement } from '@/components/admin/AdminMenuManagement';
 import { WeeklyCalendar } from '@/components/admin/WeeklyCalendar';
+import { TableManagement } from '@/components/admin/TableManagement';
 import {
   Dialog,
   DialogContent,
@@ -46,10 +47,11 @@ import {
   RefreshCw,
   UserPlus,
   Shield,
-  Briefcase
+  Briefcase,
+  LayoutGrid
 } from 'lucide-react';
 
-type Tab = 'dashboard' | 'menu' | 'reservations' | 'orders' | 'users' | 'settings' | 'checkin';
+type Tab = 'dashboard' | 'menu' | 'reservations' | 'orders' | 'users' | 'settings' | 'checkin' | 'tables';
 type ReservationStatusFilter = 'all' | 'pending' | 'confirmed' | 'arrived' | 'cancelled';
 type AppRole = 'admin' | 'manager' | 'staff';
 
@@ -368,6 +370,7 @@ function AdminContent() {
     { id: 'reservations' as Tab, label: 'Reservations', icon: Calendar, roles: ['staff', 'manager', 'admin'] },
     { id: 'orders' as Tab, label: 'Orders', icon: ShoppingBag, roles: ['staff', 'manager', 'admin'] },
     { id: 'checkin' as Tab, label: 'Check-In', icon: ScanLine, roles: ['staff', 'manager', 'admin'] },
+    { id: 'tables' as Tab, label: 'Tables', icon: LayoutGrid, roles: ['manager', 'admin'] },
     { id: 'menu' as Tab, label: 'Menu', icon: UtensilsCrossed, roles: ['manager', 'admin'] },
     { id: 'users' as Tab, label: 'Users', icon: Users, roles: ['admin'] },
     { id: 'settings' as Tab, label: 'Settings', icon: Settings, roles: ['admin'] },
@@ -776,6 +779,11 @@ function AdminContent() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Tables Tab */}
+        {activeTab === 'tables' && (
+          <TableManagement />
         )}
 
         {/* Reservations Tab */}
