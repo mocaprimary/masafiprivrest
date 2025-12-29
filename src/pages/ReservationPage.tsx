@@ -6,12 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Clock, Users, CreditCard, Shield, ArrowLeft, Check } from 'lucide-react';
+import { Calendar, Clock, Users, CreditCard, Shield, ArrowLeft, Check, Table } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import { QRCodeSVG } from 'qrcode.react';
+import { TableLayoutVisual } from '@/components/TableLayoutVisual';
 
 const DEPOSIT_AMOUNT = 100; // AED - configurable
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -40,9 +41,10 @@ interface ReservationResponse {
 
 function ReservationContent() {
   const { t } = useLanguage();
-  const [step, setStep] = useState<'form' | 'payment' | 'success'>('form');
+  const [step, setStep] = useState<'form' | 'table' | 'payment' | 'success'>('form');
   const [reservationNumber, setReservationNumber] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTable, setSelectedTable] = useState<{ id: string; table_number: number } | null>(null);
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -76,6 +78,10 @@ function ReservationContent() {
       return;
     }
 
+    setStep('table');
+  };
+
+  const handleTableSelection = () => {
     setStep('payment');
   };
 
@@ -99,6 +105,7 @@ function ReservationContent() {
           time: formData.time,
           specialRequests: formData.requests.trim() || undefined,
           depositAmount: DEPOSIT_AMOUNT,
+          tableId: selectedTable?.id,
         }),
       });
 
@@ -132,6 +139,11 @@ function ReservationContent() {
             </h1>
             <p className="text-muted-foreground mb-6">
               Thank you! Your reservation #{reservationNumber} is confirmed.
+              {selectedTable && (
+                <span className="block mt-1 text-primary font-medium">
+                  Table {selectedTable.table_number} has been reserved for you.
+                </span>
+              )}
             </p>
             
             <div className="glass-card rounded-xl p-6 mb-6">
@@ -163,12 +175,64 @@ function ReservationContent() {
     );
   }
 
+  if (step === 'table') {
+    return (
+      <div className="min-h-screen bg-background pt-20 pb-8">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <button
+            onClick={() => setStep('form')}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Details
+          </button>
+
+          <div className="text-center mb-8">
+            <Table className="w-12 h-12 mx-auto text-primary mb-4" />
+            <h1 className="font-display text-2xl font-bold text-foreground mb-2">
+              Choose Your Table
+            </h1>
+            <p className="text-muted-foreground">
+              Select your preferred table for {formData.guests} guest{formData.guests !== 1 ? 's' : ''} on {formData.date} at {formData.time}
+            </p>
+          </div>
+
+          <TableLayoutVisual
+            date={formData.date}
+            time={formData.time}
+            guests={formData.guests}
+            selectedTableId={selectedTable?.id}
+            onTableSelect={(table) => setSelectedTable(table ? { id: table.id, table_number: table.table_number } : null)}
+          />
+
+          <div className="mt-6 flex gap-3">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={handleTableSelection}
+            >
+              Skip Table Selection
+            </Button>
+            <Button
+              variant="gold"
+              className="flex-1"
+              onClick={handleTableSelection}
+              disabled={!selectedTable}
+            >
+              {selectedTable ? `Continue with Table ${selectedTable.table_number}` : 'Select a Table'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (step === 'payment') {
     return (
       <div className="min-h-screen bg-background pt-20 pb-8">
         <div className="container mx-auto px-4 max-w-md">
           <button
-            onClick={() => setStep('form')}
+            onClick={() => setStep('table')}
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />

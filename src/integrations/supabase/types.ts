@@ -258,6 +258,7 @@ export type Database = {
           reservation_time: string
           special_requests: string | null
           status: string
+          table_id: string | null
           updated_at: string
         }
         Insert: {
@@ -279,6 +280,7 @@ export type Database = {
           reservation_time: string
           special_requests?: string | null
           status?: string
+          table_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -300,9 +302,18 @@ export type Database = {
           reservation_time?: string
           special_requests?: string | null
           status?: string
+          table_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "reservations_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "tables"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       settings: {
         Row: {
@@ -325,6 +336,42 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: Json
+        }
+        Relationships: []
+      }
+      tables: {
+        Row: {
+          capacity: number
+          created_at: string
+          id: string
+          is_active: boolean | null
+          location: string | null
+          position_x: number | null
+          position_y: number | null
+          table_number: number
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          position_x?: number | null
+          position_y?: number | null
+          table_number: number
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          position_x?: number | null
+          position_y?: number | null
+          table_number?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -368,6 +415,26 @@ export type Database = {
       }
       generate_order_number: { Args: never; Returns: string }
       generate_reservation_number: { Args: never; Returns: string }
+      get_available_tables: {
+        Args: { p_date: string; p_guests: number; p_time: string }
+        Returns: {
+          capacity: number
+          created_at: string
+          id: string
+          is_active: boolean | null
+          location: string | null
+          position_x: number | null
+          position_y: number | null
+          table_number: number
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "tables"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_current_user_email: { Args: never; Returns: string }
       has_role: {
         Args: {

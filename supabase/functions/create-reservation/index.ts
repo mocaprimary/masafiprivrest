@@ -14,6 +14,7 @@ interface ReservationRequest {
   time: string
   specialRequests?: string
   depositAmount?: number
+  tableId?: string
 }
 
 // UAE phone validation regex
@@ -151,6 +152,19 @@ Deno.serve(async (req) => {
       )
     }
 
+    // If tableId provided, update the reservation with the table
+    if (body.tableId && result.reservation?.id) {
+      const { error: tableError } = await supabase
+        .from('reservations')
+        .update({ table_id: body.tableId })
+        .eq('id', result.reservation.id)
+      
+      if (tableError) {
+        console.log('Failed to assign table:', tableError)
+        // Don't fail the reservation, just log it
+      }
+    }
+
     console.log('Reservation created securely:', result.reservation.reservation_number)
 
     return new Response(
@@ -159,7 +173,8 @@ Deno.serve(async (req) => {
         reservation: {
           id: result.reservation.id,
           reservationNumber: result.reservation.reservation_number,
-          depositAmount: result.reservation.deposit_amount
+          depositAmount: result.reservation.deposit_amount,
+          tableId: body.tableId
         }
       }),
       { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
