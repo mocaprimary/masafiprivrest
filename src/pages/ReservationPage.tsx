@@ -589,11 +589,20 @@ function ReservationContent() {
                         <span className="flex items-center gap-2">
                           <Clock className="w-4 h-4" />
                           {formData.time ? (
-                            <span className="flex items-center gap-1">
-                              <span className="text-lg font-semibold">{formData.time.split(':')[0]}</span>
-                              <span className="text-muted-foreground">:</span>
-                              <span className="text-lg font-semibold">{formData.time.split(':')[1]}</span>
-                            </span>
+                            (() => {
+                              const [h, m] = formData.time.split(':');
+                              const hour24 = parseInt(h);
+                              const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+                              const ampm = hour24 < 12 ? 'AM' : 'PM';
+                              return (
+                                <span className="flex items-center gap-1">
+                                  <span className="text-lg font-semibold">{hour12}</span>
+                                  <span className="text-muted-foreground">:</span>
+                                  <span className="text-lg font-semibold">{m}</span>
+                                  <span className="text-sm font-medium text-primary ml-1">{ampm}</span>
+                                </span>
+                              );
+                            })()
                           ) : 'Select time'}
                         </span>
                         {formData.time && (
@@ -613,33 +622,42 @@ function ReservationContent() {
                           Select Time
                         </div>
                         
-                        {/* Hour and Minute Selectors */}
-                        <div className="flex items-center justify-center gap-3">
-                          {/* Hour Selector */}
+                        {/* Hour, Minute, and AM/PM Selectors */}
+                        <div className="flex items-center justify-center gap-2">
+                          {/* Hour Selector (1-12) */}
                           <div className="flex flex-col items-center">
                             <span className="text-xs text-muted-foreground mb-1">Hour</span>
-                            <div className="relative h-36 w-14 overflow-hidden rounded-lg border border-border bg-muted/30">
+                            <div className="relative h-36 w-12 overflow-hidden rounded-lg border border-border bg-muted/30">
                               <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-9 bg-primary/20 border-y border-primary/30 pointer-events-none z-10" />
                               <div className="h-full overflow-y-auto scrollbar-hide py-[54px]">
-                                {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                                  <motion.button
-                                    key={hour}
-                                    type="button"
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => {
-                                      const currentMinute = formData.time?.split(':')[1] || '00';
-                                      setFormData({ ...formData, time: `${hour.toString().padStart(2, '0')}:${currentMinute}` });
-                                    }}
-                                    className={cn(
-                                      "w-full h-9 flex items-center justify-center text-base font-medium transition-all",
-                                      formData.time?.split(':')[0] === hour.toString().padStart(2, '0')
-                                        ? "text-primary font-bold scale-110"
-                                        : "text-muted-foreground hover:text-foreground"
-                                    )}
-                                  >
-                                    {hour.toString().padStart(2, '0')}
-                                  </motion.button>
-                                ))}
+                                {Array.from({ length: 12 }, (_, i) => i + 1).map((hour12) => {
+                                  const currentHour24 = parseInt(formData.time?.split(':')[0] || '12');
+                                  const currentIsAM = currentHour24 < 12;
+                                  const selectedHour12 = currentHour24 === 0 ? 12 : currentHour24 > 12 ? currentHour24 - 12 : currentHour24;
+                                  
+                                  return (
+                                    <motion.button
+                                      key={hour12}
+                                      type="button"
+                                      whileTap={{ scale: 0.95 }}
+                                      onClick={() => {
+                                        const currentMinute = formData.time?.split(':')[1] || '00';
+                                        const hour24 = currentIsAM
+                                          ? (hour12 === 12 ? 0 : hour12)
+                                          : (hour12 === 12 ? 12 : hour12 + 12);
+                                        setFormData({ ...formData, time: `${hour24.toString().padStart(2, '0')}:${currentMinute}` });
+                                      }}
+                                      className={cn(
+                                        "w-full h-9 flex items-center justify-center text-base font-medium transition-all",
+                                        selectedHour12 === hour12
+                                          ? "text-primary font-bold scale-110"
+                                          : "text-muted-foreground hover:text-foreground"
+                                      )}
+                                    >
+                                      {hour12}
+                                    </motion.button>
+                                  );
+                                })}
                               </div>
                             </div>
                           </div>
@@ -649,7 +667,7 @@ function ReservationContent() {
                           {/* Minute Selector */}
                           <div className="flex flex-col items-center">
                             <span className="text-xs text-muted-foreground mb-1">Min</span>
-                            <div className="relative h-36 w-14 overflow-hidden rounded-lg border border-border bg-muted/30">
+                            <div className="relative h-36 w-12 overflow-hidden rounded-lg border border-border bg-muted/30">
                               <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-9 bg-primary/20 border-y border-primary/30 pointer-events-none z-10" />
                               <div className="h-full overflow-y-auto scrollbar-hide py-[54px]">
                                 {Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0')).map((minute) => (
@@ -658,7 +676,7 @@ function ReservationContent() {
                                     type="button"
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => {
-                                      const currentHour = formData.time?.split(':')[0] || '19';
+                                      const currentHour = formData.time?.split(':')[0] || '12';
                                       setFormData({ ...formData, time: `${currentHour}:${minute}` });
                                     }}
                                     className={cn(
@@ -672,6 +690,47 @@ function ReservationContent() {
                                   </motion.button>
                                 ))}
                               </div>
+                            </div>
+                          </div>
+                          
+                          {/* AM/PM Selector */}
+                          <div className="flex flex-col items-center">
+                            <span className="text-xs text-muted-foreground mb-1">Period</span>
+                            <div className="flex flex-col gap-1 mt-1">
+                              {['AM', 'PM'].map((period) => {
+                                const currentHour24 = parseInt(formData.time?.split(':')[0] || '12');
+                                const isAM = currentHour24 < 12;
+                                const isSelected = (period === 'AM' && isAM) || (period === 'PM' && !isAM);
+                                
+                                return (
+                                  <motion.button
+                                    key={period}
+                                    type="button"
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => {
+                                      const currentHour24 = parseInt(formData.time?.split(':')[0] || '12');
+                                      const currentMinute = formData.time?.split(':')[1] || '00';
+                                      const currentHour12 = currentHour24 === 0 ? 12 : currentHour24 > 12 ? currentHour24 - 12 : currentHour24;
+                                      
+                                      let newHour24: number;
+                                      if (period === 'AM') {
+                                        newHour24 = currentHour12 === 12 ? 0 : currentHour12;
+                                      } else {
+                                        newHour24 = currentHour12 === 12 ? 12 : currentHour12 + 12;
+                                      }
+                                      setFormData({ ...formData, time: `${newHour24.toString().padStart(2, '0')}:${currentMinute}` });
+                                    }}
+                                    className={cn(
+                                      "w-12 h-9 rounded-lg text-sm font-semibold transition-all",
+                                      isSelected
+                                        ? "bg-primary text-primary-foreground"
+                                        : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                                    )}
+                                  >
+                                    {period}
+                                  </motion.button>
+                                );
+                              })}
                             </div>
                           </div>
                         </div>
