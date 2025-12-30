@@ -62,11 +62,25 @@ export function TableManagement() {
   const [editingTable, setEditingTable] = useState<Table | null>(null);
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [highlightedTables, setHighlightedTables] = useState<Set<string>>(new Set());
   const [newTable, setNewTable] = useState({
     table_number: 1,
     capacity: 4,
     location: 'main'
   });
+
+  // Function to highlight a table temporarily
+  const highlightTable = (tableId: string) => {
+    setHighlightedTables(prev => new Set(prev).add(tableId));
+    // Remove highlight after animation completes (2s)
+    setTimeout(() => {
+      setHighlightedTables(prev => {
+        const next = new Set(prev);
+        next.delete(tableId);
+        return next;
+      });
+    }, 2000);
+  };
 
   useEffect(() => {
     fetchData();
@@ -80,6 +94,13 @@ export function TableManagement() {
         (payload) => {
           console.log('Tables changed:', payload);
           setLastUpdate(new Date());
+          
+          // Highlight the changed table
+          const tableId = (payload.new as any)?.id || (payload.old as any)?.id;
+          if (tableId) {
+            highlightTable(tableId);
+          }
+          
           fetchData();
           toast.info('Table updated', { duration: 2000 });
         }
@@ -100,11 +121,19 @@ export function TableManagement() {
         (payload) => {
           console.log('Reservations changed:', payload);
           setLastUpdate(new Date());
+          
+          // Highlight the affected table
+          const newData = payload.new as any;
+          const oldData = payload.old as any;
+          const tableId = newData?.table_id || oldData?.table_id;
+          if (tableId) {
+            highlightTable(tableId);
+          }
+          
           fetchData();
           
           // Show specific toast based on event
           if (payload.eventType === 'UPDATE') {
-            const newData = payload.new as any;
             if (newData.status === 'arrived' || newData.status === 'checked_in') {
               toast.success('Guest checked in!', { duration: 3000 });
             } else if (newData.status === 'cancelled') {
@@ -377,6 +406,7 @@ export function TableManagement() {
             {tables.map((table) => {
               const reservation = getTableReservation(table.id);
               const isOccupied = !!reservation;
+              const isHighlighted = highlightedTables.has(table.id);
               
               return (
                 <div
@@ -386,7 +416,8 @@ export function TableManagement() {
                     !table.is_active && "opacity-50 bg-muted",
                     isOccupied 
                       ? "border-amber-500/50 bg-amber-500/10" 
-                      : "border-green-500/30 bg-green-500/5"
+                      : "border-green-500/30 bg-green-500/5",
+                    isHighlighted && "animate-highlight-change"
                   )}
                 >
                   <div className="flex items-center justify-between mb-2">

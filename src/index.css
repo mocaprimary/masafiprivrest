@@ -270,6 +270,14 @@
   .animate-pulse-gold {
     animation: pulseGold 2s ease-in-out infinite;
   }
+
+  .animate-highlight-change {
+    animation: highlightChange 2s ease-out forwards;
+  }
+
+  .animate-ring-pulse {
+    animation: ringPulse 1.5s ease-out;
+  }
 }
 
 @keyframes fadeIn {
@@ -321,5 +329,32 @@
   }
   50% { 
     box-shadow: 0 0 0 10px hsl(38 70% 50% / 0);
+  }
+}
+
+@keyframes highlightChange {
+  0% { 
+    box-shadow: 0 0 0 4px hsl(38 70% 50% / 0.8), 0 0 20px hsl(38 70% 50% / 0.4);
+    transform: scale(1.02);
+  }
+  30% {
+    box-shadow: 0 0 0 8px hsl(38 70% 50% / 0.4), 0 0 30px hsl(38 70% 50% / 0.3);
+    transform: scale(1.05);
+  }
+  100% { 
+    box-shadow: 0 0 0 0 hsl(38 70% 50% / 0);
+    transform: scale(1);
+  }
+}
+
+@keyframes ringPulse {
+  0% {
+    box-shadow: 0 0 0 0 hsl(160 60% 40% / 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 12px hsl(160 60% 40% / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 hsl(160 60% 40% / 0);
   }
 }
