@@ -16,7 +16,7 @@ import { TableLayoutVisual } from '@/components/TableLayoutVisual';
 import { AnimatedTablePreview } from '@/components/AnimatedTablePreview';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar as CalendarPicker } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format, addDays } from 'date-fns';
 
@@ -528,7 +528,7 @@ function ReservationContent() {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 z-50" align="start" sideOffset={4}>
-                      <Calendar
+                      <CalendarPicker
                         mode="single"
                         selected={formData.date ? new Date(formData.date) : undefined}
                         onSelect={(date) => setFormData({ ...formData, date: date ? format(date, 'yyyy-MM-dd') : '' })}
@@ -781,8 +781,8 @@ function ReservationContent() {
                   className="text-center p-3 rounded-xl bg-primary/5 border border-primary/10"
                   whileHover={{ scale: 1.02 }}
                 >
-                  <Calendar className="w-5 h-5 text-primary mx-auto mb-1" />
-                  <p className="text-lg font-bold text-foreground">{formData.date || '--'}</p>
+                  <CalendarIcon className="w-5 h-5 text-primary mx-auto mb-1" />
+                  <p className="text-lg font-bold text-foreground">{formData.date ? format(new Date(formData.date), 'MMM d') : '--'}</p>
                   <p className="text-xs text-muted-foreground">Date</p>
                 </motion.div>
                 <motion.div 
