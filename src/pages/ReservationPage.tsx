@@ -614,20 +614,20 @@ function ReservationContent() {
                         )}
                       </motion.button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-72 p-4" align="start">
-                      <div className="space-y-4">
-                        <div className="text-center text-sm font-medium text-muted-foreground mb-2">
+                    <PopoverContent className="w-64 p-4" align="start">
+                      <div className="space-y-3">
+                        <div className="text-center text-sm font-medium text-foreground">
                           Select Time
                         </div>
                         
                         {/* Hour and Minute Selectors */}
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center justify-center gap-3">
                           {/* Hour Selector */}
                           <div className="flex flex-col items-center">
                             <span className="text-xs text-muted-foreground mb-1">Hour</span>
-                            <div className="relative h-32 w-16 overflow-hidden rounded-lg border border-border bg-muted/30">
-                              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-10 bg-primary/20 border-y border-primary/30 pointer-events-none z-10" />
-                              <div className="h-full overflow-y-auto scrollbar-hide snap-y snap-mandatory py-11">
+                            <div className="relative h-36 w-14 overflow-hidden rounded-lg border border-border bg-muted/30">
+                              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-9 bg-primary/20 border-y border-primary/30 pointer-events-none z-10" />
+                              <div className="h-full overflow-y-auto scrollbar-hide py-[54px]">
                                 {Array.from({ length: 13 }, (_, i) => i + 12).map((hour) => (
                                   <motion.button
                                     key={hour}
@@ -638,9 +638,9 @@ function ReservationContent() {
                                       setFormData({ ...formData, time: `${hour.toString().padStart(2, '0')}:${currentMinute}` });
                                     }}
                                     className={cn(
-                                      "w-full h-10 flex items-center justify-center text-lg font-medium snap-center transition-all",
+                                      "w-full h-9 flex items-center justify-center text-base font-medium transition-all",
                                       formData.time?.split(':')[0] === hour.toString().padStart(2, '0')
-                                        ? "text-primary font-bold"
+                                        ? "text-primary font-bold scale-110"
                                         : "text-muted-foreground hover:text-foreground"
                                     )}
                                   >
@@ -651,15 +651,15 @@ function ReservationContent() {
                             </div>
                           </div>
                           
-                          <span className="text-2xl font-bold text-muted-foreground mt-5">:</span>
+                          <span className="text-2xl font-bold text-primary mt-5">:</span>
                           
                           {/* Minute Selector */}
                           <div className="flex flex-col items-center">
                             <span className="text-xs text-muted-foreground mb-1">Min</span>
-                            <div className="relative h-32 w-16 overflow-hidden rounded-lg border border-border bg-muted/30">
-                              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-10 bg-primary/20 border-y border-primary/30 pointer-events-none z-10" />
-                              <div className="h-full overflow-y-auto scrollbar-hide snap-y snap-mandatory py-11">
-                                {['00', '15', '30', '45'].map((minute) => (
+                            <div className="relative h-36 w-14 overflow-hidden rounded-lg border border-border bg-muted/30">
+                              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-9 bg-primary/20 border-y border-primary/30 pointer-events-none z-10" />
+                              <div className="h-full overflow-y-auto scrollbar-hide py-[54px]">
+                                {Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0')).map((minute) => (
                                   <motion.button
                                     key={minute}
                                     type="button"
@@ -669,9 +669,9 @@ function ReservationContent() {
                                       setFormData({ ...formData, time: `${currentHour}:${minute}` });
                                     }}
                                     className={cn(
-                                      "w-full h-10 flex items-center justify-center text-lg font-medium snap-center transition-all",
+                                      "w-full h-9 flex items-center justify-center text-base font-medium transition-all",
                                       formData.time?.split(':')[1] === minute
-                                        ? "text-primary font-bold"
+                                        ? "text-primary font-bold scale-110"
                                         : "text-muted-foreground hover:text-foreground"
                                     )}
                                   >
@@ -680,29 +680,6 @@ function ReservationContent() {
                                 ))}
                               </div>
                             </div>
-                          </div>
-                        </div>
-                        
-                        {/* Quick time presets */}
-                        <div className="border-t border-border pt-3">
-                          <span className="text-xs text-muted-foreground mb-2 block">Popular times</span>
-                          <div className="grid grid-cols-4 gap-1.5">
-                            {['18:00', '19:00', '20:00', '21:00'].map((time) => (
-                              <motion.button
-                                key={time}
-                                type="button"
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setFormData({ ...formData, time })}
-                                className={cn(
-                                  "py-2 rounded-md text-sm font-medium transition-all",
-                                  formData.time === time
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted/70 text-muted-foreground hover:bg-muted"
-                                )}
-                              >
-                                {time}
-                              </motion.button>
-                            ))}
                           </div>
                         </div>
                       </div>
