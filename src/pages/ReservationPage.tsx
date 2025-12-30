@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Clock, Users, CreditCard, Shield, ArrowLeft, Check, Table, Sparkles } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Users, CreditCard, Shield, ArrowLeft, Check, Table, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,8 +14,11 @@ import { z } from 'zod';
 import { QRCodeSVG } from 'qrcode.react';
 import { TableLayoutVisual } from '@/components/TableLayoutVisual';
 import { AnimatedTablePreview } from '@/components/AnimatedTablePreview';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format, addDays } from 'date-fns';
 
 const DEPOSIT_AMOUNT = 100; // AED - configurable deposit amount
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -387,8 +390,8 @@ function ReservationContent() {
                       </div>
                       {formData.date && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="w-3.5 h-3.5 text-primary" />
-                          <span>{formData.date}</span>
+                          <CalendarIcon className="w-3.5 h-3.5 text-primary" />
+                          <span>{format(new Date(formData.date), 'MMM d, yyyy')}</span>
                         </div>
                       )}
                       {formData.time && (
@@ -497,32 +500,132 @@ function ReservationContent() {
                   </div>
                 </div>
 
-                {/* Date & Time - Full width on mobile */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <div>
-                    <Label htmlFor="date" className="flex items-center gap-2 text-sm">
-                      <Calendar className="w-4 h-4 text-primary" />
-                      {t('reservation.date')} *
-                    </Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="input-field mt-1 h-11"
-                    />
+                {/* Date Picker */}
+                <div>
+                  <Label className="flex items-center gap-2 text-sm mb-2">
+                    <CalendarIcon className="w-4 h-4 text-primary" />
+                    {t('reservation.date')} *
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <motion.button
+                        type="button"
+                        whileTap={{ scale: 0.98 }}
+                        className={cn(
+                          "w-full h-12 px-4 rounded-lg border text-left font-medium transition-all flex items-center justify-between",
+                          formData.date
+                            ? "bg-primary/10 border-primary/30 text-foreground"
+                            : "bg-muted/50 border-border text-muted-foreground hover:border-primary/30"
+                        )}
+                      >
+                        <span className="flex items-center gap-2">
+                          <CalendarIcon className="w-4 h-4" />
+                          {formData.date ? format(new Date(formData.date), 'EEEE, MMMM d, yyyy') : 'Select date'}
+                        </span>
+                        {formData.date && (
+                          <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="w-5 h-5 rounded-full bg-primary flex items-center justify-center"
+                          >
+                            <Check className="w-3 h-3 text-primary-foreground" />
+                          </motion.span>
+                        )}
+                      </motion.button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={formData.date ? new Date(formData.date) : undefined}
+                        onSelect={(date) => setFormData({ ...formData, date: date ? format(date, 'yyyy-MM-dd') : '' })}
+                        disabled={(date) => date < new Date() || date > addDays(new Date(), 60)}
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  
+                  {/* Quick date buttons */}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {[
+                      { label: 'Today', date: new Date() },
+                      { label: 'Tomorrow', date: addDays(new Date(), 1) },
+                      { label: 'This Weekend', date: (() => {
+                        const today = new Date();
+                        const dayOfWeek = today.getDay();
+                        const daysUntilSaturday = dayOfWeek === 0 ? 6 : 6 - dayOfWeek;
+                        return addDays(today, daysUntilSaturday);
+                      })() },
+                    ].map((option) => (
+                      <motion.button
+                        key={option.label}
+                        type="button"
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setFormData({ ...formData, date: format(option.date, 'yyyy-MM-dd') })}
+                        className={cn(
+                          "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                          formData.date === format(option.date, 'yyyy-MM-dd')
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted/70 text-muted-foreground hover:bg-muted"
+                        )}
+                      >
+                        {option.label}
+                      </motion.button>
+                    ))}
                   </div>
-                  <div>
-                    <Label htmlFor="time" className="flex items-center gap-2 text-sm">
-                      <Clock className="w-4 h-4 text-primary" />
-                      {t('reservation.time')} *
-                    </Label>
+                </div>
+
+                {/* Time Slots */}
+                <div>
+                  <Label className="flex items-center gap-2 text-sm mb-2">
+                    <Clock className="w-4 h-4 text-primary" />
+                    {t('reservation.time')} *
+                  </Label>
+                  
+                  {/* Popular time slots */}
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-2">
+                    <AnimatePresence>
+                      {['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30'].map((time, index) => (
+                        <motion.button
+                          key={time}
+                          type="button"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => setFormData({ ...formData, time })}
+                          className={cn(
+                            "h-11 rounded-lg font-medium text-sm transition-all relative overflow-hidden",
+                            formData.time === time
+                              ? "bg-primary text-primary-foreground shadow-lg"
+                              : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground border border-border/50"
+                          )}
+                        >
+                          {formData.time === time && (
+                            <motion.div
+                              layoutId="timeIndicator"
+                              className="absolute inset-0 bg-primary"
+                              initial={false}
+                              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                            />
+                          )}
+                          <span className="relative z-10">
+                            {time.split(':')[0]}:{time.split(':')[1]}
+                          </span>
+                        </motion.button>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                  
+                  {/* Custom time option */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">or</span>
                     <Input
-                      id="time"
                       type="time"
                       value={formData.time}
                       onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                      className="input-field mt-1 h-11"
+                      className="input-field h-10 flex-1"
+                      placeholder="Custom time"
                     />
                   </div>
                 </div>
