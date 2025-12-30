@@ -10,6 +10,11 @@ interface Reservation {
   reservation_date: string;
   reservation_time: string;
   status: string;
+  table?: {
+    id: string;
+    table_number: number;
+    location: string;
+  } | null;
   private_details?: {
     full_name: string;
   };
@@ -132,7 +137,9 @@ export function WeeklyCalendar({ reservations, onReservationClick }: WeeklyCalen
                           <div className="flex items-center gap-1 opacity-80">
                             <Users className="w-3 h-3" />
                             <span>{res.guests}</span>
-                            <span className="ml-1">{res.reservation_time}</span>
+                            {res.table && (
+                              <span className="ml-1 px-1 rounded bg-primary/30 text-primary font-medium">T{res.table.table_number}</span>
+                            )}
                           </div>
                         </button>
                       ))}
