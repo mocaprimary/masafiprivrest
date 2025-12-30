@@ -14,7 +14,7 @@ import { z } from 'zod';
 import { QRCodeSVG } from 'qrcode.react';
 import { TableLayoutVisual } from '@/components/TableLayoutVisual';
 import { AnimatedTablePreview } from '@/components/AnimatedTablePreview';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -575,59 +575,139 @@ function ReservationContent() {
                   </div>
                 </div>
 
-                {/* Time Slots */}
+                {/* Time Picker */}
                 <div>
                   <Label className="flex items-center gap-2 text-sm mb-2">
                     <Clock className="w-4 h-4 text-primary" />
                     {t('reservation.time')} *
                   </Label>
-                  
-                  {/* Popular time slots */}
-                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-2">
-                    <AnimatePresence>
-                      {['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30'].map((time, index) => (
-                        <motion.button
-                          key={time}
-                          type="button"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => setFormData({ ...formData, time })}
-                          className={cn(
-                            "h-11 rounded-lg font-medium text-sm transition-all relative overflow-hidden",
-                            formData.time === time
-                              ? "bg-primary text-primary-foreground shadow-lg"
-                              : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground border border-border/50"
-                          )}
-                        >
-                          {formData.time === time && (
-                            <motion.div
-                              layoutId="timeIndicator"
-                              className="absolute inset-0 bg-primary"
-                              initial={false}
-                              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                            />
-                          )}
-                          <span className="relative z-10">
-                            {time.split(':')[0]}:{time.split(':')[1]}
-                          </span>
-                        </motion.button>
-                      ))}
-                    </AnimatePresence>
-                  </div>
-                  
-                  {/* Custom time option */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">or</span>
-                    <Input
-                      type="time"
-                      value={formData.time}
-                      onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                      className="input-field h-10 flex-1"
-                      placeholder="Custom time"
-                    />
-                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <motion.button
+                        type="button"
+                        whileTap={{ scale: 0.98 }}
+                        className={cn(
+                          "w-full h-12 px-4 rounded-lg border text-left font-medium transition-all flex items-center justify-between",
+                          formData.time
+                            ? "bg-primary/10 border-primary/30 text-foreground"
+                            : "bg-muted/50 border-border text-muted-foreground hover:border-primary/30"
+                        )}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Clock className="w-4 h-4" />
+                          {formData.time ? (
+                            <span className="flex items-center gap-1">
+                              <span className="text-lg font-semibold">{formData.time.split(':')[0]}</span>
+                              <span className="text-muted-foreground">:</span>
+                              <span className="text-lg font-semibold">{formData.time.split(':')[1]}</span>
+                            </span>
+                          ) : 'Select time'}
+                        </span>
+                        {formData.time && (
+                          <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="w-5 h-5 rounded-full bg-primary flex items-center justify-center"
+                          >
+                            <Check className="w-3 h-3 text-primary-foreground" />
+                          </motion.span>
+                        )}
+                      </motion.button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-4" align="start">
+                      <div className="space-y-4">
+                        <div className="text-center text-sm font-medium text-muted-foreground mb-2">
+                          Select Time
+                        </div>
+                        
+                        {/* Hour and Minute Selectors */}
+                        <div className="flex items-center justify-center gap-2">
+                          {/* Hour Selector */}
+                          <div className="flex flex-col items-center">
+                            <span className="text-xs text-muted-foreground mb-1">Hour</span>
+                            <div className="relative h-32 w-16 overflow-hidden rounded-lg border border-border bg-muted/30">
+                              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-10 bg-primary/20 border-y border-primary/30 pointer-events-none z-10" />
+                              <div className="h-full overflow-y-auto scrollbar-hide snap-y snap-mandatory py-11">
+                                {Array.from({ length: 13 }, (_, i) => i + 12).map((hour) => (
+                                  <motion.button
+                                    key={hour}
+                                    type="button"
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => {
+                                      const currentMinute = formData.time?.split(':')[1] || '00';
+                                      setFormData({ ...formData, time: `${hour.toString().padStart(2, '0')}:${currentMinute}` });
+                                    }}
+                                    className={cn(
+                                      "w-full h-10 flex items-center justify-center text-lg font-medium snap-center transition-all",
+                                      formData.time?.split(':')[0] === hour.toString().padStart(2, '0')
+                                        ? "text-primary font-bold"
+                                        : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                  >
+                                    {hour.toString().padStart(2, '0')}
+                                  </motion.button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <span className="text-2xl font-bold text-muted-foreground mt-5">:</span>
+                          
+                          {/* Minute Selector */}
+                          <div className="flex flex-col items-center">
+                            <span className="text-xs text-muted-foreground mb-1">Min</span>
+                            <div className="relative h-32 w-16 overflow-hidden rounded-lg border border-border bg-muted/30">
+                              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-10 bg-primary/20 border-y border-primary/30 pointer-events-none z-10" />
+                              <div className="h-full overflow-y-auto scrollbar-hide snap-y snap-mandatory py-11">
+                                {['00', '15', '30', '45'].map((minute) => (
+                                  <motion.button
+                                    key={minute}
+                                    type="button"
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => {
+                                      const currentHour = formData.time?.split(':')[0] || '19';
+                                      setFormData({ ...formData, time: `${currentHour}:${minute}` });
+                                    }}
+                                    className={cn(
+                                      "w-full h-10 flex items-center justify-center text-lg font-medium snap-center transition-all",
+                                      formData.time?.split(':')[1] === minute
+                                        ? "text-primary font-bold"
+                                        : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                  >
+                                    {minute}
+                                  </motion.button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Quick time presets */}
+                        <div className="border-t border-border pt-3">
+                          <span className="text-xs text-muted-foreground mb-2 block">Popular times</span>
+                          <div className="grid grid-cols-4 gap-1.5">
+                            {['18:00', '19:00', '20:00', '21:00'].map((time) => (
+                              <motion.button
+                                key={time}
+                                type="button"
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => setFormData({ ...formData, time })}
+                                className={cn(
+                                  "py-2 rounded-md text-sm font-medium transition-all",
+                                  formData.time === time
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted/70 text-muted-foreground hover:bg-muted"
+                                )}
+                              >
+                                {time}
+                              </motion.button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 <div>
