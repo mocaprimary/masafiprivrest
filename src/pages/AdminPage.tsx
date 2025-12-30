@@ -66,6 +66,14 @@ interface Reservation {
   deposit_amount: number;
   created_at: string;
   reservation_code: string | null;
+  table_id: string | null;
+  // Joined table info
+  table?: {
+    id: string;
+    table_number: number;
+    capacity: number;
+    location: string;
+  } | null;
   // PII from joined table
   private_details?: {
     full_name: string;
@@ -157,7 +165,8 @@ function AdminContent() {
       .select(`
         id, reservation_number, reservation_code, guests, 
         reservation_date, reservation_time, status, 
-        deposit_status, deposit_amount, created_at,
+        deposit_status, deposit_amount, created_at, table_id,
+        tables(id, table_number, capacity, location),
         reservation_private_details(full_name, phone, email, special_requests)
       `)
       .order('reservation_date', { ascending: true })
@@ -167,6 +176,7 @@ function AdminContent() {
       // Transform to match interface
       const transformed = data.map((r: any) => ({
         ...r,
+        table: r.tables,
         private_details: r.reservation_private_details
       }));
       setReservations(transformed);
@@ -877,6 +887,7 @@ function AdminContent() {
                     <th className="text-left p-4 text-sm font-medium text-muted-foreground">Reservation</th>
                     <th className="text-left p-4 text-sm font-medium text-muted-foreground">Guest</th>
                     <th className="text-left p-4 text-sm font-medium text-muted-foreground">Date & Time</th>
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground">Table</th>
                     <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
                     <th className="text-left p-4 text-sm font-medium text-muted-foreground">Deposit</th>
                     <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
@@ -896,6 +907,21 @@ function AdminContent() {
                       <td className="p-4">
                         <p className="font-medium text-foreground">{reservation.reservation_date}</p>
                         <p className="text-sm text-muted-foreground">{reservation.reservation_time}</p>
+                      </td>
+                      <td className="p-4">
+                        {reservation.table ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                              <span className="text-xs font-bold text-primary">T{reservation.table.table_number}</span>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-foreground">Table {reservation.table.table_number}</p>
+                              <p className="text-xs text-muted-foreground capitalize">{reservation.table.location}</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">Not assigned</span>
+                        )}
                       </td>
                       <td className="p-4">
                         <span className={`text-xs px-2 py-1 rounded-full ${
@@ -1036,6 +1062,25 @@ function AdminContent() {
                           <span>{selectedReservation.reservation_time}</span>
                         </div>
                       </div>
+                    </div>
+
+                    <div className="glass-card rounded-lg p-4 space-y-3">
+                      <h4 className="font-semibold text-foreground">Table Assignment</h4>
+                      {selectedReservation.table ? (
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+                            <span className="text-lg font-bold text-primary">T{selectedReservation.table.table_number}</span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">Table {selectedReservation.table.table_number}</p>
+                            <p className="text-sm text-muted-foreground capitalize">
+                              {selectedReservation.table.location} • Seats {selectedReservation.table.capacity}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No table assigned yet</p>
+                      )}
                     </div>
 
                     {selectedReservation.private_details?.special_requests && (

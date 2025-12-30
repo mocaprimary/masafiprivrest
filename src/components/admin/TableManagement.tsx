@@ -356,7 +356,10 @@ export function TableManagement() {
                         {reservation?.private_details?.full_name || 'Guest'}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {reservation?.reservation_time}
+                        {reservation?.reservation_time} • {reservation?.guests} guests
+                      </p>
+                      <p className="text-[10px] text-muted-foreground/70 truncate">
+                        {reservation?.reservation_number}
                       </p>
                     </div>
                   )}
