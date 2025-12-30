@@ -12,7 +12,8 @@ import {
   Edit2, 
   Check, 
   X,
-  RefreshCw 
+  RefreshCw,
+  Wifi
 } from 'lucide-react';
 import {
   Dialog,
@@ -59,6 +60,8 @@ export function TableManagement() {
   const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingTable, setEditingTable] = useState<Table | null>(null);
+  const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [newTable, setNewTable] = useState({
     table_number: 1,
     capacity: 4,
@@ -67,6 +70,60 @@ export function TableManagement() {
 
   useEffect(() => {
     fetchData();
+
+    // Real-time subscription for tables changes
+    const tablesChannel = supabase
+      .channel('tables-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tables' },
+        (payload) => {
+          console.log('Tables changed:', payload);
+          setLastUpdate(new Date());
+          fetchData();
+          toast.info('Table updated', { duration: 2000 });
+        }
+      )
+      .subscribe((status) => {
+        console.log('Tables channel status:', status);
+        if (status === 'SUBSCRIBED') {
+          setIsRealtimeConnected(true);
+        }
+      });
+
+    // Real-time subscription for reservations changes (affects table availability)
+    const reservationsChannel = supabase
+      .channel('reservations-table-status')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'reservations' },
+        (payload) => {
+          console.log('Reservations changed:', payload);
+          setLastUpdate(new Date());
+          fetchData();
+          
+          // Show specific toast based on event
+          if (payload.eventType === 'UPDATE') {
+            const newData = payload.new as any;
+            if (newData.status === 'arrived' || newData.status === 'checked_in') {
+              toast.success('Guest checked in!', { duration: 3000 });
+            } else if (newData.status === 'cancelled') {
+              toast.info('Reservation cancelled - table now available', { duration: 3000 });
+            } else if (newData.status === 'completed') {
+              toast.info('Reservation completed - table now available', { duration: 3000 });
+            }
+          } else if (payload.eventType === 'INSERT') {
+            toast.info('New reservation received', { duration: 2000 });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      setIsRealtimeConnected(false);
+      supabase.removeChannel(tablesChannel);
+      supabase.removeChannel(reservationsChannel);
+    };
   }, []);
 
   const fetchData = async () => {
@@ -217,8 +274,26 @@ export function TableManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-display text-2xl font-bold text-foreground">Table Management</h2>
-          <p className="text-muted-foreground">Manage restaurant tables and assignments</p>
+          <div className="flex items-center gap-3">
+            <h2 className="font-display text-2xl font-bold text-foreground">Table Management</h2>
+            <div className={cn(
+              "flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium",
+              isRealtimeConnected 
+                ? "bg-green-500/20 text-green-500" 
+                : "bg-muted text-muted-foreground"
+            )}>
+              <Wifi className={cn("w-3 h-3", isRealtimeConnected && "animate-pulse")} />
+              {isRealtimeConnected ? 'Live' : 'Connecting...'}
+            </div>
+          </div>
+          <p className="text-muted-foreground">
+            Manage restaurant tables and assignments
+            {lastUpdate && (
+              <span className="ml-2 text-xs">
+                • Last update: {lastUpdate.toLocaleTimeString()}
+              </span>
+            )}
+          </p>
         </div>
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogTrigger asChild>
