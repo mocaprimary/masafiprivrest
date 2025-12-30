@@ -508,39 +508,32 @@ function ReservationContent() {
                   </Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <motion.button
+                      <Button
                         type="button"
-                        whileTap={{ scale: 0.98 }}
+                        variant="outline"
                         className={cn(
-                          "w-full h-12 px-4 rounded-lg border text-left font-medium transition-all flex items-center justify-between",
+                          "w-full h-12 px-4 justify-start text-left font-medium",
                           formData.date
                             ? "bg-primary/10 border-primary/30 text-foreground"
-                            : "bg-muted/50 border-border text-muted-foreground hover:border-primary/30"
+                            : "text-muted-foreground"
                         )}
                       >
-                        <span className="flex items-center gap-2">
-                          <CalendarIcon className="w-4 h-4" />
-                          {formData.date ? format(new Date(formData.date), 'EEEE, MMMM d, yyyy') : 'Select date'}
-                        </span>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.date ? format(new Date(formData.date), 'EEEE, MMMM d, yyyy') : 'Select date'}
                         {formData.date && (
-                          <motion.span
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="w-5 h-5 rounded-full bg-primary flex items-center justify-center"
-                          >
+                          <span className="ml-auto w-5 h-5 rounded-full bg-primary flex items-center justify-center">
                             <Check className="w-3 h-3 text-primary-foreground" />
-                          </motion.span>
+                          </span>
                         )}
-                      </motion.button>
+                      </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 z-50" align="start" sideOffset={4}>
                       <Calendar
                         mode="single"
                         selected={formData.date ? new Date(formData.date) : undefined}
                         onSelect={(date) => setFormData({ ...formData, date: date ? format(date, 'yyyy-MM-dd') : '' })}
                         disabled={(date) => date < new Date() || date > addDays(new Date(), 60)}
                         initialFocus
-                        className="pointer-events-auto"
                       />
                     </PopoverContent>
                   </Popover>
@@ -628,7 +621,7 @@ function ReservationContent() {
                             <div className="relative h-36 w-14 overflow-hidden rounded-lg border border-border bg-muted/30">
                               <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-9 bg-primary/20 border-y border-primary/30 pointer-events-none z-10" />
                               <div className="h-full overflow-y-auto scrollbar-hide py-[54px]">
-                                {Array.from({ length: 13 }, (_, i) => i + 12).map((hour) => (
+                                {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
                                   <motion.button
                                     key={hour}
                                     type="button"
