@@ -9,6 +9,7 @@ import { AdminMenuManagement } from '@/components/admin/AdminMenuManagement';
 import { WeeklyCalendar } from '@/components/admin/WeeklyCalendar';
 import { TableManagement } from '@/components/admin/TableManagement';
 import { TodayReservations } from '@/components/admin/TodayReservations';
+import { CheckInWidget } from '@/components/admin/CheckInWidget';
 import {
   Dialog,
   DialogContent,
@@ -781,7 +782,7 @@ function AdminContent() {
                 <ScanLine className="w-10 h-10 text-primary-foreground" />
               </div>
               <h2 className="font-display text-2xl font-bold text-foreground mb-2">Quick Check-In</h2>
-              <p className="text-muted-foreground">Verify guest reservations by number</p>
+              <p className="text-muted-foreground">Scan QR code or enter reservation number</p>
             </div>
 
             <div className="glass-card rounded-xl p-6">
@@ -1380,77 +1381,6 @@ function AdminContent() {
           </div>
         )}
       </main>
-    </div>
-  );
-}
-
-// Check-In Widget Component
-function CheckInWidget({ onCheckin }: { onCheckin: () => void }) {
-  const [code, setCode] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ success: boolean; message: string; guest?: string } | null>(null);
-
-  const handleVerify = async () => {
-    if (!code.trim()) {
-      toast.error('Please enter a reservation number');
-      return;
-    }
-
-    setLoading(true);
-    setResult(null);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('validate-qr', {
-        body: { reservationNumber: code.trim().toUpperCase() }
-      });
-
-      if (error) throw new Error(error.message);
-
-      if (data.success) {
-        setResult({ 
-          success: true, 
-          message: 'Guest checked in successfully!',
-          guest: data.reservation?.full_name 
-        });
-        toast.success('Guest checked in!');
-        onCheckin();
-        setCode('');
-      } else {
-        setResult({ success: false, message: data.error || 'Verification failed' });
-      }
-    } catch (err) {
-      setResult({ success: false, message: err instanceof Error ? err.message : 'Failed' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex gap-2">
-        <Input
-          placeholder="Enter reservation number (e.g., RES-20241227-1234)"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          className="input-field"
-          onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
-        />
-        <Button variant="gold" onClick={handleVerify} disabled={loading}>
-          {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-        </Button>
-      </div>
-      
-      {result && (
-        <div className={`p-4 rounded-lg flex items-center gap-3 ${
-          result.success ? 'bg-green-500/10 text-green-500' : 'bg-destructive/10 text-destructive'
-        }`}>
-          {result.success ? <Check className="w-5 h-5" /> : <X className="w-5 h-5" />}
-          <div>
-            <p className="font-medium">{result.message}</p>
-            {result.guest && <p className="text-sm opacity-80">Welcome, {result.guest}!</p>}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
