@@ -133,6 +133,9 @@ function ReservationContent() {
   };
 
   if (step === 'success') {
+    // Get last 4 digits of phone for PIN display
+    const phoneLast4 = formData.phone.replace(/\D/g, '').slice(-4);
+    
     return (
       <div className="min-h-screen bg-background pt-20 pb-8">
         <div className="container mx-auto px-4 max-w-md">
@@ -166,15 +169,46 @@ function ReservationContent() {
               </p>
             </div>
 
+            {/* Pre-order Info Card */}
+            <div className="glass-card rounded-xl p-5 mb-6 text-left">
+              <div className="flex items-start gap-3 mb-3">
+                <Sparkles className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-foreground mb-1">Pre-Order Your Meal!</p>
+                  <p className="text-sm text-muted-foreground">
+                    Order ahead so your food is ready when you arrive.
+                  </p>
+                </div>
+              </div>
+              <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Reservation #</span>
+                  <span className="font-mono font-medium text-foreground">{reservationNumber}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Your PIN</span>
+                  <span className="font-mono font-bold text-primary text-lg tracking-widest">{phoneLast4}</span>
+                </div>
+              </div>
+            </div>
+
             <div className="glass-card rounded-xl p-4 mb-6 text-left">
               <p className="text-sm text-muted-foreground mb-2">{t('checkin.depositNote')}</p>
             </div>
 
-            <Link to="/">
-              <Button variant="gold" className="w-full">
-                Back to Menu
-              </Button>
-            </Link>
+            <div className="space-y-3">
+              <Link to="/guest-login">
+                <Button variant="gold" className="w-full">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Pre-Order Now
+                </Button>
+              </Link>
+              <Link to="/">
+                <Button variant="outline" className="w-full">
+                  Back to Menu
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

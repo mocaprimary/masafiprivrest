@@ -1,7 +1,8 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Globe, ShoppingBag, Receipt, User } from 'lucide-react';
+import { Globe, ShoppingBag, Receipt, User, Utensils } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useGuestSession } from '@/contexts/GuestSessionContext';
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,8 +11,10 @@ import { User as SupabaseUser } from '@supabase/supabase-js';
 export function Header() {
   const { language, setLanguage, t } = useLanguage();
   const { totalItems } = useCart();
+  const { isGuestLoggedIn, guestReservation } = useGuestSession();
   const location = useLocation();
   const isOrderPage = location.pathname.startsWith('/order');
+  const isPreorderPage = location.pathname.startsWith('/preorder');
   const [user, setUser] = useState<SupabaseUser | null>(null);
 
   useEffect(() => {
@@ -42,6 +45,26 @@ export function Header() {
         </Link>
 
         <div className="flex items-center gap-2">
+          {/* Pre-Order Link for guests with reservation */}
+          {isGuestLoggedIn && !isPreorderPage && (
+            <Link to="/preorder">
+              <Button variant="ghost" size="sm" className="gap-2 text-primary">
+                <Utensils className="w-4 h-4" />
+                <span className="hidden sm:inline text-sm">Pre-Order</span>
+              </Button>
+            </Link>
+          )}
+
+          {/* Pre-Order link for users without login */}
+          {!user && !isGuestLoggedIn && !location.pathname.includes('guest-login') && (
+            <Link to="/guest-login">
+              <Button variant="ghost" size="sm" className="gap-2">
+                <Utensils className="w-4 h-4" />
+                <span className="hidden sm:inline text-sm">Pre-Order</span>
+              </Button>
+            </Link>
+          )}
+
           {user && (
             <Link to="/my-orders">
               <Button variant="ghost" size="sm" className="gap-2">
