@@ -514,7 +514,7 @@ export type Database = {
         Returns: Json
       }
       validate_and_use_qr: {
-        Args: { p_qr_code: string; p_reservation_number?: string }
+        Args: { p_qr_code?: string; p_reservation_number?: string }
         Returns: Json
       }
       validate_reservation_input: {
