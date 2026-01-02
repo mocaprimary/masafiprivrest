@@ -171,9 +171,12 @@ export type Database = {
           customer_user_id: string | null
           deposit_applied: number | null
           id: string
+          is_preorder: boolean | null
           order_number: string
           payment_status: string | null
+          preorder_notes: string | null
           reservation_id: string | null
+          scheduled_for: string | null
           status: string
           subtotal: number
           table_number: number
@@ -186,9 +189,12 @@ export type Database = {
           customer_user_id?: string | null
           deposit_applied?: number | null
           id?: string
+          is_preorder?: boolean | null
           order_number: string
           payment_status?: string | null
+          preorder_notes?: string | null
           reservation_id?: string | null
+          scheduled_for?: string | null
           status?: string
           subtotal?: number
           table_number: number
@@ -201,9 +207,12 @@ export type Database = {
           customer_user_id?: string | null
           deposit_applied?: number | null
           id?: string
+          is_preorder?: boolean | null
           order_number?: string
           payment_status?: string | null
+          preorder_notes?: string | null
           reservation_id?: string | null
+          scheduled_for?: string | null
           status?: string
           subtotal?: number
           table_number?: number
@@ -447,6 +456,10 @@ export type Database = {
         }
         Returns: Json
       }
+      create_preorder: {
+        Args: { p_items?: Json; p_notes?: string; p_reservation_id: string }
+        Returns: Json
+      }
       create_reservation_secure: {
         Args: {
           p_email: string
@@ -482,6 +495,10 @@ export type Database = {
         }
       }
       get_current_user_email: { Args: never; Returns: string }
+      get_reservation_preorders: {
+        Args: { p_reservation_id: string }
+        Returns: Json
+      }
       get_reservation_with_details: {
         Args: { p_reservation_id: string }
         Returns: Json
@@ -526,6 +543,10 @@ export type Database = {
           p_phone: string
           p_time: string
         }
+        Returns: Json
+      }
+      verify_guest_access: {
+        Args: { p_pin: string; p_reservation_number: string }
         Returns: Json
       }
     }
