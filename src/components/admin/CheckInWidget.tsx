@@ -5,14 +5,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { QRScanner } from '@/components/QRScanner';
-import { 
-  Check, 
-  X, 
-  Loader2, 
-  Camera, 
+import { parseCheckInCode } from '@/lib/checkinCode';
+import {
+  Check,
+  X,
+  Loader2,
+  Camera,
   Keyboard,
   UserCheck,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 
 interface CheckInResult {
@@ -34,71 +35,6 @@ export function CheckInWidget({ onCheckin }: CheckInWidgetProps) {
   const [result, setResult] = useState<CheckInResult | null>(null);
   const [activeTab, setActiveTab] = useState<'manual' | 'scan'>('manual');
 
-  const handleVerify = async (inputCode: string, isQrCode = false) => {
-    const trimmedCode = inputCode.trim();
-    if (!trimmedCode) {
-      toast.error('Please enter a reservation number or scan a QR code');
-      return;
-    }
-
-    setLoading(true);
-    setResult(null);
-
-    try {
-      const body = isQrCode 
-        ? { qrCode: trimmedCode }
-        : { reservationNumber: trimmedCode.toUpperCase() };
-
-      const { data, error } = await supabase.functions.invoke('validate-qr', {
-        body
-      });
-
-      if (error) {
-        throw new Error(error.message || 'Check-in failed');
-      }
-
-      if (data.success) {
-        const reservation = data.reservation;
-        setResult({ 
-          success: true, 
-          message: 'Guest checked in successfully!',
-          guest: reservation?.full_name,
-          guests: reservation?.guests,
-          reservationNumber: reservation?.reservation_number,
-          time: reservation?.reservation_time
-        });
-        toast.success(`${reservation?.full_name || 'Guest'} checked in!`);
-        onCheckin();
-        setCode('');
-      } else {
-        setResult({ 
-          success: false, 
-          message: data.error || 'Verification failed' 
-        });
-        toast.error(data.error || 'Check-in failed');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Check-in failed';
-      setResult({ success: false, message: errorMessage });
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleManualVerify = () => {
-    handleVerify(code, false);
-  };
-
-  const handleQRScan = (data: string) => {
-    handleVerify(data, true);
-  };
-
-  const handleReset = () => {
-    setResult(null);
-    setCode('');
-  };
-
   const formatTime = (time: string) => {
     if (!time) return '';
     const [hours, minutes] = time.split(':');
@@ -108,21 +44,82 @@ export function CheckInWidget({ onCheckin }: CheckInWidgetProps) {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  // Show result view when check-in is successful
+  const handleVerify = async (input: string) => {
+    const parsed = parseCheckInCode(input);
+
+    if (!parsed.qrCode && !parsed.reservationNumber) {
+      toast.error('Please enter a reservation number or scan a QR code');
+      return;
+    }
+
+    setLoading(true);
+    setResult(null);
+
+    try {
+      // Use secure RPC directly (this call will:
+      // - validate staff role
+      // - return guest details on success
+      // - mark the QR/code as used (qr_used_at) and set status=checked_in
+      const { data, error } = await supabase.rpc(
+        'validate_and_use_qr',
+        {
+          p_qr_code: parsed.qrCode ?? null,
+          p_reservation_number: parsed.reservationNumber ?? null,
+        } as any
+      );
+
+      if (error) throw new Error(error.message || 'Check-in failed');
+
+      const rpcResult = data as any;
+      if (!rpcResult?.success) {
+        const msg = rpcResult?.error || 'Verification failed';
+        setResult({ success: false, message: msg });
+        toast.error(msg);
+        return;
+      }
+
+      const reservation = rpcResult.reservation;
+      setResult({
+        success: true,
+        message: 'Guest checked in successfully!',
+        guest: reservation?.full_name,
+        guests: reservation?.guests,
+        reservationNumber: reservation?.reservation_number,
+        time: reservation?.reservation_time,
+      });
+
+      toast.success(`${reservation?.full_name || 'Guest'} checked in!`);
+      onCheckin();
+      setCode('');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Check-in failed';
+      setResult({ success: false, message: msg });
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = () => {
+    setResult(null);
+    setCode('');
+  };
+
+  // Success view
   if (result?.success) {
     return (
       <div className="space-y-4 animate-fade-in">
-        <div className="p-6 rounded-xl bg-green-500/10 border border-green-500/30">
+        <div className="p-6 rounded-xl bg-success/10 border border-success/30">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
-              <UserCheck className="w-6 h-6 text-green-500" />
+            <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center">
+              <UserCheck className="w-6 h-6 text-success" />
             </div>
             <div>
               <h3 className="font-semibold text-lg text-foreground">{result.guest || 'Guest'}</h3>
-              <p className="text-sm text-muted-foreground">Checked in successfully</p>
+              <p className="text-sm text-muted-foreground">Checked in successfully (QR now expired)</p>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="p-3 rounded-lg bg-background/50">
               <p className="text-muted-foreground">Party Size</p>
@@ -141,11 +138,7 @@ export function CheckInWidget({ onCheckin }: CheckInWidgetProps) {
           </div>
         </div>
 
-        <Button 
-          variant="outline" 
-          className="w-full" 
-          onClick={handleReset}
-        >
+        <Button variant="outline" className="w-full" onClick={handleReset}>
           <RefreshCw className="w-4 h-4 mr-2" />
           Check In Another Guest
         </Button>
@@ -153,7 +146,7 @@ export function CheckInWidget({ onCheckin }: CheckInWidgetProps) {
     );
   }
 
-  // Show error result
+  // Error view
   if (result && !result.success) {
     return (
       <div className="space-y-4 animate-fade-in">
@@ -169,11 +162,7 @@ export function CheckInWidget({ onCheckin }: CheckInWidgetProps) {
           </div>
         </div>
 
-        <Button 
-          variant="outline" 
-          className="w-full" 
-          onClick={handleReset}
-        >
+        <Button variant="outline" className="w-full" onClick={handleReset}>
           Try Again
         </Button>
       </div>
@@ -201,14 +190,14 @@ export function CheckInWidget({ onCheckin }: CheckInWidgetProps) {
               value={code}
               onChange={(e) => setCode(e.target.value)}
               className="input-field text-center text-lg font-mono"
-              onKeyDown={(e) => e.key === 'Enter' && handleManualVerify()}
+              onKeyDown={(e) => e.key === 'Enter' && handleVerify(code)}
               disabled={loading}
             />
-            <Button 
-              variant="gold" 
+            <Button
+              variant="gold"
               size="lg"
-              className="w-full" 
-              onClick={handleManualVerify} 
+              className="w-full"
+              onClick={() => handleVerify(code)}
               disabled={loading || !code.trim()}
             >
               {loading ? (
@@ -233,10 +222,7 @@ export function CheckInWidget({ onCheckin }: CheckInWidgetProps) {
               <p className="text-muted-foreground">Verifying reservation...</p>
             </div>
           ) : (
-            <QRScanner 
-              onScan={handleQRScan}
-              onError={(err) => toast.error(err)}
-            />
+            <QRScanner onScan={(data) => handleVerify(data)} onError={(err) => toast.error(err)} />
           )}
         </TabsContent>
       </Tabs>
