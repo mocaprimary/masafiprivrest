@@ -19,7 +19,7 @@ export function MenuItemModal({ item, open, onClose }: MenuItemModalProps) {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const location = useLocation();
-  const isOrderPage = location.pathname.startsWith('/order');
+  const isOrderPage = location.pathname.startsWith('/order') || location.pathname.startsWith('/preorder');
 
   if (!item) return null;
 
