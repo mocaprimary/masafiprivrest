@@ -11,6 +11,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { QRScanner } from '@/components/QRScanner';
+import { parseCheckInCode } from '@/lib/checkinCode';
 
 interface ReservationInfo {
   id: string;
@@ -64,54 +65,53 @@ function CheckinContent() {
     );
   }
 
-  const handleVerify = async (codeOrQr: string, isQrCode = false) => {
-    const code = codeOrQr.trim();
-    if (!code) {
+  const handleVerify = async (codeOrQr: string) => {
+    const parsed = parseCheckInCode(codeOrQr);
+
+    if (!parsed.qrCode && !parsed.reservationNumber) {
       toast.error('Please enter a reservation number');
       return;
     }
 
     setStatus('loading');
     setError('');
-    
-    try {
-      const body = isQrCode 
-        ? { qrCode: code }
-        : { reservationNumber: code.toUpperCase() };
 
-      const { data, error: fnError } = await supabase.functions.invoke('validate-qr', {
-        body
+    try {
+      const { data, error: rpcError } = await supabase.rpc('validate_and_use_qr', {
+        p_qr_code: parsed.qrCode ?? '',
+        p_reservation_number: parsed.reservationNumber,
       });
 
-      if (fnError) {
-        throw new Error(fnError.message || 'Verification failed');
-      }
+      if (rpcError) throw new Error(rpcError.message || 'Verification failed');
 
-      if (!data.success) {
+      const result = data as any;
+
+      if (!result?.success) {
+        const msg = result?.error || 'Reservation not found';
         setStatus('error');
-        setError(data.error || 'Reservation not found');
-        toast.error(data.error || 'Reservation not found');
+        setError(msg);
+        toast.error(msg);
         return;
       }
 
       setStatus('success');
-      setReservationInfo(data.reservation);
+      setReservationInfo(result.reservation);
       toast.success('Guest checked in successfully!');
-
     } catch (err) {
       console.error('Verification error:', err);
+      const msg = err instanceof Error ? err.message : 'Verification failed';
       setStatus('error');
-      setError(err instanceof Error ? err.message : 'Verification failed');
-      toast.error(err instanceof Error ? err.message : 'Verification failed');
+      setError(msg);
+      toast.error(msg);
     }
   };
 
   const handleQRScan = (data: string) => {
-    handleVerify(data, true);
+    handleVerify(data);
   };
 
   const handleManualVerify = () => {
-    handleVerify(reservationCode, false);
+    handleVerify(reservationCode);
   };
 
   const handleReset = () => {
