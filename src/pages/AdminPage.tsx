@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { AdminMenuManagement } from '@/components/admin/AdminMenuManagement';
 import { WeeklyCalendar } from '@/components/admin/WeeklyCalendar';
 import { TableManagement } from '@/components/admin/TableManagement';
+import { TodayReservations } from '@/components/admin/TodayReservations';
 import {
   Dialog,
   DialogContent,
@@ -710,8 +711,18 @@ function AdminContent() {
               </div>
             </div>
 
+            {/* Today's Reservations Dashboard */}
+            <TodayReservations 
+              reservations={reservations}
+              onStatusChange={updateReservationStatus}
+              onViewAll={() => {
+                setActiveTab('reservations');
+                setDateFilter(today);
+              }}
+            />
+
             {/* Weekly Calendar */}
-            <WeeklyCalendar 
+            <WeeklyCalendar
               reservations={reservations as any} 
               onReservationClick={(res: any) => {
                 setSelectedReservation(res as Reservation);
