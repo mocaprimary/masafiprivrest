@@ -10,6 +10,7 @@ import { WeeklyCalendar } from '@/components/admin/WeeklyCalendar';
 import { TableManagement } from '@/components/admin/TableManagement';
 import { TodayReservations } from '@/components/admin/TodayReservations';
 import { CheckInWidget } from '@/components/admin/CheckInWidget';
+import { PreordersPanel } from '@/components/admin/PreordersPanel';
 import {
   Dialog,
   DialogContent,
@@ -50,10 +51,11 @@ import {
   UserPlus,
   Shield,
   Briefcase,
-  LayoutGrid
+  LayoutGrid,
+  Package
 } from 'lucide-react';
 
-type Tab = 'dashboard' | 'menu' | 'reservations' | 'orders' | 'users' | 'settings' | 'checkin' | 'tables';
+type Tab = 'dashboard' | 'menu' | 'reservations' | 'orders' | 'preorders' | 'users' | 'settings' | 'checkin' | 'tables';
 type ReservationStatusFilter = 'all' | 'pending' | 'confirmed' | 'arrived' | 'cancelled';
 type AppRole = 'admin' | 'manager' | 'staff';
 
@@ -397,6 +399,7 @@ function AdminContent() {
     { id: 'dashboard' as Tab, label: 'Dashboard', icon: LayoutDashboard, roles: ['staff', 'manager', 'admin'] },
     { id: 'reservations' as Tab, label: 'Reservations', icon: Calendar, roles: ['staff', 'manager', 'admin'] },
     { id: 'orders' as Tab, label: 'Orders', icon: ShoppingBag, roles: ['staff', 'manager', 'admin'] },
+    { id: 'preorders' as Tab, label: 'Pre-Orders', icon: Package, roles: ['staff', 'manager', 'admin'] },
     { id: 'checkin' as Tab, label: 'Check-In', icon: ScanLine, roles: ['staff', 'manager', 'admin'] },
     { id: 'tables' as Tab, label: 'Tables', icon: LayoutGrid, roles: ['manager', 'admin'] },
     { id: 'menu' as Tab, label: 'Menu', icon: UtensilsCrossed, roles: ['manager', 'admin'] },
@@ -1236,6 +1239,11 @@ function AdminContent() {
               ))}
             </div>
           </div>
+        )}
+
+        {/* Pre-Orders Tab */}
+        {activeTab === 'preorders' && (
+          <PreordersPanel />
         )}
 
         {/* Menu Tab (Manager + Admin) */}
