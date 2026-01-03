@@ -55,8 +55,19 @@ import {
   Package,
   Trash2,
   UserX,
-  Ban
+  Ban,
+  Undo2
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type Tab = 'dashboard' | 'menu' | 'reservations' | 'orders' | 'preorders' | 'users' | 'settings' | 'checkin' | 'tables';
 type ReservationStatusFilter = 'all' | 'pending' | 'confirmed' | 'arrived' | 'cancelled' | 'no_show';
@@ -121,6 +132,11 @@ function AdminContent() {
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
   const [showReservationModal, setShowReservationModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{
+    type: 'cancel' | 'no_show' | 'delete' | null;
+    reservationId: string | null;
+    reservationNumber: string | null;
+  }>({ type: null, reservationId: null, reservationNumber: null });
 
   useEffect(() => {
     if (!loading && !user) {
@@ -1056,7 +1072,11 @@ function AdminContent() {
                                 variant="ghost"
                                 className="text-orange-500 hover:bg-orange-500/10"
                                 title="Mark as No-Show"
-                                onClick={() => updateReservationStatus(reservation.id, 'no_show')}
+                                onClick={() => setConfirmAction({ 
+                                  type: 'no_show', 
+                                  reservationId: reservation.id, 
+                                  reservationNumber: reservation.reservation_number 
+                                })}
                               >
                                 <UserX className="w-4 h-4" />
                               </Button>
@@ -1065,22 +1085,43 @@ function AdminContent() {
                                 variant="ghost"
                                 className="text-destructive hover:bg-destructive/10"
                                 title="Cancel Reservation"
-                                onClick={() => updateReservationStatus(reservation.id, 'cancelled')}
+                                onClick={() => setConfirmAction({ 
+                                  type: 'cancel', 
+                                  reservationId: reservation.id, 
+                                  reservationNumber: reservation.reservation_number 
+                                })}
                               >
                                 <Ban className="w-4 h-4" />
                               </Button>
                             </>
                           )}
-                          {(reservation.status === 'cancelled' || reservation.status === 'no_show') && isAdmin && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-destructive hover:bg-destructive/10"
-                              title="Delete Reservation"
-                              onClick={() => deleteReservation(reservation.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                          {(reservation.status === 'cancelled' || reservation.status === 'no_show') && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-green-600 hover:bg-green-600/10"
+                                title="Restore Reservation"
+                                onClick={() => updateReservationStatus(reservation.id, 'confirmed')}
+                              >
+                                <Undo2 className="w-4 h-4" />
+                              </Button>
+                              {isAdmin && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="text-destructive hover:bg-destructive/10"
+                                  title="Delete Reservation"
+                                  onClick={() => setConfirmAction({ 
+                                    type: 'delete', 
+                                    reservationId: reservation.id, 
+                                    reservationNumber: reservation.reservation_number 
+                                  })}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </>
                           )}
                         </div>
                       </td>
@@ -1257,8 +1298,11 @@ function AdminContent() {
                               variant="outline" 
                               className="flex-1 text-orange-500 border-orange-500/30 hover:bg-orange-500/10"
                               onClick={() => {
-                                updateReservationStatus(selectedReservation.id, 'no_show');
-                                setShowReservationModal(false);
+                                setConfirmAction({ 
+                                  type: 'no_show', 
+                                  reservationId: selectedReservation.id, 
+                                  reservationNumber: selectedReservation.reservation_number 
+                                });
                               }}
                             >
                               <UserX className="w-4 h-4 mr-2" />
@@ -1268,8 +1312,11 @@ function AdminContent() {
                               variant="outline" 
                               className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/10"
                               onClick={() => {
-                                updateReservationStatus(selectedReservation.id, 'cancelled');
-                                setShowReservationModal(false);
+                                setConfirmAction({ 
+                                  type: 'cancel', 
+                                  reservationId: selectedReservation.id, 
+                                  reservationNumber: selectedReservation.reservation_number 
+                                });
                               }}
                             >
                               <Ban className="w-4 h-4 mr-2" />
@@ -1278,15 +1325,36 @@ function AdminContent() {
                           </div>
                         </div>
                       )}
-                      {(selectedReservation.status === 'cancelled' || selectedReservation.status === 'no_show') && isAdmin && (
-                        <Button 
-                          variant="outline" 
-                          className="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
-                          onClick={() => deleteReservation(selectedReservation.id)}
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Remove from Database
-                        </Button>
+                      {(selectedReservation.status === 'cancelled' || selectedReservation.status === 'no_show') && (
+                        <div className="space-y-2">
+                          <Button 
+                            variant="outline" 
+                            className="w-full text-green-600 border-green-600/30 hover:bg-green-600/10"
+                            onClick={() => {
+                              updateReservationStatus(selectedReservation.id, 'confirmed');
+                              setShowReservationModal(false);
+                            }}
+                          >
+                            <Undo2 className="w-4 h-4 mr-2" />
+                            Restore Reservation
+                          </Button>
+                          {isAdmin && (
+                            <Button 
+                              variant="outline" 
+                              className="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
+                              onClick={() => {
+                                setConfirmAction({ 
+                                  type: 'delete', 
+                                  reservationId: selectedReservation.id, 
+                                  reservationNumber: selectedReservation.reservation_number 
+                                });
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Remove from Database
+                            </Button>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
@@ -1508,6 +1576,57 @@ function AdminContent() {
           </div>
         )}
       </main>
+
+      {/* Confirmation Dialog for Cancel/No-Show/Delete */}
+      <AlertDialog 
+        open={confirmAction.type !== null} 
+        onOpenChange={(open) => !open && setConfirmAction({ type: null, reservationId: null, reservationNumber: null })}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmAction.type === 'cancel' && 'Cancel Reservation?'}
+              {confirmAction.type === 'no_show' && 'Mark as No-Show?'}
+              {confirmAction.type === 'delete' && 'Permanently Delete?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmAction.type === 'cancel' && (
+                <>Are you sure you want to cancel reservation <strong>{confirmAction.reservationNumber}</strong>? The deposit will be refunded. You can restore it later if needed.</>
+              )}
+              {confirmAction.type === 'no_show' && (
+                <>Are you sure you want to mark reservation <strong>{confirmAction.reservationNumber}</strong> as no-show? The deposit will be forfeited. You can restore it later if needed.</>
+              )}
+              {confirmAction.type === 'delete' && (
+                <>Are you sure you want to permanently delete reservation <strong>{confirmAction.reservationNumber}</strong>? This action cannot be undone.</>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Go Back</AlertDialogCancel>
+            <AlertDialogAction
+              className={confirmAction.type === 'delete' ? 'bg-destructive hover:bg-destructive/90' : confirmAction.type === 'no_show' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-destructive hover:bg-destructive/90'}
+              onClick={() => {
+                if (confirmAction.reservationId) {
+                  if (confirmAction.type === 'delete') {
+                    deleteReservation(confirmAction.reservationId);
+                  } else if (confirmAction.type === 'cancel') {
+                    updateReservationStatus(confirmAction.reservationId, 'cancelled');
+                    setShowReservationModal(false);
+                  } else if (confirmAction.type === 'no_show') {
+                    updateReservationStatus(confirmAction.reservationId, 'no_show');
+                    setShowReservationModal(false);
+                  }
+                }
+                setConfirmAction({ type: null, reservationId: null, reservationNumber: null });
+              }}
+            >
+              {confirmAction.type === 'cancel' && 'Cancel Reservation'}
+              {confirmAction.type === 'no_show' && 'Mark as No-Show'}
+              {confirmAction.type === 'delete' && 'Delete Permanently'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
