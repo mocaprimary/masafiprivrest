@@ -1030,15 +1030,27 @@ function AdminContent() {
                             <Eye className="w-4 h-4" />
                           </Button>
                           {reservation.status === 'confirmed' && (
+                            <Button
+                              size="sm"
+                              variant="gold"
+                              onClick={() => updateReservationStatus(reservation.id, 'arrived')}
+                            >
+                              <Check className="w-4 h-4 mr-1" />
+                              Check In
+                            </Button>
+                          )}
+                          {reservation.status === 'pending' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => updateReservationStatus(reservation.id, 'confirmed')}
+                            >
+                              Confirm
+                            </Button>
+                          )}
+                          {/* Show action buttons for active reservations */}
+                          {['pending', 'confirmed', 'arrived'].includes(reservation.status) && (
                             <>
-                              <Button
-                                size="sm"
-                                variant="gold"
-                                onClick={() => updateReservationStatus(reservation.id, 'arrived')}
-                              >
-                                <Check className="w-4 h-4 mr-1" />
-                                Check In
-                              </Button>
                               <Button
                                 size="sm"
                                 variant="ghost"
@@ -1056,25 +1068,6 @@ function AdminContent() {
                                 onClick={() => updateReservationStatus(reservation.id, 'cancelled')}
                               >
                                 <Ban className="w-4 h-4" />
-                              </Button>
-                            </>
-                          )}
-                          {reservation.status === 'pending' && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => updateReservationStatus(reservation.id, 'confirmed')}
-                              >
-                                Confirm
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="text-destructive"
-                                onClick={() => updateReservationStatus(reservation.id, 'cancelled')}
-                              >
-                                <X className="w-4 h-4" />
                               </Button>
                             </>
                           )}
