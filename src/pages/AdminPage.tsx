@@ -737,7 +737,7 @@ function AdminContent() {
             {/* Quick Actions */}
             <div className="glass-card rounded-xl p-6">
               <h3 className="font-semibold text-foreground mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 <Button
                   variant="outline"
                   className="h-auto py-4 flex-col gap-2"
@@ -762,6 +762,15 @@ function AdminContent() {
                   <ShoppingBag className="w-6 h-6 text-amber-500" />
                   <span>Manage Orders</span>
                 </Button>
+                <Link to="/kitchen">
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex-col gap-2 w-full"
+                  >
+                    <ChefHat className="w-6 h-6 text-orange-500" />
+                    <span>Kitchen Display</span>
+                  </Button>
+                </Link>
                 {(isManager || isAdmin) && (
                   <Button
                     variant="outline"
