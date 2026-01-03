@@ -7,6 +7,7 @@ import { Header } from '@/components/Header';
 import { CategoryTabs } from '@/components/CategoryTabs';
 import { MenuItemCard } from '@/components/MenuItemCard';
 import { MenuItemModal } from '@/components/MenuItemModal';
+import { PreorderCartReview } from '@/components/PreorderCartReview';
 import { Button } from '@/components/ui/button';
 import { menuItems, MenuItem } from '@/data/menuData';
 import { supabase } from '@/integrations/supabase/client';
@@ -83,6 +84,7 @@ function PreorderContent() {
   const [existingPreorders, setExistingPreorders] = useState<Preorder[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreorders, setShowPreorders] = useState(false);
+  const [showCartReview, setShowCartReview] = useState(false);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -353,24 +355,31 @@ function PreorderContent() {
               variant="gold" 
               size="xl" 
               className="w-full justify-between"
-              onClick={handlePlacePreorder}
+              onClick={() => setShowCartReview(true)}
               disabled={isSubmitting}
             >
               <div className="flex items-center gap-3">
-                {isSubmitting ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <ShoppingBag className="w-5 h-5" />
-                )}
-                <span>
-                  {isSubmitting ? 'Placing Pre-Order...' : `Place Pre-Order (${totalItems} items)`}
-                </span>
+                <ShoppingBag className="w-5 h-5" />
+                <span>Review Pre-Order ({totalItems} items)</span>
               </div>
               <span className="font-bold">{subtotal} {t('currency')}</span>
             </Button>
           </div>
         </div>
       )}
+
+      {/* Cart Review Modal */}
+      <PreorderCartReview
+        open={showCartReview}
+        onClose={() => setShowCartReview(false)}
+        onConfirm={() => {
+          setShowCartReview(false);
+          handlePlacePreorder();
+        }}
+        isSubmitting={isSubmitting}
+        reservationDate={format(reservationDate, 'MMMM d, yyyy')}
+        reservationTime={guestReservation.reservation_time}
+      />
 
       <MenuItemModal
         item={selectedItem}
