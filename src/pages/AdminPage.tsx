@@ -52,11 +52,14 @@ import {
   Shield,
   Briefcase,
   LayoutGrid,
-  Package
+  Package,
+  Trash2,
+  UserX,
+  Ban
 } from 'lucide-react';
 
 type Tab = 'dashboard' | 'menu' | 'reservations' | 'orders' | 'preorders' | 'users' | 'settings' | 'checkin' | 'tables';
-type ReservationStatusFilter = 'all' | 'pending' | 'confirmed' | 'arrived' | 'cancelled';
+type ReservationStatusFilter = 'all' | 'pending' | 'confirmed' | 'arrived' | 'cancelled' | 'no_show';
 type AppRole = 'admin' | 'manager' | 'staff';
 
 interface Reservation {
@@ -239,6 +242,14 @@ function AdminContent() {
       updateData.checked_in_at = new Date().toISOString();
       updateData.checked_in_by = user?.id;
     }
+    // Auto-forfeit deposit for no-show
+    if (status === 'no_show') {
+      updateData.deposit_status = 'forfeited';
+    }
+    // Auto-refund deposit for guest-initiated cancellations
+    if (status === 'cancelled') {
+      updateData.deposit_status = 'refunded';
+    }
 
     const { error } = await supabase
       .from('reservations')
@@ -248,11 +259,39 @@ function AdminContent() {
     if (error) {
       toast.error('Failed to update reservation');
     } else {
-      toast.success('Reservation updated');
+      const statusMessages: Record<string, string> = {
+        'no_show': 'Marked as No-Show - deposit forfeited',
+        'cancelled': 'Reservation cancelled - deposit will be refunded',
+        'arrived': 'Guest checked in successfully',
+        'confirmed': 'Reservation confirmed',
+      };
+      toast.success(statusMessages[status] || 'Reservation updated');
       fetchReservations();
       if (selectedReservation?.id === id) {
         setSelectedReservation(prev => prev ? { ...prev, status } : null);
       }
+    }
+  };
+
+  const deleteReservation = async (id: string) => {
+    // First delete private details (due to foreign key)
+    await supabase
+      .from('reservation_private_details')
+      .delete()
+      .eq('reservation_id', id);
+    
+    const { error } = await supabase
+      .from('reservations')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast.error('Failed to delete reservation');
+    } else {
+      toast.success('Reservation removed from database');
+      fetchReservations();
+      setShowReservationModal(false);
+      setSelectedReservation(null);
     }
   };
 
@@ -862,6 +901,7 @@ function AdminContent() {
                     <SelectItem value="confirmed">Confirmed</SelectItem>
                     <SelectItem value="arrived">Arrived</SelectItem>
                     <SelectItem value="cancelled">Cancelled</SelectItem>
+                    <SelectItem value="no_show">No-Show</SelectItem>
                   </SelectContent>
                 </Select>
                 <Input
@@ -879,14 +919,22 @@ function AdminContent() {
             </div>
 
             {/* Status Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-              {(['pending', 'confirmed', 'arrived', 'cancelled'] as const).map((status) => {
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+              {(['pending', 'confirmed', 'arrived', 'no_show', 'cancelled'] as const).map((status) => {
                 const count = reservations.filter(r => r.status === status).length;
-                const colors = {
+                const colors: Record<string, string> = {
                   pending: 'border-amber-500/30 bg-amber-500/5 text-amber-500',
                   confirmed: 'border-primary/30 bg-primary/5 text-primary',
                   arrived: 'border-green-500/30 bg-green-500/5 text-green-500',
+                  no_show: 'border-orange-500/30 bg-orange-500/5 text-orange-500',
                   cancelled: 'border-destructive/30 bg-destructive/5 text-destructive',
+                };
+                const labels: Record<string, string> = {
+                  pending: 'Pending',
+                  confirmed: 'Confirmed',
+                  arrived: 'Arrived',
+                  no_show: 'No-Show',
+                  cancelled: 'Cancelled',
                 };
                 return (
                   <button
@@ -897,7 +945,7 @@ function AdminContent() {
                     }`}
                   >
                     <p className="text-2xl font-bold">{count}</p>
-                    <p className="text-sm capitalize">{status}</p>
+                    <p className="text-sm">{labels[status]}</p>
                   </button>
                 );
               })}
@@ -952,9 +1000,10 @@ function AdminContent() {
                           reservation.status === 'arrived' ? 'bg-green-500/20 text-green-500' :
                           reservation.status === 'confirmed' ? 'bg-primary/20 text-primary' :
                           reservation.status === 'cancelled' ? 'bg-destructive/20 text-destructive' :
+                          reservation.status === 'no_show' ? 'bg-orange-500/20 text-orange-500' :
                           'bg-amber-500/20 text-amber-500'
                         }`}>
-                          {reservation.status}
+                          {reservation.status === 'no_show' ? 'No-Show' : reservation.status}
                         </span>
                       </td>
                       <td className="p-4">
@@ -962,13 +1011,14 @@ function AdminContent() {
                         <span className={`text-xs ${
                           reservation.deposit_status === 'paid' ? 'text-green-500' :
                           reservation.deposit_status === 'refunded' ? 'text-primary' :
+                          reservation.deposit_status === 'forfeited' ? 'text-orange-500' :
                           'text-muted-foreground'
                         }`}>
                           {reservation.deposit_status}
                         </span>
                       </td>
                       <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1">
                           <Button
                             size="sm"
                             variant="ghost"
@@ -980,14 +1030,34 @@ function AdminContent() {
                             <Eye className="w-4 h-4" />
                           </Button>
                           {reservation.status === 'confirmed' && (
-                            <Button
-                              size="sm"
-                              variant="gold"
-                              onClick={() => updateReservationStatus(reservation.id, 'arrived')}
-                            >
-                              <Check className="w-4 h-4 mr-1" />
-                              Check In
-                            </Button>
+                            <>
+                              <Button
+                                size="sm"
+                                variant="gold"
+                                onClick={() => updateReservationStatus(reservation.id, 'arrived')}
+                              >
+                                <Check className="w-4 h-4 mr-1" />
+                                Check In
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-orange-500 hover:bg-orange-500/10"
+                                title="Mark as No-Show"
+                                onClick={() => updateReservationStatus(reservation.id, 'no_show')}
+                              >
+                                <UserX className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-destructive hover:bg-destructive/10"
+                                title="Cancel Reservation"
+                                onClick={() => updateReservationStatus(reservation.id, 'cancelled')}
+                              >
+                                <Ban className="w-4 h-4" />
+                              </Button>
+                            </>
                           )}
                           {reservation.status === 'pending' && (
                             <>
@@ -1007,6 +1077,17 @@ function AdminContent() {
                                 <X className="w-4 h-4" />
                               </Button>
                             </>
+                          )}
+                          {(reservation.status === 'cancelled' || reservation.status === 'no_show') && isAdmin && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-destructive hover:bg-destructive/10"
+                              title="Delete Reservation"
+                              onClick={() => deleteReservation(reservation.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           )}
                         </div>
                       </td>
@@ -1138,9 +1219,9 @@ function AdminContent() {
                       </div>
                     </div>
 
-                    <div className="flex gap-2 pt-2">
+                    <div className="flex flex-col gap-2 pt-2">
                       {selectedReservation.status === 'pending' && (
-                        <>
+                        <div className="flex gap-2">
                           <Button 
                             variant="gold" 
                             className="flex-1"
@@ -1163,19 +1244,55 @@ function AdminContent() {
                             <X className="w-4 h-4 mr-2" />
                             Cancel
                           </Button>
-                        </>
+                        </div>
                       )}
                       {selectedReservation.status === 'confirmed' && (
+                        <div className="space-y-2">
+                          <Button 
+                            variant="gold" 
+                            className="w-full"
+                            onClick={() => {
+                              updateReservationStatus(selectedReservation.id, 'arrived');
+                              setShowReservationModal(false);
+                            }}
+                          >
+                            <UserCheck className="w-4 h-4 mr-2" />
+                            Check In Guest
+                          </Button>
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              className="flex-1 text-orange-500 border-orange-500/30 hover:bg-orange-500/10"
+                              onClick={() => {
+                                updateReservationStatus(selectedReservation.id, 'no_show');
+                                setShowReservationModal(false);
+                              }}
+                            >
+                              <UserX className="w-4 h-4 mr-2" />
+                              No-Show
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/10"
+                              onClick={() => {
+                                updateReservationStatus(selectedReservation.id, 'cancelled');
+                                setShowReservationModal(false);
+                              }}
+                            >
+                              <Ban className="w-4 h-4 mr-2" />
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      {(selectedReservation.status === 'cancelled' || selectedReservation.status === 'no_show') && isAdmin && (
                         <Button 
-                          variant="gold" 
-                          className="flex-1"
-                          onClick={() => {
-                            updateReservationStatus(selectedReservation.id, 'arrived');
-                            setShowReservationModal(false);
-                          }}
+                          variant="outline" 
+                          className="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
+                          onClick={() => deleteReservation(selectedReservation.id)}
                         >
-                          <UserCheck className="w-4 h-4 mr-2" />
-                          Check In Guest
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Remove from Database
                         </Button>
                       )}
                     </div>

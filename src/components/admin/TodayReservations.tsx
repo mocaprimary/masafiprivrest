@@ -11,7 +11,9 @@ import {
   Calendar,
   MessageSquare,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  UserX,
+  Ban
 } from 'lucide-react';
 
 interface Reservation {
@@ -68,6 +70,8 @@ export function TodayReservations({ reservations, onStatusChange, onViewAll }: T
         return 'bg-amber-500/20 text-amber-500 border-amber-500/30';
       case 'cancelled':
         return 'bg-destructive/20 text-destructive border-destructive/30';
+      case 'no_show':
+        return 'bg-orange-500/20 text-orange-500 border-orange-500/30';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -84,9 +88,17 @@ export function TodayReservations({ reservations, onStatusChange, onViewAll }: T
         return <Clock className="w-3.5 h-3.5" />;
       case 'cancelled':
         return <X className="w-3.5 h-3.5" />;
+      case 'no_show':
+        return <UserX className="w-3.5 h-3.5" />;
       default:
         return null;
     }
+  };
+
+  const getStatusLabel = (status: string) => {
+    if (status === 'checked_in') return 'Arrived';
+    if (status === 'no_show') return 'No-Show';
+    return status;
   };
 
   const formatTime = (time: string) => {
@@ -207,17 +219,18 @@ export function TodayReservations({ reservations, onStatusChange, onViewAll }: T
                       className={`${getStatusColor(res.status)} flex items-center gap-1.5`}
                     >
                       {getStatusIcon(res.status)}
-                      <span className="capitalize">{res.status === 'checked_in' ? 'Arrived' : res.status}</span>
+                      <span className="capitalize">{getStatusLabel(res.status)}</span>
                     </Badge>
 
                     {/* Quick Actions */}
-                    {!isArrived && res.status !== 'cancelled' && (
+                    {!isArrived && res.status !== 'cancelled' && res.status !== 'no_show' && (
                       <div className="flex items-center gap-1">
                         {res.status === 'pending' && (
                           <Button
                             size="sm"
                             variant="ghost"
                             className="h-8 w-8 p-0 text-primary hover:bg-primary/10"
+                            title="Confirm"
                             onClick={(e) => {
                               e.stopPropagation();
                               onStatusChange(res.id, 'confirmed');
@@ -226,17 +239,46 @@ export function TodayReservations({ reservations, onStatusChange, onViewAll }: T
                             <Check className="w-4 h-4" />
                           </Button>
                         )}
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0 text-green-500 hover:bg-green-500/10"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onStatusChange(res.id, 'arrived');
-                          }}
-                        >
-                          <UserCheck className="w-4 h-4" />
-                        </Button>
+                        {res.status === 'confirmed' && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-green-500 hover:bg-green-500/10"
+                              title="Check In"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onStatusChange(res.id, 'arrived');
+                              }}
+                            >
+                              <UserCheck className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-orange-500 hover:bg-orange-500/10"
+                              title="Mark as No-Show"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onStatusChange(res.id, 'no_show');
+                              }}
+                            >
+                              <UserX className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
+                              title="Cancel Reservation"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onStatusChange(res.id, 'cancelled');
+                              }}
+                            >
+                              <Ban className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     )}
 
