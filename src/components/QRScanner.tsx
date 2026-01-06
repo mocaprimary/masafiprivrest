@@ -135,11 +135,11 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
 
   return (
     <div className="w-full">
-      <div 
-        id={scannerIdRef.current}
-        className="w-full aspect-square bg-secondary rounded-lg overflow-hidden relative"
-        style={{ minHeight: '280px' }}
-      >
+      <div className="w-full aspect-square bg-secondary rounded-lg overflow-hidden relative" style={{ minHeight: '280px' }}>
+        {/* IMPORTANT: html5-qrcode mutates/clears the target element.
+            Keep React-managed UI OUTSIDE this element to prevent DOM removeChild errors. */}
+        <div id={scannerIdRef.current} className="absolute inset-0 w-full h-full" />
+
         {!isScanning && !isStarting && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
             {hasPermission === false ? (
@@ -152,13 +152,12 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
             ) : (
               <>
                 <Camera className="w-12 h-12 text-muted-foreground mb-4" />
-                <p className="text-sm text-muted-foreground">
-                  Tap below to start scanning
-                </p>
+                <p className="text-sm text-muted-foreground">Tap below to start scanning</p>
               </>
             )}
           </div>
         )}
+
         {isStarting && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-secondary">
             <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
