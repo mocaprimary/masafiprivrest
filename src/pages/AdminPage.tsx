@@ -1298,11 +1298,14 @@ function AdminContent() {
                               variant="outline" 
                               className="flex-1 text-orange-500 border-orange-500/30 hover:bg-orange-500/10"
                               onClick={() => {
-                                setConfirmAction({ 
-                                  type: 'no_show', 
-                                  reservationId: selectedReservation.id, 
-                                  reservationNumber: selectedReservation.reservation_number 
-                                });
+                                setShowReservationModal(false);
+                                setTimeout(() => {
+                                  setConfirmAction({ 
+                                    type: 'no_show', 
+                                    reservationId: selectedReservation.id, 
+                                    reservationNumber: selectedReservation.reservation_number 
+                                  });
+                                }, 150);
                               }}
                             >
                               <UserX className="w-4 h-4 mr-2" />
@@ -1312,11 +1315,14 @@ function AdminContent() {
                               variant="outline" 
                               className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/10"
                               onClick={() => {
-                                setConfirmAction({ 
-                                  type: 'cancel', 
-                                  reservationId: selectedReservation.id, 
-                                  reservationNumber: selectedReservation.reservation_number 
-                                });
+                                setShowReservationModal(false);
+                                setTimeout(() => {
+                                  setConfirmAction({ 
+                                    type: 'cancel', 
+                                    reservationId: selectedReservation.id, 
+                                    reservationNumber: selectedReservation.reservation_number 
+                                  });
+                                }, 150);
                               }}
                             >
                               <Ban className="w-4 h-4 mr-2" />
@@ -1343,11 +1349,14 @@ function AdminContent() {
                               variant="outline" 
                               className="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
                               onClick={() => {
-                                setConfirmAction({ 
-                                  type: 'delete', 
-                                  reservationId: selectedReservation.id, 
-                                  reservationNumber: selectedReservation.reservation_number 
-                                });
+                                setShowReservationModal(false);
+                                setTimeout(() => {
+                                  setConfirmAction({ 
+                                    type: 'delete', 
+                                    reservationId: selectedReservation.id, 
+                                    reservationNumber: selectedReservation.reservation_number 
+                                  });
+                                }, 150);
                               }}
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
@@ -1611,10 +1620,8 @@ function AdminContent() {
                     deleteReservation(confirmAction.reservationId);
                   } else if (confirmAction.type === 'cancel') {
                     updateReservationStatus(confirmAction.reservationId, 'cancelled');
-                    setShowReservationModal(false);
                   } else if (confirmAction.type === 'no_show') {
                     updateReservationStatus(confirmAction.reservationId, 'no_show');
-                    setShowReservationModal(false);
                   }
                 }
                 setConfirmAction({ type: null, reservationId: null, reservationNumber: null });
