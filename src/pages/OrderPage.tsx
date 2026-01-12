@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useLanguage, LanguageProvider } from '@/contexts/LanguageContext';
-import { CartProvider, useCart } from '@/contexts/CartContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useCart } from '@/contexts/CartContext';
 import { Header } from '@/components/Header';
 import { CategoryTabs } from '@/components/CategoryTabs';
 import { MenuItemCard } from '@/components/MenuItemCard';
@@ -11,45 +11,95 @@ import { menuItems, MenuItem } from '@/data/menuData';
 import { ShoppingBag, QrCode } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-// Import menu images
-import hummusTrio from '@/assets/menu/hummus-trio.jpg';
-import lambKibbeh from '@/assets/menu/lamb-kibbeh.jpg';
-import tabbouleh from '@/assets/menu/tabbouleh.jpg';
-import saffronShrimp from '@/assets/menu/saffron-shrimp.jpg';
-import lambShank from '@/assets/menu/lamb-shank.jpg';
-import grilledHammour from '@/assets/menu/grilled-hammour.jpg';
-import wagyuMedallions from '@/assets/menu/wagyu-medallions.jpg';
-import mixedGrill from '@/assets/menu/mixed-grill.jpg';
-import vegetableTagine from '@/assets/menu/vegetable-tagine.jpg';
-import kunafa from '@/assets/menu/kunafa.jpg';
-import datePudding from '@/assets/menu/date-pudding.jpg';
-import saffronCremeBrulee from '@/assets/menu/saffron-creme-brulee.jpg';
-import arabicCoffee from '@/assets/menu/arabic-coffee.jpg';
-import mintLemonade from '@/assets/menu/mint-lemonade.jpg';
-import rosePomegranateMocktail from '@/assets/menu/rose-pomegranate-mocktail.jpg';
-import karakChai from '@/assets/menu/karak-chai.jpg';
-import chefsTastingMenu from '@/assets/menu/chefs-tasting-menu.jpg';
-import wholeOuzi from '@/assets/menu/whole-ouzi.jpg';
+// Import Italian menu images
+import bruschettaPomodoro from '@/assets/menu/bruschetta-pomodoro.jpg';
+import bruschettaGarlic from '@/assets/menu/bruschetta-garlic.jpg';
+import polpetteCarne from '@/assets/menu/polpette-carne.jpg';
+import crocchettePatate from '@/assets/menu/crocchette-patate.jpg';
+import panzerottoSemplice from '@/assets/menu/panzerotto-semplice.jpg';
+import panzerottoProsciutto from '@/assets/menu/panzerotto-prosciutto.jpg';
+import polpoPatate from '@/assets/menu/polpo-patate.jpg';
+import gamberiBurrata from '@/assets/menu/gamberi-burrata.jpg';
+import parmigianaMelanzane from '@/assets/menu/parmigiana-melanzane.jpg';
+import zuppaMare from '@/assets/menu/zuppa-mare.jpg';
+import zuppaMinestrone from '@/assets/menu/zuppa-minestrone.jpg';
+import zuppaFunghi from '@/assets/menu/zuppa-funghi.jpg';
+import caesarSalad from '@/assets/menu/caesar-salad.jpg';
+import rucolaPomodorini from '@/assets/menu/rucola-pomodorini.jpg';
+import quinoaAvocado from '@/assets/menu/quinoa-avocado.jpg';
+import risottoMare from '@/assets/menu/risotto-mare.jpg';
+import risottoPolloFunghi from '@/assets/menu/risotto-pollo-funghi.jpg';
+import risottoBurrata from '@/assets/menu/risotto-burrata.jpg';
+import pizzaMargherita from '@/assets/menu/pizza-margherita.jpg';
+import pizzaChickenMushroom from '@/assets/menu/pizza-chicken-mushroom.jpg';
+import pizzaAlfredo from '@/assets/menu/pizza-alfredo.jpg';
+import pizzaQuattroFormaggi from '@/assets/menu/pizza-quattro-formaggi.jpg';
+import pizzaTonnoCipolla from '@/assets/menu/pizza-tonno-cipolla.jpg';
+import pizzaSalmone from '@/assets/menu/pizza-salmone.jpg';
+import pizzaNapoletana from '@/assets/menu/pizza-napoletana.jpg';
+import pizzaHawaiian from '@/assets/menu/pizza-hawaiian.jpg';
+import pizzaVegetariana from '@/assets/menu/pizza-vegetariana.jpg';
+import pizzaFruttiMare from '@/assets/menu/pizza-frutti-mare.jpg';
+import grilledSalmon from '@/assets/menu/grilled-salmon.jpg';
+import seaBream from '@/assets/menu/sea-bream.jpg';
+import grilledSteak from '@/assets/menu/grilled-steak.jpg';
+import grilledLambChops from '@/assets/menu/grilled-lamb-chops.jpg';
+import chickenMilanese from '@/assets/menu/chicken-milanese.jpg';
+import grilledChicken from '@/assets/menu/grilled-chicken.jpg';
+import pannaCotta from '@/assets/menu/panna-cotta.jpg';
+import tiramisu from '@/assets/menu/tiramisu.jpg';
+import cremeBrulee from '@/assets/menu/creme-brulee.jpg';
+import nutellaPizza from '@/assets/menu/nutella-pizza.jpg';
+import fruitSalad from '@/assets/menu/fruit-salad.jpg';
 
 const imageMap: Record<string, string> = {
-  'starter-1': hummusTrio,
-  'starter-2': lambKibbeh,
-  'starter-3': tabbouleh,
-  'starter-4': saffronShrimp,
-  'main-1': lambShank,
-  'main-2': grilledHammour,
-  'main-3': wagyuMedallions,
-  'main-4': mixedGrill,
-  'main-5': vegetableTagine,
-  'dessert-1': kunafa,
-  'dessert-2': datePudding,
-  'dessert-3': saffronCremeBrulee,
-  'drink-1': arabicCoffee,
-  'drink-2': mintLemonade,
-  'drink-3': rosePomegranateMocktail,
-  'drink-4': karakChai,
-  'special-1': chefsTastingMenu,
-  'special-2': wholeOuzi,
+  // Hot Starters
+  'starter-1': bruschettaPomodoro,
+  'starter-2': bruschettaGarlic,
+  'starter-3': polpetteCarne,
+  'starter-4': crocchettePatate,
+  'starter-5': panzerottoSemplice,
+  'starter-6': panzerottoProsciutto,
+  // Cold Appetizers
+  'appetizer-1': polpoPatate,
+  'appetizer-2': gamberiBurrata,
+  'appetizer-3': parmigianaMelanzane,
+  // Soups
+  'soup-1': zuppaMare,
+  'soup-2': zuppaMinestrone,
+  'soup-3': zuppaFunghi,
+  // Salads
+  'salad-1': caesarSalad,
+  'salad-2': rucolaPomodorini,
+  'salad-3': quinoaAvocado,
+  // Risotto
+  'risotto-1': risottoMare,
+  'risotto-2': risottoPolloFunghi,
+  'risotto-3': risottoBurrata,
+  // Pizza
+  'pizza-1': pizzaMargherita,
+  'pizza-2': pizzaChickenMushroom,
+  'pizza-3': pizzaAlfredo,
+  'pizza-4': pizzaQuattroFormaggi,
+  'pizza-5': pizzaTonnoCipolla,
+  'pizza-6': pizzaSalmone,
+  'pizza-7': pizzaNapoletana,
+  'pizza-8': pizzaHawaiian,
+  'pizza-9': pizzaVegetariana,
+  'pizza-10': pizzaFruttiMare,
+  // Main Course
+  'main-1': grilledSalmon,
+  'main-2': seaBream,
+  'main-3': grilledSteak,
+  'main-4': grilledLambChops,
+  'main-5': chickenMilanese,
+  'main-6': grilledChicken,
+  // Desserts
+  'dessert-1': pannaCotta,
+  'dessert-2': tiramisu,
+  'dessert-3': cremeBrulee,
+  'dessert-4': nutellaPizza,
+  'dessert-5': fruitSalad,
 };
 
 function TableSelector() {
