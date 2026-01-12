@@ -5,7 +5,7 @@ export interface MenuItem {
   description: string;
   descriptionAr: string;
   price: number;
-  category: 'starters' | 'appetizers' | 'soups' | 'salads' | 'risotto' | 'pizza' | 'main' | 'desserts';
+  category: 'starters' | 'appetizers' | 'soups' | 'risotto' | 'pizza' | 'main' | 'desserts';
   image: string;
   ingredients: string[];
   ingredientsAr: string[];
@@ -207,7 +207,7 @@ export const menuItems: MenuItem[] = [
     available: true,
   },
 
-  // Salads
+  // Salads (Cold Appetizers)
   {
     id: 'salad-1',
     name: 'Caesar Salad',
@@ -215,7 +215,7 @@ export const menuItems: MenuItem[] = [
     description: 'Grilled chicken, romaine lettuce, parmesan shavings, croutons, homemade Caesar dressing',
     descriptionAr: 'دجاج مشوي، خس روماني، شرائح جبن بارميزان، قطع خبز محمصة، صلصة سيزر منزلية',
     price: 48,
-    category: 'salads',
+    category: 'appetizers',
     image: '/placeholder.svg',
     ingredients: ['Chicken', 'Romaine lettuce', 'Parmesan', 'Croutons', 'Caesar dressing'],
     ingredientsAr: ['دجاج', 'خس روماني', 'جبن بارميزان', 'خبز محمص', 'صلصة سيزر'],
@@ -229,7 +229,7 @@ export const menuItems: MenuItem[] = [
     description: 'Rocket salad with cherry tomatoes, black olives, and capers',
     descriptionAr: 'سلطة جرجير مع طماطم كرزية، زيتون أسود، وكبر',
     price: 38,
-    category: 'salads',
+    category: 'appetizers',
     image: '/placeholder.svg',
     ingredients: ['Rocket', 'Cherry tomatoes', 'Black olives', 'Capers'],
     ingredientsAr: ['جرجير', 'طماطم كرزية', 'زيتون أسود', 'كبر'],
@@ -246,7 +246,7 @@ export const menuItems: MenuItem[] = [
     description: 'Quinoa, avocado, celery, red radish, wild rocket, baby gem leaves',
     descriptionAr: 'كينوا، أفوكادو، كرفس، فجل أحمر، جرجير بري، أوراق خس صغيرة',
     price: 52,
-    category: 'salads',
+    category: 'appetizers',
     image: '/placeholder.svg',
     ingredients: ['Quinoa', 'Avocado', 'Celery', 'Radish', 'Rocket', 'Baby gem'],
     ingredientsAr: ['كينوا', 'أفوكادو', 'كرفس', 'فجل', 'جرجير', 'خس صغير'],
@@ -634,7 +634,6 @@ export const categories = [
   { id: 'starters', labelKey: 'category.starters' },
   { id: 'appetizers', labelKey: 'category.appetizers' },
   { id: 'soups', labelKey: 'category.soups' },
-  { id: 'salads', labelKey: 'category.salads' },
   { id: 'risotto', labelKey: 'category.risotto' },
   { id: 'pizza', labelKey: 'category.pizza' },
   { id: 'main', labelKey: 'category.main' },

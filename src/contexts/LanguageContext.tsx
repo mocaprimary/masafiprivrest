@@ -20,9 +20,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Menu Categories
     'category.all': 'All',
     'category.starters': 'Hot Starters',
-    'category.appetizers': 'Cold Appetizers',
+    'category.appetizers': 'Cold Appetizers & Salads',
     'category.soups': 'Soups',
-    'category.salads': 'Salads',
     'category.risotto': 'Risotto',
     'category.pizza': 'Pizza',
     'category.main': 'Main Course',
@@ -105,9 +104,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Menu Categories
     'category.all': 'الكل',
     'category.starters': 'مقبلات ساخنة',
-    'category.appetizers': 'مقبلات باردة',
+    'category.appetizers': 'مقبلات باردة وسلطات',
     'category.soups': 'الشوربات',
-    'category.salads': 'السلطات',
     'category.risotto': 'ريزوتو',
     'category.pizza': 'بيتزا',
     'category.main': 'الأطباق الرئيسية',
