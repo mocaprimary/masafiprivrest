@@ -19,11 +19,14 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Menu Categories
     'category.all': 'All',
-    'category.starters': 'Starters',
+    'category.starters': 'Hot Starters',
+    'category.appetizers': 'Cold Appetizers',
+    'category.soups': 'Soups',
+    'category.salads': 'Salads',
+    'category.risotto': 'Risotto',
+    'category.pizza': 'Pizza',
     'category.main': 'Main Course',
     'category.desserts': 'Desserts',
-    'category.drinks': 'Drinks',
-    'category.specials': 'Specials',
     
     // Menu Item
     'item.addToOrder': 'Add to Order',
@@ -101,11 +104,14 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Menu Categories
     'category.all': 'الكل',
-    'category.starters': 'المقبلات',
+    'category.starters': 'مقبلات ساخنة',
+    'category.appetizers': 'مقبلات باردة',
+    'category.soups': 'الشوربات',
+    'category.salads': 'السلطات',
+    'category.risotto': 'ريزوتو',
+    'category.pizza': 'بيتزا',
     'category.main': 'الأطباق الرئيسية',
     'category.desserts': 'الحلويات',
-    'category.drinks': 'المشروبات',
-    'category.specials': 'العروض الخاصة',
     
     // Menu Item
     'item.addToOrder': 'أضف للطلب',
