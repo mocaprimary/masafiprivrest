@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { CategoryTabs } from '@/components/CategoryTabs';
+import { MenuSection } from '@/components/MenuSection';
 import { MenuItemCard } from '@/components/MenuItemCard';
 import { MenuItemModal } from '@/components/MenuItemModal';
 import { ReservationCTA } from '@/components/ReservationCTA';
@@ -104,16 +105,18 @@ const imageMap: Record<string, string> = {
   'dessert-5': fruitSalad,
 };
 
-// Map database categories to local categories
-const categoryMap: Record<string, string> = {
-  'starters': 'starters',
-  'appetizers': 'appetizers',
-  'soups': 'soups',
-  'salads': 'salads',
-  'risotto': 'risotto',
-  'pizza': 'pizza',
-  'main': 'main',
-  'desserts': 'desserts', 
+// Map subcategory to main category for navigation
+const subcategoryToCategory: Record<string, 'starters' | 'main' | 'desserts'> = {
+  'hot-starters': 'starters',
+  'cold-appetizers': 'starters',
+  'soups': 'starters',
+  'salads': 'starters',
+  'risotto': 'main',
+  'pizza': 'main',
+  'fish': 'main',
+  'meat': 'main',
+  'chicken': 'main',
+  'sweet': 'desserts',
 };
 
 function MenuContent() {
@@ -139,15 +142,15 @@ function MenuContent() {
     ? menuItems
     : menuItems.filter(item => item.category === activeCategory);
 
-  // Apply real images to menu items
-  const itemsWithImages = filteredItems.map(item => ({
-    ...item,
-    image: imageMap[item.id] || item.image,
-  }));
-
   // Handle chatbot navigation to category
   const handleNavigateToCategory = useCallback((category: string) => {
-    setActiveCategory(category);
+    // Check if it's a subcategory and map to main category
+    const mainCategory = subcategoryToCategory[category] || category;
+    if (mainCategory === 'starters' || mainCategory === 'main' || mainCategory === 'desserts') {
+      setActiveCategory(mainCategory);
+    } else {
+      setActiveCategory('all');
+    }
     // Scroll to menu section
     const menuSection = document.querySelector('section.container');
     if (menuSection) {
@@ -183,10 +186,47 @@ function MenuContent() {
       }
       
       // Navigate to the category if we can't show the item
-      const category = categoryMap[dbItem.category] || dbItem.category;
-      handleNavigateToCategory(category);
+      handleNavigateToCategory(dbItem.category);
     }
   }, [dbMenuItems, handleNavigateToCategory]);
+
+  const renderContent = () => {
+    if (activeCategory === 'all') {
+      // Show all items with category sections
+      return (
+        <div className="space-y-16">
+          <MenuSection
+            category="starters"
+            items={menuItems.filter(item => item.category === 'starters')}
+            onItemClick={setSelectedItem}
+            imageMap={imageMap}
+          />
+          <MenuSection
+            category="main"
+            items={menuItems.filter(item => item.category === 'main')}
+            onItemClick={setSelectedItem}
+            imageMap={imageMap}
+          />
+          <MenuSection
+            category="desserts"
+            items={menuItems.filter(item => item.category === 'desserts')}
+            onItemClick={setSelectedItem}
+            imageMap={imageMap}
+          />
+        </div>
+      );
+    }
+
+    // Show filtered category with subcategory sections
+    return (
+      <MenuSection
+        category={activeCategory as 'starters' | 'main' | 'desserts'}
+        items={filteredItems}
+        onItemClick={setSelectedItem}
+        imageMap={imageMap}
+      />
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -203,15 +243,8 @@ function MenuContent() {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-            {itemsWithImages.map((item, index) => (
-              <MenuItemCard
-                key={item.id}
-                item={item}
-                index={index}
-                onClick={() => setSelectedItem(item)}
-              />
-            ))}
+          <div className="mt-6">
+            {renderContent()}
           </div>
         </section>
 

@@ -19,13 +19,21 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Menu Categories
     'category.all': 'All',
-    'category.starters': 'Hot Starters',
-    'category.appetizers': 'Cold Appetizers & Salads',
-    'category.soups': 'Soups',
-    'category.risotto': 'Risotto',
-    'category.pizza': 'Pizza',
-    'category.main': 'Main Course',
+    'category.starters': 'Starters',
+    'category.main': 'Main Courses',
     'category.desserts': 'Desserts',
+    
+    // Subcategories
+    'subcategory.hotStarters': 'Hot Starters',
+    'subcategory.coldAppetizers': 'Cold Appetizers',
+    'subcategory.soups': 'Soups',
+    'subcategory.salads': 'Salads',
+    'subcategory.risotto': 'Italian Rice (Risotto)',
+    'subcategory.pizza': 'Pizza',
+    'subcategory.fish': 'Fish',
+    'subcategory.meat': 'Meat',
+    'subcategory.chicken': 'Chicken',
+    'subcategory.sweet': 'Desserts',
     
     // Menu Item
     'item.addToOrder': 'Add to Order',
@@ -103,13 +111,21 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Menu Categories
     'category.all': 'الكل',
-    'category.starters': 'مقبلات ساخنة',
-    'category.appetizers': 'مقبلات باردة وسلطات',
-    'category.soups': 'الشوربات',
-    'category.risotto': 'ريزوتو',
-    'category.pizza': 'بيتزا',
+    'category.starters': 'المقبلات',
     'category.main': 'الأطباق الرئيسية',
     'category.desserts': 'الحلويات',
+    
+    // Subcategories
+    'subcategory.hotStarters': 'مقبلات ساخنة',
+    'subcategory.coldAppetizers': 'مقبلات باردة',
+    'subcategory.soups': 'الشوربات',
+    'subcategory.salads': 'السلطات',
+    'subcategory.risotto': 'الأرز الإيطالي (ريزوتو)',
+    'subcategory.pizza': 'بيتزا',
+    'subcategory.fish': 'الأسماك',
+    'subcategory.meat': 'اللحوم',
+    'subcategory.chicken': 'الدجاج',
+    'subcategory.sweet': 'الحلويات',
     
     // Menu Item
     'item.addToOrder': 'أضف للطلب',

@@ -5,7 +5,8 @@ export interface MenuItem {
   description: string;
   descriptionAr: string;
   price: number;
-  category: 'starters' | 'appetizers' | 'soups' | 'risotto' | 'pizza' | 'main' | 'desserts';
+  category: 'starters' | 'main' | 'desserts';
+  subcategory: 'hot-starters' | 'cold-appetizers' | 'soups' | 'salads' | 'risotto' | 'pizza' | 'fish' | 'meat' | 'chicken' | 'sweet';
   image: string;
   ingredients: string[];
   ingredientsAr: string[];
@@ -19,7 +20,9 @@ export interface MenuItem {
 }
 
 export const menuItems: MenuItem[] = [
-  // Starters - Hot
+  // ========== STARTERS ==========
+  
+  // Hot Starters
   {
     id: 'starter-1',
     name: 'Bruschetta al Pomodoro',
@@ -28,6 +31,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'طماطم كرزية طازجة، ريحان، أوريجانو، بصل',
     price: 28,
     category: 'starters',
+    subcategory: 'hot-starters',
     image: '/placeholder.svg',
     ingredients: ['Cherry tomatoes', 'Basil', 'Oregano', 'Onion', 'Bread'],
     ingredientsAr: ['طماطم كرزية', 'ريحان', 'أوريجانو', 'بصل', 'خبز'],
@@ -44,6 +48,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'زبدة طازجة وثوم',
     price: 24,
     category: 'starters',
+    subcategory: 'hot-starters',
     image: '/placeholder.svg',
     ingredients: ['Butter', 'Garlic', 'Bread'],
     ingredientsAr: ['زبدة', 'ثوم', 'خبز'],
@@ -53,12 +58,13 @@ export const menuItems: MenuItem[] = [
   },
   {
     id: 'starter-3',
-    name: 'Poupette di Carne',
+    name: 'Polpette di Carne',
     nameAr: 'كرات اللحم المقلية',
     description: '8 deep-fried meatballs',
     descriptionAr: '٨ كرات لحم مقلية',
     price: 38,
     category: 'starters',
+    subcategory: 'hot-starters',
     image: '/placeholder.svg',
     ingredients: ['Beef', 'Breadcrumbs', 'Herbs', 'Spices'],
     ingredientsAr: ['لحم بقري', 'فتات الخبز', 'أعشاب', 'بهارات'],
@@ -73,6 +79,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'كروكيت بطاطس مهروسة مغطاة بالبقسماط ومقلية',
     price: 32,
     category: 'starters',
+    subcategory: 'hot-starters',
     image: '/placeholder.svg',
     ingredients: ['Potato', 'Breadcrumbs', 'Parmesan'],
     ingredientsAr: ['بطاطس', 'فتات الخبز', 'جبن بارميزان'],
@@ -88,6 +95,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'عجينة بيتزا مطوية ومقلية مع صلصة الطماطم',
     price: 28,
     category: 'starters',
+    subcategory: 'hot-starters',
     image: '/placeholder.svg',
     ingredients: ['Pizza dough', 'Tomato sauce'],
     ingredientsAr: ['عجينة بيتزا', 'صلصة طماطم'],
@@ -104,6 +112,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'عجينة بيتزا مطوية ومقلية مع لحم ديك رومي مدخن، فطر، صلصة طماطم، وموزاريلا',
     price: 36,
     category: 'starters',
+    subcategory: 'hot-starters',
     image: '/placeholder.svg',
     ingredients: ['Pizza dough', 'Turkey ham', 'Mushrooms', 'Tomato sauce', 'Mozzarella'],
     ingredientsAr: ['عجينة بيتزا', 'لحم ديك رومي', 'فطر', 'صلصة طماطم', 'موزاريلا'],
@@ -111,7 +120,7 @@ export const menuItems: MenuItem[] = [
     available: true,
   },
 
-  // Appetizers (Cold Starters)
+  // Cold Appetizers
   {
     id: 'appetizer-1',
     name: 'Polpo e Patate',
@@ -119,7 +128,8 @@ export const menuItems: MenuItem[] = [
     description: 'Mediterranean octopus with boiled potatoes, celery, parsley, extra virgin olive oil, and red onion',
     descriptionAr: 'أخطبوط متوسطي مع بطاطس مسلوقة، كرفس، بقدونس، زيت زيتون بكر، وبصل أحمر',
     price: 68,
-    category: 'appetizers',
+    category: 'starters',
+    subcategory: 'cold-appetizers',
     image: '/placeholder.svg',
     ingredients: ['Octopus', 'Potato', 'Celery', 'Parsley', 'Olive oil', 'Red onion'],
     ingredientsAr: ['أخطبوط', 'بطاطس', 'كرفس', 'بقدونس', 'زيت زيتون', 'بصل أحمر'],
@@ -134,7 +144,8 @@ export const menuItems: MenuItem[] = [
     description: 'Grilled shrimp dipped in burrata cream, cherry tomatoes, and basil',
     descriptionAr: 'جمبري مشوي مغمس في كريمة البوراتا، طماطم كرزية، وريحان',
     price: 72,
-    category: 'appetizers',
+    category: 'starters',
+    subcategory: 'cold-appetizers',
     image: '/placeholder.svg',
     ingredients: ['Shrimp', 'Burrata', 'Cherry tomatoes', 'Basil'],
     ingredientsAr: ['جمبري', 'بوراتا', 'طماطم كرزية', 'ريحان'],
@@ -149,7 +160,8 @@ export const menuItems: MenuItem[] = [
     description: 'Fried eggplant layered with tomato sauce, parmesan, basil, mozzarella, baked in the oven',
     descriptionAr: 'باذنجان مقلي مع طبقات من صلصة الطماطم، جبن بارميزان، ريحان، موزاريلا، مخبوز في الفرن',
     price: 48,
-    category: 'appetizers',
+    category: 'starters',
+    subcategory: 'cold-appetizers',
     image: '/placeholder.svg',
     ingredients: ['Eggplant', 'Tomato sauce', 'Parmesan', 'Basil', 'Mozzarella'],
     ingredientsAr: ['باذنجان', 'صلصة طماطم', 'جبن بارميزان', 'ريحان', 'موزاريلا'],
@@ -166,7 +178,8 @@ export const menuItems: MenuItem[] = [
     description: 'Fresh tomato soup with mussels, clams, and shrimp',
     descriptionAr: 'شوربة طماطم طازجة مع بلح البحر، المحار، والجمبري',
     price: 52,
-    category: 'soups',
+    category: 'starters',
+    subcategory: 'soups',
     image: '/placeholder.svg',
     ingredients: ['Tomato', 'Mussels', 'Clams', 'Shrimp'],
     ingredientsAr: ['طماطم', 'بلح البحر', 'محار', 'جمبري'],
@@ -181,7 +194,8 @@ export const menuItems: MenuItem[] = [
     description: 'Fresh vegetable soup',
     descriptionAr: 'شوربة خضار طازجة',
     price: 32,
-    category: 'soups',
+    category: 'starters',
+    subcategory: 'soups',
     image: '/placeholder.svg',
     ingredients: ['Mixed vegetables', 'Beans', 'Pasta'],
     ingredientsAr: ['خضار مشكلة', 'فاصوليا', 'معكرونة'],
@@ -197,7 +211,8 @@ export const menuItems: MenuItem[] = [
     description: 'Mushroom soup',
     descriptionAr: 'شوربة فطر',
     price: 34,
-    category: 'soups',
+    category: 'starters',
+    subcategory: 'soups',
     image: '/placeholder.svg',
     ingredients: ['Mushrooms', 'Cream', 'Herbs'],
     ingredientsAr: ['فطر', 'كريمة', 'أعشاب'],
@@ -207,7 +222,7 @@ export const menuItems: MenuItem[] = [
     available: true,
   },
 
-  // Salads (Cold Appetizers)
+  // Salads
   {
     id: 'salad-1',
     name: 'Caesar Salad',
@@ -215,7 +230,8 @@ export const menuItems: MenuItem[] = [
     description: 'Grilled chicken, romaine lettuce, parmesan shavings, croutons, homemade Caesar dressing',
     descriptionAr: 'دجاج مشوي، خس روماني، شرائح جبن بارميزان، قطع خبز محمصة، صلصة سيزر منزلية',
     price: 48,
-    category: 'appetizers',
+    category: 'starters',
+    subcategory: 'salads',
     image: '/placeholder.svg',
     ingredients: ['Chicken', 'Romaine lettuce', 'Parmesan', 'Croutons', 'Caesar dressing'],
     ingredientsAr: ['دجاج', 'خس روماني', 'جبن بارميزان', 'خبز محمص', 'صلصة سيزر'],
@@ -229,7 +245,8 @@ export const menuItems: MenuItem[] = [
     description: 'Rocket salad with cherry tomatoes, black olives, and capers',
     descriptionAr: 'سلطة جرجير مع طماطم كرزية، زيتون أسود، وكبر',
     price: 38,
-    category: 'appetizers',
+    category: 'starters',
+    subcategory: 'salads',
     image: '/placeholder.svg',
     ingredients: ['Rocket', 'Cherry tomatoes', 'Black olives', 'Capers'],
     ingredientsAr: ['جرجير', 'طماطم كرزية', 'زيتون أسود', 'كبر'],
@@ -246,7 +263,8 @@ export const menuItems: MenuItem[] = [
     description: 'Quinoa, avocado, celery, red radish, wild rocket, baby gem leaves',
     descriptionAr: 'كينوا، أفوكادو، كرفس، فجل أحمر، جرجير بري، أوراق خس صغيرة',
     price: 52,
-    category: 'appetizers',
+    category: 'starters',
+    subcategory: 'salads',
     image: '/placeholder.svg',
     ingredients: ['Quinoa', 'Avocado', 'Celery', 'Radish', 'Rocket', 'Baby gem'],
     ingredientsAr: ['كينوا', 'أفوكادو', 'كرفس', 'فجل', 'جرجير', 'خس صغير'],
@@ -257,6 +275,8 @@ export const menuItems: MenuItem[] = [
     available: true,
   },
 
+  // ========== MAIN COURSES ==========
+
   // Risotto
   {
     id: 'risotto-1',
@@ -265,7 +285,8 @@ export const menuItems: MenuItem[] = [
     description: 'Mussels, clams, shrimp, calamari',
     descriptionAr: 'بلح البحر، محار، جمبري، كاليماري',
     price: 78,
-    category: 'risotto',
+    category: 'main',
+    subcategory: 'risotto',
     image: '/placeholder.svg',
     ingredients: ['Arborio rice', 'Mussels', 'Clams', 'Shrimp', 'Calamari'],
     ingredientsAr: ['أرز أربوريو', 'بلح البحر', 'محار', 'جمبري', 'كاليماري'],
@@ -280,7 +301,8 @@ export const menuItems: MenuItem[] = [
     description: 'Chicken, porcini mushrooms, parmesan cheese',
     descriptionAr: 'دجاج، فطر بورسيني، جبن بارميزان',
     price: 68,
-    category: 'risotto',
+    category: 'main',
+    subcategory: 'risotto',
     image: '/placeholder.svg',
     ingredients: ['Arborio rice', 'Chicken', 'Porcini mushrooms', 'Parmesan'],
     ingredientsAr: ['أرز أربوريو', 'دجاج', 'فطر بورسيني', 'جبن بارميزان'],
@@ -295,7 +317,8 @@ export const menuItems: MenuItem[] = [
     description: 'Cherry tomatoes, burrata cheese, basil',
     descriptionAr: 'طماطم كرزية، جبن بوراتا، ريحان',
     price: 62,
-    category: 'risotto',
+    category: 'main',
+    subcategory: 'risotto',
     image: '/placeholder.svg',
     ingredients: ['Arborio rice', 'Cherry tomatoes', 'Burrata', 'Basil'],
     ingredientsAr: ['أرز أربوريو', 'طماطم كرزية', 'بوراتا', 'ريحان'],
@@ -313,7 +336,8 @@ export const menuItems: MenuItem[] = [
     description: 'Tomato sauce, fiore di latte mozzarella',
     descriptionAr: 'صلصة طماطم، موزاريلا فيوري دي لاتي',
     price: 42,
-    category: 'pizza',
+    category: 'main',
+    subcategory: 'pizza',
     image: '/placeholder.svg',
     ingredients: ['Tomato sauce', 'Mozzarella'],
     ingredientsAr: ['صلصة طماطم', 'موزاريلا'],
@@ -328,7 +352,8 @@ export const menuItems: MenuItem[] = [
     description: 'Tomato sauce, mozzarella, grilled chicken, mushrooms',
     descriptionAr: 'صلصة طماطم، موزاريلا، دجاج مشوي، فطر',
     price: 56,
-    category: 'pizza',
+    category: 'main',
+    subcategory: 'pizza',
     image: '/placeholder.svg',
     ingredients: ['Tomato sauce', 'Mozzarella', 'Chicken', 'Mushrooms'],
     ingredientsAr: ['صلصة طماطم', 'موزاريلا', 'دجاج', 'فطر'],
@@ -342,7 +367,8 @@ export const menuItems: MenuItem[] = [
     description: 'Cream sauce, chicken, mushrooms',
     descriptionAr: 'صلصة كريمة، دجاج، فطر',
     price: 58,
-    category: 'pizza',
+    category: 'main',
+    subcategory: 'pizza',
     image: '/placeholder.svg',
     ingredients: ['Cream sauce', 'Chicken', 'Mushrooms', 'Mozzarella'],
     ingredientsAr: ['صلصة كريمة', 'دجاج', 'فطر', 'موزاريلا'],
@@ -356,7 +382,8 @@ export const menuItems: MenuItem[] = [
     description: 'Mozzarella, gorgonzola, smoked cheese, parmesan',
     descriptionAr: 'موزاريلا، جورجونزولا، جبن مدخن، بارميزان',
     price: 62,
-    category: 'pizza',
+    category: 'main',
+    subcategory: 'pizza',
     image: '/placeholder.svg',
     ingredients: ['Mozzarella', 'Gorgonzola', 'Smoked cheese', 'Parmesan'],
     ingredientsAr: ['موزاريلا', 'جورجونزولا', 'جبن مدخن', 'بارميزان'],
@@ -371,7 +398,8 @@ export const menuItems: MenuItem[] = [
     description: 'Tomato sauce, mozzarella, tuna, onion',
     descriptionAr: 'صلصة طماطم، موزاريلا، تونة، بصل',
     price: 54,
-    category: 'pizza',
+    category: 'main',
+    subcategory: 'pizza',
     image: '/placeholder.svg',
     ingredients: ['Tomato sauce', 'Mozzarella', 'Tuna', 'Onion'],
     ingredientsAr: ['صلصة طماطم', 'موزاريلا', 'تونة', 'بصل'],
@@ -385,7 +413,8 @@ export const menuItems: MenuItem[] = [
     description: 'Mozzarella, salmon, parsley',
     descriptionAr: 'موزاريلا، سلمون، بقدونس',
     price: 68,
-    category: 'pizza',
+    category: 'main',
+    subcategory: 'pizza',
     image: '/placeholder.svg',
     ingredients: ['Mozzarella', 'Salmon', 'Parsley'],
     ingredientsAr: ['موزاريلا', 'سلمون', 'بقدونس'],
@@ -399,7 +428,8 @@ export const menuItems: MenuItem[] = [
     description: 'Tomato sauce, oregano, garlic',
     descriptionAr: 'صلصة طماطم، أوريجانو، ثوم',
     price: 38,
-    category: 'pizza',
+    category: 'main',
+    subcategory: 'pizza',
     image: '/placeholder.svg',
     ingredients: ['Tomato sauce', 'Oregano', 'Garlic'],
     ingredientsAr: ['صلصة طماطم', 'أوريجانو', 'ثوم'],
@@ -415,7 +445,8 @@ export const menuItems: MenuItem[] = [
     description: 'Tomato sauce, mozzarella, beef bacon, pineapple',
     descriptionAr: 'صلصة طماطم، موزاريلا، لحم بقري مدخن، أناناس',
     price: 56,
-    category: 'pizza',
+    category: 'main',
+    subcategory: 'pizza',
     image: '/placeholder.svg',
     ingredients: ['Tomato sauce', 'Mozzarella', 'Beef bacon', 'Pineapple'],
     ingredientsAr: ['صلصة طماطم', 'موزاريلا', 'لحم بقري مدخن', 'أناناس'],
@@ -429,7 +460,8 @@ export const menuItems: MenuItem[] = [
     description: 'Tomato sauce, mozzarella, zucchini, capsicum, onion, eggplant',
     descriptionAr: 'صلصة طماطم، موزاريلا، كوسة، فلفل، بصل، باذنجان',
     price: 52,
-    category: 'pizza',
+    category: 'main',
+    subcategory: 'pizza',
     image: '/placeholder.svg',
     ingredients: ['Tomato sauce', 'Mozzarella', 'Zucchini', 'Capsicum', 'Onion', 'Eggplant'],
     ingredientsAr: ['صلصة طماطم', 'موزاريلا', 'كوسة', 'فلفل', 'بصل', 'باذنجان'],
@@ -444,7 +476,8 @@ export const menuItems: MenuItem[] = [
     description: 'Tomato sauce, mozzarella, mussels, calamari, shrimp, clams',
     descriptionAr: 'صلصة طماطم، موزاريلا، بلح البحر، كاليماري، جمبري، محار',
     price: 78,
-    category: 'pizza',
+    category: 'main',
+    subcategory: 'pizza',
     image: '/placeholder.svg',
     ingredients: ['Tomato sauce', 'Mozzarella', 'Mussels', 'Calamari', 'Shrimp', 'Clams'],
     ingredientsAr: ['صلصة طماطم', 'موزاريلا', 'بلح البحر', 'كاليماري', 'جمبري', 'محار'],
@@ -452,7 +485,7 @@ export const menuItems: MenuItem[] = [
     available: true,
   },
 
-  // Main Course - Fish
+  // Fish Main Course
   {
     id: 'main-1',
     name: 'Grilled Salmon',
@@ -461,6 +494,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'تتبيلة خاصة، يقدم مع سلطة',
     price: 88,
     category: 'main',
+    subcategory: 'fish',
     image: '/placeholder.svg',
     ingredients: ['Salmon', 'Mixed salad', 'Herbs'],
     ingredientsAr: ['سلمون', 'سلطة مشكلة', 'أعشاب'],
@@ -476,6 +510,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'سمك دنيس مخبوز مع طماطم كرزية، زيتون أسود، وأعشاب',
     price: 92,
     category: 'main',
+    subcategory: 'fish',
     image: '/placeholder.svg',
     ingredients: ['Sea bream', 'Cherry tomatoes', 'Black olives', 'Herbs'],
     ingredientsAr: ['سمك دنيس', 'طماطم كرزية', 'زيتون أسود', 'أعشاب'],
@@ -484,7 +519,7 @@ export const menuItems: MenuItem[] = [
     available: true,
   },
 
-  // Main Course - Meat
+  // Meat Main Course
   {
     id: 'main-3',
     name: 'Grilled Steak',
@@ -493,6 +528,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'يقدم مع بطاطس مهروسة وصلصة الفلفل الأسود',
     price: 125,
     category: 'main',
+    subcategory: 'meat',
     image: '/placeholder.svg',
     ingredients: ['Beef steak', 'Mashed potatoes', 'Black pepper sauce'],
     ingredientsAr: ['ستيك بقري', 'بطاطس مهروسة', 'صلصة فلفل أسود'],
@@ -508,6 +544,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'تتبيلة خاصة، تقدم مع بطاطس مقلية وصلصة التارتار',
     price: 115,
     category: 'main',
+    subcategory: 'meat',
     image: '/placeholder.svg',
     ingredients: ['Lamb chops', 'French fries', 'Tartar sauce'],
     ingredientsAr: ['ريش غنم', 'بطاطس مقلية', 'صلصة تارتار'],
@@ -516,7 +553,7 @@ export const menuItems: MenuItem[] = [
     available: true,
   },
 
-  // Main Course - Chicken
+  // Chicken Main Course
   {
     id: 'main-5',
     name: 'Chicken Milanese',
@@ -525,6 +562,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'صدر دجاج مغطى بالبقسماط ومقلي، بطاطس مقلية، صلصة طماطم',
     price: 68,
     category: 'main',
+    subcategory: 'chicken',
     image: '/placeholder.svg',
     ingredients: ['Chicken breast', 'Breadcrumbs', 'French fries', 'Tomato sauce'],
     ingredientsAr: ['صدر دجاج', 'فتات خبز', 'بطاطس مقلية', 'صلصة طماطم'],
@@ -539,6 +577,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'يقدم مع سلطة وبطاطس مقلية',
     price: 62,
     category: 'main',
+    subcategory: 'chicken',
     image: '/placeholder.svg',
     ingredients: ['Chicken breast', 'Mixed salad', 'French fries'],
     ingredientsAr: ['صدر دجاج', 'سلطة مشكلة', 'بطاطس مقلية'],
@@ -547,7 +586,7 @@ export const menuItems: MenuItem[] = [
     available: true,
   },
 
-  // Desserts
+  // ========== DESSERTS ==========
   {
     id: 'dessert-1',
     name: 'Panna Cotta',
@@ -556,9 +595,10 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'حلوى كريمة إيطالية بالفانيليا وصلصة التوت',
     price: 32,
     category: 'desserts',
+    subcategory: 'sweet',
     image: '/placeholder.svg',
-    ingredients: ['Cream', 'Vanilla', 'Berries'],
-    ingredientsAr: ['كريمة', 'فانيليا', 'توت'],
+    ingredients: ['Cream', 'Vanilla', 'Berry sauce'],
+    ingredientsAr: ['كريمة', 'فانيليا', 'صلصة توت'],
     allergens: ['Dairy'],
     isVegetarian: true,
     isGlutenFree: true,
@@ -568,13 +608,14 @@ export const menuItems: MenuItem[] = [
     id: 'dessert-2',
     name: 'Tiramisu',
     nameAr: 'تيراميسو',
-    description: 'Classic Italian dessert with mascarpone and coffee',
-    descriptionAr: 'حلوى إيطالية كلاسيكية مع ماسكاربوني وقهوة',
-    price: 36,
+    description: 'Classic Italian dessert with mascarpone, espresso, and cocoa',
+    descriptionAr: 'حلوى إيطالية كلاسيكية مع ماسكاربوني، إسبريسو، وكاكاو',
+    price: 38,
     category: 'desserts',
+    subcategory: 'sweet',
     image: '/placeholder.svg',
-    ingredients: ['Mascarpone', 'Coffee', 'Ladyfingers', 'Cocoa'],
-    ingredientsAr: ['ماسكاربوني', 'قهوة', 'بسكويت', 'كاكاو'],
+    ingredients: ['Mascarpone', 'Espresso', 'Ladyfingers', 'Cocoa'],
+    ingredientsAr: ['ماسكاربوني', 'إسبريسو', 'بسكويت', 'كاكاو'],
     allergens: ['Dairy', 'Gluten', 'Eggs'],
     isVegetarian: true,
     available: true,
@@ -584,9 +625,10 @@ export const menuItems: MenuItem[] = [
     name: 'Crème Brûlée',
     nameAr: 'كريم بروليه',
     description: 'French vanilla custard with caramelized sugar top',
-    descriptionAr: 'كاسترد فانيليا فرنسي مع طبقة سكر كراميل',
-    price: 34,
+    descriptionAr: 'كاسترد فرنسي بالفانيليا مع طبقة سكر كراميل',
+    price: 36,
     category: 'desserts',
+    subcategory: 'sweet',
     image: '/placeholder.svg',
     ingredients: ['Cream', 'Vanilla', 'Sugar', 'Eggs'],
     ingredientsAr: ['كريمة', 'فانيليا', 'سكر', 'بيض'],
@@ -603,6 +645,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'عجينة بيتزا حلوة مع شوكولاتة نوتيلا',
     price: 38,
     category: 'desserts',
+    subcategory: 'sweet',
     image: '/placeholder.svg',
     ingredients: ['Pizza dough', 'Nutella'],
     ingredientsAr: ['عجينة بيتزا', 'نوتيلا'],
@@ -618,6 +661,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'فواكه موسمية طازجة',
     price: 28,
     category: 'desserts',
+    subcategory: 'sweet',
     image: '/placeholder.svg',
     ingredients: ['Seasonal fruits'],
     ingredientsAr: ['فواكه موسمية'],
@@ -629,13 +673,32 @@ export const menuItems: MenuItem[] = [
   },
 ];
 
+// Main categories for top-level navigation
 export const categories = [
   { id: 'all', labelKey: 'category.all' },
   { id: 'starters', labelKey: 'category.starters' },
-  { id: 'appetizers', labelKey: 'category.appetizers' },
-  { id: 'soups', labelKey: 'category.soups' },
-  { id: 'risotto', labelKey: 'category.risotto' },
-  { id: 'pizza', labelKey: 'category.pizza' },
   { id: 'main', labelKey: 'category.main' },
   { id: 'desserts', labelKey: 'category.desserts' },
 ] as const;
+
+// Subcategories with their labels and icons
+export const subcategories = {
+  starters: [
+    { id: 'hot-starters', labelKey: 'subcategory.hotStarters', icon: '🔥' },
+    { id: 'cold-appetizers', labelKey: 'subcategory.coldAppetizers', icon: '❄️' },
+    { id: 'soups', labelKey: 'subcategory.soups', icon: '🍲' },
+    { id: 'salads', labelKey: 'subcategory.salads', icon: '🥗' },
+  ],
+  main: [
+    { id: 'risotto', labelKey: 'subcategory.risotto', icon: '🍚' },
+    { id: 'pizza', labelKey: 'subcategory.pizza', icon: '🍕' },
+    { id: 'fish', labelKey: 'subcategory.fish', icon: '🐟' },
+    { id: 'meat', labelKey: 'subcategory.meat', icon: '🥩' },
+    { id: 'chicken', labelKey: 'subcategory.chicken', icon: '🍗' },
+  ],
+  desserts: [
+    { id: 'sweet', labelKey: 'subcategory.sweet', icon: '🍰' },
+  ],
+} as const;
+
+export type SubcategoryType = typeof subcategories;
