@@ -3,25 +3,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { GuestSessionProvider } from "@/contexts/GuestSessionContext";
 import { SplashScreen } from "@/components/SplashScreen";
-import Index from "./pages/Index";
-import ReservationPage from "./pages/ReservationPage";
-import OrderPage from "./pages/OrderPage";
-import CartPage from "./pages/CartPage";
-import CheckinPage from "./pages/CheckinPage";
-import AdminPage from "./pages/AdminPage";
-import AuthPage from "./pages/AuthPage";
-import MyOrdersPage from "./pages/MyOrdersPage";
-import GuestLoginPage from "./pages/GuestLoginPage";
-import PreorderPage from "./pages/PreorderPage";
-import KitchenDisplayPage from "./pages/KitchenDisplayPage";
-import TestQRPage from "./pages/TestQRPage";
-import NotFound from "./pages/NotFound";
+import { AnimatedRoutes } from "@/components/AnimatedRoutes";
 
 const queryClient = new QueryClient();
 
@@ -56,22 +44,7 @@ const App = () => {
                   <SplashScreen key="splash" onComplete={handleSplashComplete} />
                 ) : (
                   <BrowserRouter>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/reserve" element={<ReservationPage />} />
-                      <Route path="/order" element={<OrderPage />} />
-                      <Route path="/order/cart" element={<CartPage />} />
-                      <Route path="/checkin" element={<CheckinPage />} />
-                      <Route path="/admin" element={<AdminPage />} />
-                      <Route path="/auth" element={<AuthPage />} />
-                      <Route path="/my-orders" element={<MyOrdersPage />} />
-                      <Route path="/guest-login" element={<GuestLoginPage />} />
-                      <Route path="/preorder" element={<PreorderPage />} />
-                      <Route path="/kitchen" element={<KitchenDisplayPage />} />
-                      <Route path="/test-qr" element={<TestQRPage />} />
-                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
+                    <AnimatedRoutes />
                   </BrowserRouter>
                 )}
               </AnimatePresence>
