@@ -58,17 +58,26 @@ import nutellaPizza from '@/assets/menu/nutella-pizza.jpg';
 import fruitSalad from '@/assets/menu/fruit-salad.jpg';
 
 const imageMap: Record<string, string> = {
+  // Hot Starters
   'starter-1': bruschettaPomodoro, 'starter-2': bruschettaGarlic, 'starter-3': polpetteCarne,
   'starter-4': crocchettePatate, 'starter-5': panzerottoSemplice, 'starter-6': panzerottoProsciutto,
-  'appetizer-1': polpoPatate, 'appetizer-2': gamberiBurrata, 'appetizer-3': parmigianaMelanzane,
+  'appetizer-hot-1': polpoPatate, 'appetizer-hot-2': gamberiBurrata, 'appetizer-hot-3': parmigianaMelanzane,
   'soup-1': zuppaMare, 'soup-2': zuppaMinestrone, 'soup-3': zuppaFunghi,
+  // Cold Starters (Salads)
   'salad-1': caesarSalad, 'salad-2': rucolaPomodorini, 'salad-3': quinoaAvocado,
+  // Risotto
   'risotto-1': risottoMare, 'risotto-2': risottoPolloFunghi, 'risotto-3': risottoBurrata,
+  // Pizza
   'pizza-1': pizzaMargherita, 'pizza-2': pizzaChickenMushroom, 'pizza-3': pizzaAlfredo,
   'pizza-4': pizzaQuattroFormaggi, 'pizza-5': pizzaTonnoCipolla, 'pizza-6': pizzaSalmone,
   'pizza-7': pizzaNapoletana, 'pizza-8': pizzaHawaiian, 'pizza-9': pizzaVegetariana, 'pizza-10': pizzaFruttiMare,
-  'main-1': grilledSalmon, 'main-2': seaBream, 'main-3': grilledSteak,
-  'main-4': grilledLambChops, 'main-5': chickenMilanese, 'main-6': grilledChicken,
+  // Fish
+  'main-1': grilledSalmon, 'main-2': seaBream,
+  // Meat
+  'main-3': grilledSteak, 'main-4': grilledLambChops,
+  // Chicken
+  'main-5': chickenMilanese, 'main-6': grilledChicken,
+  // Desserts
   'dessert-1': pannaCotta, 'dessert-2': tiramisu, 'dessert-3': cremeBrulee,
   'dessert-4': nutellaPizza, 'dessert-5': fruitSalad,
 };
