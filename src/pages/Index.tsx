@@ -63,15 +63,13 @@ const imageMap: Record<string, string> = {
   'starter-4': crocchettePatate,
   'starter-5': panzerottoSemplice,
   'starter-6': panzerottoProsciutto,
-  // Cold Appetizers
-  'appetizer-1': polpoPatate,
-  'appetizer-2': gamberiBurrata,
-  'appetizer-3': parmigianaMelanzane,
-  // Soups
+  'appetizer-hot-1': polpoPatate,
+  'appetizer-hot-2': gamberiBurrata,
+  'appetizer-hot-3': parmigianaMelanzane,
   'soup-1': zuppaMare,
   'soup-2': zuppaMinestrone,
   'soup-3': zuppaFunghi,
-  // Salads
+  // Cold Starters (Salads)
   'salad-1': caesarSalad,
   'salad-2': rucolaPomodorini,
   'salad-3': quinoaAvocado,
@@ -90,11 +88,13 @@ const imageMap: Record<string, string> = {
   'pizza-8': pizzaHawaiian,
   'pizza-9': pizzaVegetariana,
   'pizza-10': pizzaFruttiMare,
-  // Main Course
+  // Fish
   'main-1': grilledSalmon,
   'main-2': seaBream,
+  // Meat
   'main-3': grilledSteak,
   'main-4': grilledLambChops,
+  // Chicken
   'main-5': chickenMilanese,
   'main-6': grilledChicken,
   // Desserts
@@ -108,9 +108,7 @@ const imageMap: Record<string, string> = {
 // Map subcategory to main category for navigation
 const subcategoryToCategory: Record<string, 'starters' | 'main' | 'desserts'> = {
   'hot-starters': 'starters',
-  'cold-appetizers': 'starters',
-  'soups': 'starters',
-  'salads': 'starters',
+  'cold-starters': 'starters',
   'risotto': 'main',
   'pizza': 'main',
   'fish': 'main',
