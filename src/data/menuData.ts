@@ -5,8 +5,8 @@ export interface MenuItem {
   description: string;
   descriptionAr: string;
   price: number;
-  category: 'starters' | 'main' | 'desserts';
-  subcategory: 'hot-starters' | 'cold-starters' | 'risotto' | 'pizza' | 'fish' | 'meat' | 'chicken' | 'sweet';
+  category: 'starters' | 'main' | 'desserts' | 'drinks';
+  subcategory: 'hot-starters' | 'cold-starters' | 'risotto' | 'pizza' | 'fish' | 'meat' | 'chicken' | 'sweet' | 'fresh-juices';
   image: string;
   ingredients: string[];
   ingredientsAr: string[];
@@ -667,6 +667,82 @@ export const menuItems: MenuItem[] = [
     isGlutenFree: true,
     available: true,
   },
+  
+  // ========== DRINKS ==========
+  
+  // Fresh Juices
+  {
+    id: 'drink-1',
+    name: 'Fresh Strawberry Juice',
+    nameAr: 'عصير الفراولة الطازج',
+    description: 'Freshly squeezed strawberry juice, naturally sweet and refreshing, served chilled',
+    descriptionAr: 'عصير فراولة طازج معصور، حلو طبيعياً ومنعش، يقدم بارداً',
+    price: 22,
+    category: 'drinks',
+    subcategory: 'fresh-juices',
+    image: '/placeholder.svg',
+    ingredients: ['Fresh strawberries'],
+    ingredientsAr: ['فراولة طازجة'],
+    allergens: [],
+    isVegan: true,
+    isVegetarian: true,
+    isGlutenFree: true,
+    available: true,
+  },
+  {
+    id: 'drink-2',
+    name: 'Fresh Pineapple Juice',
+    nameAr: 'عصير الأناناس الطازج',
+    description: 'Tropical pineapple juice, freshly pressed with a hint of natural sweetness',
+    descriptionAr: 'عصير أناناس استوائي، معصور طازجاً بلمسة من الحلاوة الطبيعية',
+    price: 22,
+    category: 'drinks',
+    subcategory: 'fresh-juices',
+    image: '/placeholder.svg',
+    ingredients: ['Fresh pineapple'],
+    ingredientsAr: ['أناناس طازج'],
+    allergens: [],
+    isVegan: true,
+    isVegetarian: true,
+    isGlutenFree: true,
+    available: true,
+  },
+  {
+    id: 'drink-3',
+    name: 'Fresh Grape Juice',
+    nameAr: 'عصير العنب الطازج',
+    description: 'Rich and flavorful grape juice, pressed from premium grapes, served chilled',
+    descriptionAr: 'عصير عنب غني ولذيذ، معصور من عنب فاخر، يقدم بارداً',
+    price: 22,
+    category: 'drinks',
+    subcategory: 'fresh-juices',
+    image: '/placeholder.svg',
+    ingredients: ['Fresh grapes'],
+    ingredientsAr: ['عنب طازج'],
+    allergens: [],
+    isVegan: true,
+    isVegetarian: true,
+    isGlutenFree: true,
+    available: true,
+  },
+  {
+    id: 'drink-4',
+    name: 'Fresh Watermelon Juice',
+    nameAr: 'عصير البطيخ الطازج',
+    description: 'Refreshing watermelon juice, naturally hydrating and perfect for hot days',
+    descriptionAr: 'عصير بطيخ منعش، مرطب طبيعياً ومثالي للأيام الحارة',
+    price: 22,
+    category: 'drinks',
+    subcategory: 'fresh-juices',
+    image: '/placeholder.svg',
+    ingredients: ['Fresh watermelon'],
+    ingredientsAr: ['بطيخ طازج'],
+    allergens: [],
+    isVegan: true,
+    isVegetarian: true,
+    isGlutenFree: true,
+    available: true,
+  },
 ];
 
 // Main categories for top-level navigation
@@ -675,6 +751,7 @@ export const categories = [
   { id: 'starters', labelKey: 'category.starters' },
   { id: 'main', labelKey: 'category.main' },
   { id: 'desserts', labelKey: 'category.desserts' },
+  { id: 'drinks', labelKey: 'category.drinks' },
 ] as const;
 
 // Subcategories with their labels and icons
@@ -692,6 +769,9 @@ export const subcategories = {
   ],
   desserts: [
     { id: 'sweet', labelKey: 'subcategory.sweet', icon: '🍰' },
+  ],
+  drinks: [
+    { id: 'fresh-juices', labelKey: 'subcategory.freshJuices', icon: '🧃' },
   ],
 } as const;
 

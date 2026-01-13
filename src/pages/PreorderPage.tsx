@@ -56,6 +56,11 @@ import tiramisu from '@/assets/menu/tiramisu.jpg';
 import cremeBrulee from '@/assets/menu/creme-brulee.jpg';
 import nutellaPizza from '@/assets/menu/nutella-pizza.jpg';
 import fruitSalad from '@/assets/menu/fruit-salad.jpg';
+// Drinks
+import strawberryJuice from '@/assets/menu/strawberry-juice.jpg';
+import pineappleJuice from '@/assets/menu/pineapple-juice.jpg';
+import grapeJuice from '@/assets/menu/grape-juice.jpg';
+import watermelonJuice from '@/assets/menu/watermelon-juice.jpg';
 
 const imageMap: Record<string, string> = {
   // Hot Starters
@@ -80,6 +85,8 @@ const imageMap: Record<string, string> = {
   // Desserts
   'dessert-1': pannaCotta, 'dessert-2': tiramisu, 'dessert-3': cremeBrulee,
   'dessert-4': nutellaPizza, 'dessert-5': fruitSalad,
+  // Drinks
+  'drink-1': strawberryJuice, 'drink-2': pineappleJuice, 'drink-3': grapeJuice, 'drink-4': watermelonJuice,
 };
 
 interface PreorderItem {

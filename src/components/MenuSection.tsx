@@ -5,7 +5,7 @@ import { MenuItem, subcategories } from '@/data/menuData';
 import { cn } from '@/lib/utils';
 
 interface MenuSectionProps {
-  category: 'starters' | 'main' | 'desserts';
+  category: 'starters' | 'main' | 'desserts' | 'drinks';
   items: MenuItem[];
   onItemClick: (item: MenuItem) => void;
   imageMap: Record<string, string>;

@@ -53,6 +53,11 @@ import tiramisu from '@/assets/menu/tiramisu.jpg';
 import cremeBrulee from '@/assets/menu/creme-brulee.jpg';
 import nutellaPizza from '@/assets/menu/nutella-pizza.jpg';
 import fruitSalad from '@/assets/menu/fruit-salad.jpg';
+// Drinks
+import strawberryJuice from '@/assets/menu/strawberry-juice.jpg';
+import pineappleJuice from '@/assets/menu/pineapple-juice.jpg';
+import grapeJuice from '@/assets/menu/grape-juice.jpg';
+import watermelonJuice from '@/assets/menu/watermelon-juice.jpg';
 
 // Map item IDs to imported images
 const imageMap: Record<string, string> = {
@@ -103,10 +108,15 @@ const imageMap: Record<string, string> = {
   'dessert-3': cremeBrulee,
   'dessert-4': nutellaPizza,
   'dessert-5': fruitSalad,
+  // Drinks
+  'drink-1': strawberryJuice,
+  'drink-2': pineappleJuice,
+  'drink-3': grapeJuice,
+  'drink-4': watermelonJuice,
 };
 
 // Map subcategory to main category for navigation
-const subcategoryToCategory: Record<string, 'starters' | 'main' | 'desserts'> = {
+const subcategoryToCategory: Record<string, 'starters' | 'main' | 'desserts' | 'drinks'> = {
   'hot-starters': 'starters',
   'cold-starters': 'starters',
   'risotto': 'main',
@@ -115,6 +125,7 @@ const subcategoryToCategory: Record<string, 'starters' | 'main' | 'desserts'> = 
   'meat': 'main',
   'chicken': 'main',
   'sweet': 'desserts',
+  'fresh-juices': 'drinks',
 };
 
 function MenuContent() {
@@ -144,7 +155,7 @@ function MenuContent() {
   const handleNavigateToCategory = useCallback((category: string) => {
     // Check if it's a subcategory and map to main category
     const mainCategory = subcategoryToCategory[category] || category;
-    if (mainCategory === 'starters' || mainCategory === 'main' || mainCategory === 'desserts') {
+    if (mainCategory === 'starters' || mainCategory === 'main' || mainCategory === 'desserts' || mainCategory === 'drinks') {
       setActiveCategory(mainCategory);
     } else {
       setActiveCategory('all');
@@ -211,6 +222,12 @@ function MenuContent() {
             onItemClick={setSelectedItem}
             imageMap={imageMap}
           />
+          <MenuSection
+            category="drinks"
+            items={menuItems.filter(item => item.category === 'drinks')}
+            onItemClick={setSelectedItem}
+            imageMap={imageMap}
+          />
         </div>
       );
     }
@@ -218,7 +235,7 @@ function MenuContent() {
     // Show filtered category with subcategory sections
     return (
       <MenuSection
-        category={activeCategory as 'starters' | 'main' | 'desserts'}
+        category={activeCategory as 'starters' | 'main' | 'desserts' | 'drinks'}
         items={filteredItems}
         onItemClick={setSelectedItem}
         imageMap={imageMap}
