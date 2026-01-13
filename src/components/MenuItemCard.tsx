@@ -19,11 +19,12 @@ export function MenuItemCard({ item, onClick, index }: MenuItemCardProps) {
   return (
     <motion.div
       onClick={onClick}
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: "-50px" }}
       transition={{ 
         duration: 0.5, 
-        delay: index * 0.08,
+        delay: (index % 4) * 0.1,
         ease: [0.25, 0.46, 0.45, 0.94]
       }}
       whileHover={{ 
@@ -77,8 +78,9 @@ export function MenuItemCard({ item, onClick, index }: MenuItemCardProps) {
             <motion.span 
               className="badge-vegan backdrop-blur-sm"
               initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.08 + 0.3, type: "spring", stiffness: 300 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 300 }}
             >
               <Leaf className="w-3 h-3" />
             </motion.span>
@@ -87,8 +89,9 @@ export function MenuItemCard({ item, onClick, index }: MenuItemCardProps) {
             <motion.span 
               className="bg-destructive/30 text-destructive-foreground backdrop-blur-sm inline-flex items-center px-2 py-0.5 rounded-full text-xs"
               initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.08 + 0.35, type: "spring", stiffness: 300 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.35, type: "spring", stiffness: 300 }}
             >
               <Flame className="w-3 h-3" />
             </motion.span>
@@ -97,8 +100,9 @@ export function MenuItemCard({ item, onClick, index }: MenuItemCardProps) {
             <motion.span 
               className="bg-amber/30 text-foreground backdrop-blur-sm inline-flex items-center px-2 py-0.5 rounded-full text-xs"
               initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.08 + 0.4, type: "spring", stiffness: 300 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, type: "spring", stiffness: 300 }}
             >
               <WheatOff className="w-3 h-3" />
             </motion.span>
@@ -126,16 +130,18 @@ export function MenuItemCard({ item, onClick, index }: MenuItemCardProps) {
           <motion.div 
             className="flex flex-wrap gap-1 mt-3"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: index * 0.08 + 0.2 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
           >
             {item.allergens.slice(0, 2).map((allergen, i) => (
               <motion.span 
                 key={allergen} 
                 className="badge-allergen"
                 initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.08 + 0.25 + i * 0.05 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.25 + i * 0.05 }}
               >
                 {allergen}
               </motion.span>
