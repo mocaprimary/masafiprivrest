@@ -25,9 +25,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Subcategories
     'subcategory.hotStarters': 'Hot Starters',
-    'subcategory.coldAppetizers': 'Cold Appetizers',
-    'subcategory.soups': 'Soups',
-    'subcategory.salads': 'Salads',
+    'subcategory.coldStarters': 'Cold Starters',
     'subcategory.risotto': 'Italian Rice (Risotto)',
     'subcategory.pizza': 'Pizza',
     'subcategory.fish': 'Fish',
@@ -117,9 +115,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Subcategories
     'subcategory.hotStarters': 'مقبلات ساخنة',
-    'subcategory.coldAppetizers': 'مقبلات باردة',
-    'subcategory.soups': 'الشوربات',
-    'subcategory.salads': 'السلطات',
+    'subcategory.coldStarters': 'مقبلات باردة',
     'subcategory.risotto': 'الأرز الإيطالي (ريزوتو)',
     'subcategory.pizza': 'بيتزا',
     'subcategory.fish': 'الأسماك',
