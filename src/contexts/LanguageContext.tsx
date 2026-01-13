@@ -22,6 +22,7 @@ const translations: Record<Language, Record<string, string>> = {
     'category.starters': 'Starters',
     'category.main': 'Main Courses',
     'category.desserts': 'Desserts',
+    'category.drinks': 'Drinks',
     
     // Subcategories
     'subcategory.hotStarters': 'Hot Starters',
@@ -32,6 +33,7 @@ const translations: Record<Language, Record<string, string>> = {
     'subcategory.meat': 'Meat',
     'subcategory.chicken': 'Chicken',
     'subcategory.sweet': 'Desserts',
+    'subcategory.freshJuices': 'Fresh Juices',
     
     // Menu Item
     'item.addToOrder': 'Add to Order',
@@ -112,6 +114,7 @@ const translations: Record<Language, Record<string, string>> = {
     'category.starters': 'المقبلات',
     'category.main': 'الأطباق الرئيسية',
     'category.desserts': 'الحلويات',
+    'category.drinks': 'المشروبات',
     
     // Subcategories
     'subcategory.hotStarters': 'مقبلات ساخنة',
@@ -122,6 +125,7 @@ const translations: Record<Language, Record<string, string>> = {
     'subcategory.meat': 'اللحوم',
     'subcategory.chicken': 'الدجاج',
     'subcategory.sweet': 'الحلويات',
+    'subcategory.freshJuices': 'عصائر طازجة',
     
     // Menu Item
     'item.addToOrder': 'أضف للطلب',
