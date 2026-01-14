@@ -229,6 +229,30 @@ export type Database = {
           },
         ]
       }
+      pin_verification_attempts: {
+        Row: {
+          attempted_at: string
+          id: string
+          ip_address: string | null
+          reservation_number: string
+          success: boolean
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          ip_address?: string | null
+          reservation_number: string
+          success?: boolean
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          ip_address?: string | null
+          reservation_number?: string
+          success?: boolean
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -448,6 +472,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_old_pin_attempts: { Args: never; Returns: undefined }
       create_order_secure: {
         Args: {
           p_items?: Json
