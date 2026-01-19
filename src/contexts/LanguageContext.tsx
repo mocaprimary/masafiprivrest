@@ -18,22 +18,14 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.admin': 'Admin',
     
     // Menu Categories
-    'category.all': 'All',
     'category.starters': 'Starters',
-    'category.main': 'Main Courses',
+    'category.pasta': 'Pasta',
+    'category.pizza': 'Pizza',
+    'category.fish': 'Fish',
+    'category.meat': 'Meat',
+    'category.chicken': 'Chicken',
     'category.desserts': 'Desserts',
-    'category.drinks': 'Drinks',
-    
-    // Subcategories
-    'subcategory.hotStarters': 'Hot Starters',
-    'subcategory.coldStarters': 'Cold Starters',
-    'subcategory.risotto': 'Italian Rice (Risotto)',
-    'subcategory.pizza': 'Pizza',
-    'subcategory.fish': 'Fish',
-    'subcategory.meat': 'Meat',
-    'subcategory.chicken': 'Chicken',
-    'subcategory.sweet': 'Desserts',
-    'subcategory.freshJuices': 'Fresh Juices',
+    'category.drinks': 'Fresh Juices',
     
     // Menu Item
     'item.addToOrder': 'Add to Order',
@@ -112,22 +104,14 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.admin': 'الإدارة',
     
     // Menu Categories
-    'category.all': 'الكل',
     'category.starters': 'المقبلات',
-    'category.main': 'الأطباق الرئيسية',
+    'category.pasta': 'المعكرونة',
+    'category.pizza': 'بيتزا',
+    'category.fish': 'الأسماك',
+    'category.meat': 'اللحوم',
+    'category.chicken': 'الدجاج',
     'category.desserts': 'الحلويات',
-    'category.drinks': 'المشروبات',
-    
-    // Subcategories
-    'subcategory.hotStarters': 'مقبلات ساخنة',
-    'subcategory.coldStarters': 'مقبلات باردة',
-    'subcategory.risotto': 'الأرز الإيطالي (ريزوتو)',
-    'subcategory.pizza': 'بيتزا',
-    'subcategory.fish': 'الأسماك',
-    'subcategory.meat': 'اللحوم',
-    'subcategory.chicken': 'الدجاج',
-    'subcategory.sweet': 'الحلويات',
-    'subcategory.freshJuices': 'عصائر طازجة',
+    'category.drinks': 'عصائر طازجة',
     
     // Menu Item
     'item.addToOrder': 'أضف للطلب',
