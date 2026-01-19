@@ -100,7 +100,9 @@ const translations: Record<Language, Record<string, string>> = {
     'close': 'Close',
     'welcome': 'Welcome to',
     'restaurantName': 'The Oasis',
-    'tagline': 'Private Dining Experience',
+    'tagline': 'Where Arabian Hospitality Meets Italian Excellence',
+    'discoverMenu': 'Discover Our Culinary Art',
+    'ourMenu': 'Our Menu',
   },
   ar: {
     // Navigation
@@ -192,7 +194,9 @@ const translations: Record<Language, Record<string, string>> = {
     'close': 'إغلاق',
     'welcome': 'مرحباً بكم في',
     'restaurantName': 'الواحة',
-    'tagline': 'تجربة طعام خاصة',
+    'tagline': 'حيث تلتقي الضيافة العربية بالتميز الإيطالي',
+    'discoverMenu': 'اكتشف فنوننا الطهوية',
+    'ourMenu': 'قائمتنا',
   },
 };
 
