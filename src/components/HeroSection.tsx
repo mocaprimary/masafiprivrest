@@ -1,10 +1,15 @@
 import { useLanguage } from '@/contexts/LanguageContext';
-import { motion, Variants } from 'framer-motion';
+import { motion, Variants, useScroll, useTransform } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import heroImage from '@/assets/hero-restaurant.jpg';
 
 export function HeroSection() {
   const { t } = useLanguage();
+  const { scrollY } = useScroll();
+  
+  // Subtle parallax - background moves slower than scroll
+  const backgroundY = useTransform(scrollY, [0, 500], [0, 100]);
+  const contentOpacity = useTransform(scrollY, [0, 300], [1, 0.5]);
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -38,19 +43,25 @@ export function HeroSection() {
 
   return (
     <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
-      {/* Background Image with strong overlay for text contrast */}
-      <div className="absolute inset-0 z-0">
+      {/* Background Image with parallax effect */}
+      <motion.div 
+        className="absolute inset-0 z-0"
+        style={{ y: backgroundY }}
+      >
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-110"
           style={{ backgroundImage: `url(${heroImage})` }}
         />
         {/* Strong gradient overlay for readability */}
         <div className="absolute inset-0 bg-background/85" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background" />
-      </div>
+      </motion.div>
 
       {/* Main Content - Clean and Focused */}
-      <div className="container mx-auto px-4 text-center relative z-10">
+      <motion.div 
+        className="container mx-auto px-4 text-center relative z-10"
+        style={{ opacity: contentOpacity }}
+      >
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -103,7 +114,7 @@ export function HeroSection() {
             <ChevronDown className="w-4 h-4" />
           </motion.button>
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* Subtle scroll indicator */}
       <motion.div
