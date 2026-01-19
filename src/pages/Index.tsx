@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { CategoryTabs } from '@/components/CategoryTabs';
@@ -9,7 +10,7 @@ import { ReservationCTA } from '@/components/ReservationCTA';
 import { ReviewsSection } from '@/components/ReviewsSection';
 import { MenuChatbot } from '@/components/MenuChatbot';
 import { menuItems, MenuItem } from '@/data/menuData';
-import { LanguageProvider } from '@/contexts/LanguageContext';
+import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -132,6 +133,7 @@ function MenuContent() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [dbMenuItems, setDbMenuItems] = useState<Array<{ id: string; name: string; category: string }>>([]);
+  const { t } = useLanguage();
 
   // Fetch database menu items for ID lookup
   useEffect(() => {
@@ -250,17 +252,63 @@ function MenuContent() {
       <main className="pt-16 pb-32">
         <HeroSection />
         
-        <section className="container mx-auto px-4 py-8">
-          <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm py-4 -mx-4 px-4">
+        {/* Menu Section with enhanced styling */}
+        <section className="container mx-auto px-4 py-12">
+          {/* Section Header */}
+          <motion.div 
+            className="text-center mb-10"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.span 
+              className="inline-block text-primary text-sm uppercase tracking-[0.3em] mb-3"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              {t('discoverMenu')}
+            </motion.span>
+            <motion.h2 
+              className="font-display text-4xl md:text-5xl font-bold gold-text mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+            >
+              {t('ourMenu')}
+            </motion.h2>
+            <motion.div 
+              className="flex justify-center items-center gap-3"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+            >
+              <div className="w-12 h-px bg-gradient-to-r from-transparent to-primary/50" />
+              <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+              <div className="w-12 h-px bg-gradient-to-l from-transparent to-primary/50" />
+            </motion.div>
+          </motion.div>
+
+          {/* Sticky Category Tabs */}
+          <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-md py-4 -mx-4 px-4 border-b border-border/30">
             <CategoryTabs
               activeCategory={activeCategory}
               onCategoryChange={setActiveCategory}
             />
           </div>
 
-          <div className="mt-6">
+          <motion.div 
+            className="mt-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+          >
             {renderContent()}
-          </div>
+          </motion.div>
         </section>
 
         <ReviewsSection />
