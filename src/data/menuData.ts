@@ -5,7 +5,7 @@ export interface MenuItem {
   description: string;
   descriptionAr: string;
   price: number;
-  category: 'starters' | 'pasta' | 'pizza' | 'fish' | 'meat' | 'chicken' | 'desserts' | 'drinks';
+  category: 'starters' | 'pasta' | 'pizza' | 'mains' | 'desserts' | 'drinks';
   subcategory?: string;
   image: string;
   ingredients: string[];
@@ -26,6 +26,9 @@ export const subcategoryLabels: Record<string, { en: string; ar: string }> = {
   'soups': { en: 'Soups', ar: 'الشوربات' },
   'salads': { en: 'Salads', ar: 'السلطات' },
   'risotto': { en: 'Risotto', ar: 'ريزوتو' },
+  'fish': { en: 'Fish', ar: 'الأسماك' },
+  'meat': { en: 'Meat', ar: 'اللحوم' },
+  'chicken': { en: 'Chicken', ar: 'الدجاج' },
 };
 
 export const menuItems: MenuItem[] = [
@@ -550,7 +553,7 @@ export const menuItems: MenuItem[] = [
     available: true,
   },
 
-  // ========== FISH ==========
+  // ========== MAIN COURSE - FISH ==========
   {
     id: 'fish-1',
     name: 'Grilled Salmon',
@@ -558,7 +561,8 @@ export const menuItems: MenuItem[] = [
     description: 'Premium Atlantic salmon grilled to perfection with our signature herb marinade, served with fresh garden salad',
     descriptionAr: 'سلمون أطلسي فاخر مشوي بإتقان مع تتبيلة الأعشاب الخاصة، يقدم مع سلطة طازجة',
     price: 88,
-    category: 'fish',
+    category: 'mains',
+    subcategory: 'fish',
     image: '/placeholder.svg',
     ingredients: ['Salmon', 'Mixed salad', 'Herbs'],
     ingredientsAr: ['سلمون', 'سلطة مشكلة', 'أعشاب'],
@@ -573,7 +577,8 @@ export const menuItems: MenuItem[] = [
     description: 'Whole Mediterranean sea bream oven-baked with vine cherry tomatoes, Kalamata olives, and fresh Italian herbs',
     descriptionAr: 'سمك دنيس متوسطي كامل مخبوز مع طماطم كرزية، زيتون كالاماتا، وأعشاب إيطالية طازجة',
     price: 92,
-    category: 'fish',
+    category: 'mains',
+    subcategory: 'fish',
     image: '/placeholder.svg',
     ingredients: ['Sea bream', 'Cherry tomatoes', 'Black olives', 'Herbs'],
     ingredientsAr: ['سمك دنيس', 'طماطم كرزية', 'زيتون أسود', 'أعشاب'],
@@ -582,7 +587,7 @@ export const menuItems: MenuItem[] = [
     available: true,
   },
 
-  // ========== MEAT ==========
+  // ========== MAIN COURSE - MEAT ==========
   {
     id: 'meat-1',
     name: 'Grilled Steak',
@@ -590,7 +595,8 @@ export const menuItems: MenuItem[] = [
     description: 'Prime beef steak grilled with our signature marinade, served with silky mashed potatoes and rich black pepper sauce',
     descriptionAr: 'ستيك بقري فاخر مشوي بتتبيلتنا الخاصة، يقدم مع بطاطس مهروسة ناعمة وصلصة الفلفل الأسود الغنية',
     price: 125,
-    category: 'meat',
+    category: 'mains',
+    subcategory: 'meat',
     image: '/placeholder.svg',
     ingredients: ['Beef steak', 'Mashed potatoes', 'Black pepper sauce'],
     ingredientsAr: ['ستيك بقري', 'بطاطس مهروسة', 'صلصة فلفل أسود'],
@@ -605,7 +611,8 @@ export const menuItems: MenuItem[] = [
     description: 'Succulent lamb chops marinated with our signature blend of Mediterranean herbs, served with crispy French fries and house-made tartar sauce',
     descriptionAr: 'ريش غنم طرية متبلة بخلطتنا الخاصة من الأعشاب المتوسطية، تقدم مع بطاطس مقلية مقرمشة وصلصة تارتار منزلية',
     price: 115,
-    category: 'meat',
+    category: 'mains',
+    subcategory: 'meat',
     image: '/placeholder.svg',
     ingredients: ['Lamb chops', 'French fries', 'Tartar sauce'],
     ingredientsAr: ['ريش غنم', 'بطاطس مقلية', 'صلصة تارتار'],
@@ -614,7 +621,7 @@ export const menuItems: MenuItem[] = [
     available: true,
   },
 
-  // ========== CHICKEN ==========
+  // ========== MAIN COURSE - CHICKEN ==========
   {
     id: 'chicken-1',
     name: 'Chicken Milanese',
@@ -622,7 +629,8 @@ export const menuItems: MenuItem[] = [
     description: 'Golden-fried chicken breast coated in our signature seasoned breadcrumbs, served with crispy French fries and house tomato sauce',
     descriptionAr: 'صدر دجاج ذهبي مغطى بفتات الخبز المتبلة الخاصة، يقدم مع بطاطس مقلية مقرمشة وصلصة الطماطم المنزلية',
     price: 68,
-    category: 'chicken',
+    category: 'mains',
+    subcategory: 'chicken',
     image: '/placeholder.svg',
     ingredients: ['Chicken breast', 'Breadcrumbs', 'French fries', 'Tomato sauce'],
     ingredientsAr: ['صدر دجاج', 'فتات خبز', 'بطاطس مقلية', 'صلصة طماطم'],
@@ -636,7 +644,8 @@ export const menuItems: MenuItem[] = [
     description: 'Tender chicken breast grilled with our signature herb marinade, served with fresh garden salad and golden French fries',
     descriptionAr: 'صدر دجاج طري مشوي بتتبيلة الأعشاب الخاصة، يقدم مع سلطة طازجة وبطاطس مقلية ذهبية',
     price: 62,
-    category: 'chicken',
+    category: 'mains',
+    subcategory: 'chicken',
     image: '/placeholder.svg',
     ingredients: ['Chicken breast', 'Mixed salad', 'French fries'],
     ingredientsAr: ['صدر دجاج', 'سلطة مشكلة', 'بطاطس مقلية'],
@@ -802,9 +811,7 @@ export const categories = [
   { id: 'starters', labelKey: 'category.starters' },
   { id: 'pasta', labelKey: 'category.pasta' },
   { id: 'pizza', labelKey: 'category.pizza' },
-  { id: 'fish', labelKey: 'category.fish' },
-  { id: 'meat', labelKey: 'category.meat' },
-  { id: 'chicken', labelKey: 'category.chicken' },
+  { id: 'mains', labelKey: 'category.mains' },
   { id: 'desserts', labelKey: 'category.desserts' },
   { id: 'drinks', labelKey: 'category.drinks' },
 ] as const;

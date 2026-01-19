@@ -21,9 +21,7 @@ const translations: Record<Language, Record<string, string>> = {
     'category.starters': 'Starters',
     'category.pasta': 'Pasta',
     'category.pizza': 'Pizza',
-    'category.fish': 'Fish',
-    'category.meat': 'Meat',
-    'category.chicken': 'Chicken',
+    'category.mains': 'Main Course',
     'category.desserts': 'Desserts',
     'category.drinks': 'Fresh Juices',
     
@@ -107,9 +105,7 @@ const translations: Record<Language, Record<string, string>> = {
     'category.starters': 'المقبلات',
     'category.pasta': 'المعكرونة',
     'category.pizza': 'بيتزا',
-    'category.fish': 'الأسماك',
-    'category.meat': 'اللحوم',
-    'category.chicken': 'الدجاج',
+    'category.mains': 'الأطباق الرئيسية',
     'category.desserts': 'الحلويات',
     'category.drinks': 'عصائر طازجة',
     
