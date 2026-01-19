@@ -6,6 +6,7 @@ export interface MenuItem {
   descriptionAr: string;
   price: number;
   category: 'starters' | 'pasta' | 'pizza' | 'fish' | 'meat' | 'chicken' | 'desserts' | 'drinks';
+  subcategory?: string;
   image: string;
   ingredients: string[];
   ingredientsAr: string[];
@@ -18,8 +19,17 @@ export interface MenuItem {
   available: boolean;
 }
 
+// Subcategory labels for translation
+export const subcategoryLabels: Record<string, { en: string; ar: string }> = {
+  'hot-starters': { en: 'Hot Starters', ar: 'المقبلات الساخنة' },
+  'cold-starters': { en: 'Cold Starters', ar: 'المقبلات الباردة' },
+  'soups': { en: 'Soups', ar: 'الشوربات' },
+  'salads': { en: 'Salads', ar: 'السلطات' },
+  'risotto': { en: 'Risotto', ar: 'ريزوتو' },
+};
+
 export const menuItems: MenuItem[] = [
-  // ========== STARTERS ==========
+  // ========== STARTERS - HOT ==========
   {
     id: 'starter-1',
     name: 'Bruschetta al Pomodoro',
@@ -28,6 +38,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'خبز محمص مع طماطم كرزية ناضجة، ريحان طازج، أوريجانو، وبصل حلو',
     price: 28,
     category: 'starters',
+    subcategory: 'hot-starters',
     image: '/placeholder.svg',
     ingredients: ['Cherry tomatoes', 'Basil', 'Oregano', 'Onion', 'Bread'],
     ingredientsAr: ['طماطم كرزية', 'ريحان', 'أوريجانو', 'بصل', 'خبز'],
@@ -44,6 +55,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'خبز محمص مقرمش مع زبدة إيطالية كريمية وثوم محمص عطري',
     price: 24,
     category: 'starters',
+    subcategory: 'hot-starters',
     image: '/placeholder.svg',
     ingredients: ['Butter', 'Garlic', 'Bread'],
     ingredientsAr: ['زبدة', 'ثوم', 'خبز'],
@@ -59,6 +71,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'ثماني كرات لحم ذهبية مقلية بخلطتنا الخاصة من الأعشاب والتوابل',
     price: 38,
     category: 'starters',
+    subcategory: 'hot-starters',
     image: '/placeholder.svg',
     ingredients: ['Beef', 'Breadcrumbs', 'Herbs', 'Spices'],
     ingredientsAr: ['لحم بقري', 'فتات الخبز', 'أعشاب', 'بهارات'],
@@ -73,6 +86,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'كروكيت ذهبي مقرمش محشو ببطاطس كريمية ولمسة من البارميزان',
     price: 32,
     category: 'starters',
+    subcategory: 'hot-starters',
     image: '/placeholder.svg',
     ingredients: ['Potato', 'Breadcrumbs', 'Parmesan'],
     ingredientsAr: ['بطاطس', 'فتات الخبز', 'جبن بارميزان'],
@@ -88,6 +102,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'جيب بيتزا مطوي ومقلي تقليدياً محشو بصلصة الطماطم المنزلية',
     price: 28,
     category: 'starters',
+    subcategory: 'hot-starters',
     image: '/placeholder.svg',
     ingredients: ['Pizza dough', 'Tomato sauce'],
     ingredientsAr: ['عجينة بيتزا', 'صلصة طماطم'],
@@ -104,12 +119,31 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'جيب بيتزا ذهبي مقلي محشو بلحم ديك رومي، فطر مقلي، صلصة طماطم، وموزاريلا ذائبة',
     price: 36,
     category: 'starters',
+    subcategory: 'hot-starters',
     image: '/placeholder.svg',
     ingredients: ['Pizza dough', 'Turkey ham', 'Mushrooms', 'Tomato sauce', 'Mozzarella'],
     ingredientsAr: ['عجينة بيتزا', 'لحم ديك رومي', 'فطر', 'صلصة طماطم', 'موزاريلا'],
     allergens: ['Gluten', 'Dairy'],
     available: true,
   },
+  {
+    id: 'starter-9',
+    name: 'Parmigiana di Melanzane',
+    nameAr: 'بارميجانا الباذنجان',
+    description: 'Layers of golden-fried eggplant baked with rich tomato sauce, aged parmesan, fresh basil, and bubbling mozzarella',
+    descriptionAr: 'طبقات باذنجان مقلي ذهبي مخبوز مع صلصة طماطم غنية، بارميزان معتق، ريحان طازج، وموزاريلا فوارة',
+    price: 48,
+    category: 'starters',
+    subcategory: 'hot-starters',
+    image: '/placeholder.svg',
+    ingredients: ['Eggplant', 'Tomato sauce', 'Parmesan', 'Basil', 'Mozzarella'],
+    ingredientsAr: ['باذنجان', 'صلصة طماطم', 'جبن بارميزان', 'ريحان', 'موزاريلا'],
+    allergens: ['Dairy'],
+    isVegetarian: true,
+    available: true,
+  },
+
+  // ========== STARTERS - COLD ==========
   {
     id: 'starter-7',
     name: 'Polpo e Patate',
@@ -118,6 +152,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'أخطبوط متوسطي طري مع بطاطس مسلوقة بالأعشاب، كرفس مقرمش، بقدونس طازج، زيت زيتون بكر، وبصل أحمر حلو',
     price: 68,
     category: 'starters',
+    subcategory: 'cold-starters',
     image: '/placeholder.svg',
     ingredients: ['Octopus', 'Potato', 'Celery', 'Parsley', 'Olive oil', 'Red onion'],
     ingredientsAr: ['أخطبوط', 'بطاطس', 'كرفس', 'بقدونس', 'زيت زيتون', 'بصل أحمر'],
@@ -133,6 +168,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'جمبري مشوي طري في كريمة بوراتا ناعمة، مع طماطم كرزية وريحان طازج',
     price: 72,
     category: 'starters',
+    subcategory: 'cold-starters',
     image: '/placeholder.svg',
     ingredients: ['Shrimp', 'Burrata', 'Cherry tomatoes', 'Basil'],
     ingredientsAr: ['جمبري', 'بوراتا', 'طماطم كرزية', 'ريحان'],
@@ -140,21 +176,8 @@ export const menuItems: MenuItem[] = [
     isGlutenFree: true,
     available: true,
   },
-  {
-    id: 'starter-9',
-    name: 'Parmigiana di Melanzane',
-    nameAr: 'بارميجانا الباذنجان',
-    description: 'Layers of golden-fried eggplant baked with rich tomato sauce, aged parmesan, fresh basil, and bubbling mozzarella',
-    descriptionAr: 'طبقات باذنجان مقلي ذهبي مخبوز مع صلصة طماطم غنية، بارميزان معتق، ريحان طازج، وموزاريلا فوارة',
-    price: 48,
-    category: 'starters',
-    image: '/placeholder.svg',
-    ingredients: ['Eggplant', 'Tomato sauce', 'Parmesan', 'Basil', 'Mozzarella'],
-    ingredientsAr: ['باذنجان', 'صلصة طماطم', 'جبن بارميزان', 'ريحان', 'موزاريلا'],
-    allergens: ['Dairy'],
-    isVegetarian: true,
-    available: true,
-  },
+
+  // ========== STARTERS - SOUPS ==========
   {
     id: 'starter-10',
     name: 'Zuppa di Mare',
@@ -163,6 +186,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'مرق طماطم غني مليء ببلح البحر الطازج، المحار الطري، والجمبري اللذيذ',
     price: 52,
     category: 'starters',
+    subcategory: 'soups',
     image: '/placeholder.svg',
     ingredients: ['Tomato', 'Mussels', 'Clams', 'Shrimp'],
     ingredientsAr: ['طماطم', 'بلح البحر', 'محار', 'جمبري'],
@@ -178,6 +202,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'شوربة خضار إيطالية دسمة مع خضار موسمية طازجة وأعشاب عطرية',
     price: 32,
     category: 'starters',
+    subcategory: 'soups',
     image: '/placeholder.svg',
     ingredients: ['Mixed vegetables', 'Beans', 'Pasta'],
     ingredientsAr: ['خضار مشكلة', 'فاصوليا', 'معكرونة'],
@@ -194,6 +219,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'شوربة فطر ناعمة مصنوعة من مزيج الفطر البري والمزروع، منتهية بالكريمة',
     price: 34,
     category: 'starters',
+    subcategory: 'soups',
     image: '/placeholder.svg',
     ingredients: ['Mushrooms', 'Cream', 'Herbs'],
     ingredientsAr: ['فطر', 'كريمة', 'أعشاب'],
@@ -202,6 +228,8 @@ export const menuItems: MenuItem[] = [
     isGlutenFree: true,
     available: true,
   },
+
+  // ========== STARTERS - SALADS ==========
   {
     id: 'starter-13',
     name: 'Caesar Salad',
@@ -210,6 +238,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'دجاج مشوي طري فوق خس روماني مقرمش، شرائح بارميزان معتق، خبز محمص ذهبي، وصلصة سيزر المنزلية الخاصة',
     price: 48,
     category: 'starters',
+    subcategory: 'salads',
     image: '/placeholder.svg',
     ingredients: ['Chicken', 'Romaine lettuce', 'Parmesan', 'Croutons', 'Caesar dressing'],
     ingredientsAr: ['دجاج', 'خس روماني', 'جبن بارميزان', 'خبز محمص', 'صلصة سيزر'],
@@ -224,6 +253,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'جرجير بري حار مع طماطم كرزية حلوة، زيتون أسود مالح، وكبر متوسطي',
     price: 38,
     category: 'starters',
+    subcategory: 'salads',
     image: '/placeholder.svg',
     ingredients: ['Rocket', 'Cherry tomatoes', 'Black olives', 'Capers'],
     ingredientsAr: ['جرجير', 'طماطم كرزية', 'زيتون أسود', 'كبر'],
@@ -241,6 +271,7 @@ export const menuItems: MenuItem[] = [
     descriptionAr: 'كينوا غنية بالبروتين مع أفوكادو كريمي، كرفس مقرمش، فجل حار، جرجير بري، وأوراق خس صغيرة طرية',
     price: 52,
     category: 'starters',
+    subcategory: 'salads',
     image: '/placeholder.svg',
     ingredients: ['Quinoa', 'Avocado', 'Celery', 'Radish', 'Rocket', 'Baby gem'],
     ingredientsAr: ['كينوا', 'أفوكادو', 'كرفس', 'فجل', 'جرجير', 'خس صغير'],
