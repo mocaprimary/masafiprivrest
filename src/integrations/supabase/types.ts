@@ -315,6 +315,30 @@ export type Database = {
           },
         ]
       }
+      reservation_rate_limits: {
+        Row: {
+          attempted_at: string
+          id: string
+          ip_address: string
+          phone_hash: string | null
+          success: boolean
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          ip_address: string
+          phone_hash?: string | null
+          success?: boolean
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          ip_address?: string
+          phone_hash?: string | null
+          success?: boolean
+        }
+        Relationships: []
+      }
       reservations: {
         Row: {
           checked_in_at: string | null
@@ -472,7 +496,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_reservation_rate_limit: {
+        Args: { p_ip_address: string; p_phone_hash?: string }
+        Returns: Json
+      }
       cleanup_old_pin_attempts: { Args: never; Returns: undefined }
+      cleanup_old_rate_limits: { Args: never; Returns: undefined }
       create_order_secure: {
         Args: {
           p_items?: Json
@@ -554,6 +583,14 @@ export type Database = {
           p_status: string
         }
         Returns: Json
+      }
+      record_reservation_attempt: {
+        Args: {
+          p_ip_address: string
+          p_phone_hash?: string
+          p_success?: boolean
+        }
+        Returns: undefined
       }
       validate_and_use_qr: {
         Args: { p_qr_code?: string; p_reservation_number?: string }

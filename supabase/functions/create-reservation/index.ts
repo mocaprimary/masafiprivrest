@@ -31,6 +31,41 @@ const MIN_NAME_LENGTH = 2
 const MAX_NAME_LENGTH = 100
 const MAX_REQUESTS_LENGTH = 500
 
+// Simple hash function for phone numbers (not cryptographically secure, but good for rate limiting)
+function hashPhone(phone: string): string {
+  const normalized = phone.replace(/[^\d]/g, '')
+  let hash = 0
+  for (let i = 0; i < normalized.length; i++) {
+    const char = normalized.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32bit integer
+  }
+  return 'ph_' + Math.abs(hash).toString(36)
+}
+
+// Get client IP from request headers
+function getClientIP(req: Request): string {
+  // Check various headers that might contain the real IP
+  const forwardedFor = req.headers.get('x-forwarded-for')
+  if (forwardedFor) {
+    // x-forwarded-for can contain multiple IPs, the first one is the client
+    return forwardedFor.split(',')[0].trim()
+  }
+  
+  const realIP = req.headers.get('x-real-ip')
+  if (realIP) {
+    return realIP
+  }
+  
+  const cfConnectingIP = req.headers.get('cf-connecting-ip')
+  if (cfConnectingIP) {
+    return cfConnectingIP
+  }
+  
+  // Fallback - this might not be the real client IP behind a proxy
+  return 'unknown'
+}
+
 function validateReservation(data: ReservationRequest): { valid: boolean; errors: string[] } {
   const errors: string[] = []
 
@@ -112,12 +147,65 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Get client IP for rate limiting
+    const clientIP = getClientIP(req)
+    console.log('Reservation attempt from IP:', clientIP)
+
     const body: ReservationRequest = await req.json()
+    
+    // Generate phone hash for rate limiting
+    const phoneHash = body.phone ? hashPhone(body.phone) : null
+
+    // Check rate limit BEFORE processing
+    const { data: rateLimitResult, error: rateLimitError } = await supabase.rpc(
+      'check_reservation_rate_limit',
+      { 
+        p_ip_address: clientIP,
+        p_phone_hash: phoneHash
+      }
+    )
+
+    if (rateLimitError) {
+      console.error('Rate limit check error:', rateLimitError)
+      // Don't block on rate limit errors, just log and continue
+    } else if (rateLimitResult && !rateLimitResult.allowed) {
+      console.log('Rate limit exceeded for IP:', clientIP)
+      
+      // Record the blocked attempt
+      await supabase.rpc('record_reservation_attempt', {
+        p_ip_address: clientIP,
+        p_phone_hash: phoneHash,
+        p_success: false
+      })
+      
+      return new Response(
+        JSON.stringify({ 
+          error: rateLimitResult.error || 'Too many requests. Please try again later.',
+          retryAfter: rateLimitResult.retry_after_seconds || 3600
+        }),
+        { 
+          status: 429, 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'Retry-After': String(rateLimitResult.retry_after_seconds || 3600)
+          } 
+        }
+      )
+    }
 
     // Server-side validation (edge function level)
     const validation = validateReservation(body)
     if (!validation.valid) {
       console.log('Edge validation failed:', validation.errors)
+      
+      // Record failed attempt
+      await supabase.rpc('record_reservation_attempt', {
+        p_ip_address: clientIP,
+        p_phone_hash: phoneHash,
+        p_success: false
+      })
+      
       return new Response(
         JSON.stringify({ error: 'Validation failed', details: validation.errors }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -137,6 +225,14 @@ Deno.serve(async (req) => {
 
     if (error) {
       console.error('Database function error:', error)
+      
+      // Record failed attempt
+      await supabase.rpc('record_reservation_attempt', {
+        p_ip_address: clientIP,
+        p_phone_hash: phoneHash,
+        p_success: false
+      })
+      
       return new Response(
         JSON.stringify({ error: 'Failed to create reservation' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -146,11 +242,26 @@ Deno.serve(async (req) => {
     // Check if the database function returned an error
     if (!result.success) {
       console.log('Reservation creation failed:', result.errors)
+      
+      // Record failed attempt
+      await supabase.rpc('record_reservation_attempt', {
+        p_ip_address: clientIP,
+        p_phone_hash: phoneHash,
+        p_success: false
+      })
+      
       return new Response(
         JSON.stringify({ error: 'Validation failed', details: result.errors }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    // Record successful attempt
+    await supabase.rpc('record_reservation_attempt', {
+      p_ip_address: clientIP,
+      p_phone_hash: phoneHash,
+      p_success: true
+    })
 
     // If tableId provided, update the reservation with the table
     if (body.tableId && result.reservation?.id) {
