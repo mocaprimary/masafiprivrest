@@ -9,7 +9,7 @@ import { MenuItemModal } from '@/components/MenuItemModal';
 import { ReservationCTA } from '@/components/ReservationCTA';
 import { ReviewsSection } from '@/components/ReviewsSection';
 import { MenuChatbot } from '@/components/MenuChatbot';
-import { menuItems, MenuItem } from '@/data/menuData';
+import { menuItems, MenuItem, categories } from '@/data/menuData';
 import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -62,27 +62,22 @@ import watermelonJuice from '@/assets/menu/watermelon-juice.jpg';
 
 // Map item IDs to imported images
 const imageMap: Record<string, string> = {
-  // Hot Starters
+  // Starters
   'starter-1': bruschettaPomodoro,
   'starter-2': bruschettaGarlic,
   'starter-3': polpetteCarne,
   'starter-4': crocchettePatate,
   'starter-5': panzerottoSemplice,
   'starter-6': panzerottoProsciutto,
-  'appetizer-hot-1': polpoPatate,
-  'appetizer-hot-2': gamberiBurrata,
-  'appetizer-hot-3': parmigianaMelanzane,
-  'soup-1': zuppaMare,
-  'soup-2': zuppaMinestrone,
-  'soup-3': zuppaFunghi,
-  // Cold Starters (Salads)
-  'salad-1': caesarSalad,
-  'salad-2': rucolaPomodorini,
-  'salad-3': quinoaAvocado,
-  // Risotto
-  'risotto-1': risottoMare,
-  'risotto-2': risottoPolloFunghi,
-  'risotto-3': risottoBurrata,
+  'starter-7': polpoPatate,
+  'starter-8': gamberiBurrata,
+  'starter-9': parmigianaMelanzane,
+  'starter-10': zuppaMare,
+  'starter-11': zuppaMinestrone,
+  'starter-12': zuppaFunghi,
+  'starter-13': caesarSalad,
+  'starter-14': rucolaPomodorini,
+  'starter-15': quinoaAvocado,
   // Pizza
   'pizza-1': pizzaMargherita,
   'pizza-2': pizzaChickenMushroom,
@@ -95,14 +90,14 @@ const imageMap: Record<string, string> = {
   'pizza-9': pizzaVegetariana,
   'pizza-10': pizzaFruttiMare,
   // Fish
-  'main-1': grilledSalmon,
-  'main-2': seaBream,
+  'fish-1': grilledSalmon,
+  'fish-2': seaBream,
   // Meat
-  'main-3': grilledSteak,
-  'main-4': grilledLambChops,
+  'meat-1': grilledSteak,
+  'meat-2': grilledLambChops,
   // Chicken
-  'main-5': chickenMilanese,
-  'main-6': grilledChicken,
+  'chicken-1': chickenMilanese,
+  'chicken-2': grilledChicken,
   // Desserts
   'dessert-1': pannaCotta,
   'dessert-2': tiramisu,
@@ -116,21 +111,8 @@ const imageMap: Record<string, string> = {
   'drink-4': watermelonJuice,
 };
 
-// Map subcategory to main category for navigation
-const subcategoryToCategory: Record<string, 'starters' | 'main' | 'desserts' | 'drinks'> = {
-  'hot-starters': 'starters',
-  'cold-starters': 'starters',
-  'risotto': 'main',
-  'pizza': 'main',
-  'fish': 'main',
-  'meat': 'main',
-  'chicken': 'main',
-  'sweet': 'desserts',
-  'fresh-juices': 'drinks',
-};
-
 function MenuContent() {
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeCategory, setActiveCategory] = useState('starters');
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [dbMenuItems, setDbMenuItems] = useState<Array<{ id: string; name: string; category: string }>>([]);
   const { t } = useLanguage();
@@ -149,18 +131,15 @@ function MenuContent() {
     fetchDbMenuItems();
   }, []);
 
-  const filteredItems = activeCategory === 'all'
-    ? menuItems
-    : menuItems.filter(item => item.category === activeCategory);
+  const filteredItems = menuItems.filter(item => item.category === activeCategory);
 
   // Handle chatbot navigation to category
   const handleNavigateToCategory = useCallback((category: string) => {
-    // Check if it's a subcategory and map to main category
-    const mainCategory = subcategoryToCategory[category] || category;
-    if (mainCategory === 'starters' || mainCategory === 'main' || mainCategory === 'desserts' || mainCategory === 'drinks') {
-      setActiveCategory(mainCategory);
+    const validCategories = categories.map(c => c.id);
+    if (validCategories.includes(category as any)) {
+      setActiveCategory(category);
     } else {
-      setActiveCategory('all');
+      setActiveCategory('starters');
     }
     // Scroll to menu section
     const menuSection = document.querySelector('section.container');
@@ -200,50 +179,6 @@ function MenuContent() {
       handleNavigateToCategory(dbItem.category);
     }
   }, [dbMenuItems, handleNavigateToCategory]);
-
-  const renderContent = () => {
-    if (activeCategory === 'all') {
-      // Show all items with category sections
-      return (
-        <div className="space-y-16">
-          <MenuSection
-            category="starters"
-            items={menuItems.filter(item => item.category === 'starters')}
-            onItemClick={setSelectedItem}
-            imageMap={imageMap}
-          />
-          <MenuSection
-            category="main"
-            items={menuItems.filter(item => item.category === 'main')}
-            onItemClick={setSelectedItem}
-            imageMap={imageMap}
-          />
-          <MenuSection
-            category="desserts"
-            items={menuItems.filter(item => item.category === 'desserts')}
-            onItemClick={setSelectedItem}
-            imageMap={imageMap}
-          />
-          <MenuSection
-            category="drinks"
-            items={menuItems.filter(item => item.category === 'drinks')}
-            onItemClick={setSelectedItem}
-            imageMap={imageMap}
-          />
-        </div>
-      );
-    }
-
-    // Show filtered category with subcategory sections
-    return (
-      <MenuSection
-        category={activeCategory as 'starters' | 'main' | 'desserts' | 'drinks'}
-        items={filteredItems}
-        onItemClick={setSelectedItem}
-        imageMap={imageMap}
-      />
-    );
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -306,8 +241,14 @@ function MenuContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
+            key={activeCategory}
           >
-            {renderContent()}
+            <MenuSection
+              category={activeCategory}
+              items={filteredItems}
+              onItemClick={setSelectedItem}
+              imageMap={imageMap}
+            />
           </motion.div>
         </section>
 
