@@ -5,7 +5,7 @@ export interface MenuItem {
   description: string;
   descriptionAr: string;
   price: number;
-  category: 'starters' | 'pasta' | 'pizza' | 'mains' | 'desserts' | 'drinks';
+  category: 'starters' | 'pasta' | 'risotto' | 'pizza' | 'mains' | 'desserts' | 'drinks';
   subcategory?: string;
   image: string;
   ingredients: string[];
@@ -25,7 +25,6 @@ export const subcategoryLabels: Record<string, { en: string; ar: string }> = {
   'cold-starters': { en: 'Cold Starters', ar: 'المقبلات الباردة' },
   'soups': { en: 'Soups', ar: 'الشوربات' },
   'salads': { en: 'Salads', ar: 'السلطات' },
-  'risotto': { en: 'Risotto', ar: 'ريزوتو' },
   'fish': { en: 'Fish', ar: 'الأسماك' },
   'meat': { en: 'Meat', ar: 'اللحوم' },
   'chicken': { en: 'Chicken', ar: 'الدجاج' },
@@ -406,7 +405,7 @@ export const menuItems: MenuItem[] = [
     available: true,
   },
 
-  // ========== RISOTTO ==========
+  // ========== RISOTTO (Italian Rice) ==========
   {
     id: 'risotto-1',
     name: 'Risotto ai Frutti di Mare',
@@ -414,8 +413,7 @@ export const menuItems: MenuItem[] = [
     description: 'Creamy Italian risotto with fresh mussels, clams, shrimp, and tender calamari in a light seafood broth',
     descriptionAr: 'ريزوتو إيطالي كريمي مع بلح البحر الطازج، المحار، الجمبري، والكاليماري الطري في مرق بحري خفيف',
     price: 78,
-    category: 'pasta',
-    subcategory: 'risotto',
+    category: 'risotto',
     image: new URL('@/assets/menu/risotto-mare.jpg', import.meta.url).href,
     ingredients: ['Arborio rice', 'Mussels', 'Clams', 'Shrimp', 'Calamari', 'White wine'],
     ingredientsAr: ['أرز أربوريو', 'بلح البحر', 'محار', 'جمبري', 'كاليماري', 'نبيذ أبيض'],
@@ -430,8 +428,7 @@ export const menuItems: MenuItem[] = [
     description: 'Rich risotto with tender chicken, earthy porcini mushrooms, and aged parmesan cheese',
     descriptionAr: 'ريزوتو غني مع دجاج طري، فطر بورتشيني ترابي، وجبن بارميزان معتق',
     price: 62,
-    category: 'pasta',
-    subcategory: 'risotto',
+    category: 'risotto',
     image: new URL('@/assets/menu/risotto-pollo-funghi.jpg', import.meta.url).href,
     ingredients: ['Arborio rice', 'Chicken', 'Porcini mushrooms', 'Parmesan', 'Butter'],
     ingredientsAr: ['أرز أربوريو', 'دجاج', 'فطر بورتشيني', 'بارميزان', 'زبدة'],
@@ -446,8 +443,7 @@ export const menuItems: MenuItem[] = [
     description: 'Creamy risotto topped with fresh cherry tomatoes, velvety burrata cheese, and fragrant basil',
     descriptionAr: 'ريزوتو كريمي مغطى بطماطم كرزية طازجة، جبن بوراتا ناعم، وريحان عطري',
     price: 58,
-    category: 'pasta',
-    subcategory: 'risotto',
+    category: 'risotto',
     image: new URL('@/assets/menu/risotto-burrata.jpg', import.meta.url).href,
     ingredients: ['Arborio rice', 'Cherry tomatoes', 'Burrata', 'Basil', 'Olive oil'],
     ingredientsAr: ['أرز أربوريو', 'طماطم كرزية', 'بوراتا', 'ريحان', 'زيت زيتون'],
@@ -861,6 +857,7 @@ export const menuItems: MenuItem[] = [
 export const categories = [
   { id: 'starters', labelKey: 'category.starters' },
   { id: 'pasta', labelKey: 'category.pasta' },
+  { id: 'risotto', labelKey: 'category.risotto' },
   { id: 'pizza', labelKey: 'category.pizza' },
   { id: 'mains', labelKey: 'category.mains' },
   { id: 'desserts', labelKey: 'category.desserts' },
