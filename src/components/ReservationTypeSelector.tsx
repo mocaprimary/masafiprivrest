@@ -139,7 +139,7 @@ export function ReservationTypeSelector({
               {/* Recommended Badge */}
               {option.recommended && (
                 <motion.div
-                  className="absolute -top-px left-4 px-3 py-1.5 rounded-b-lg bg-gradient-to-r from-primary to-amber text-primary-foreground text-xs font-semibold flex items-center gap-1.5 shadow-md"
+                  className="absolute -top-px left-4 px-3 py-1 rounded-b-lg bg-gradient-to-r from-primary to-amber text-primary-foreground text-xs font-semibold flex items-center gap-1.5 shadow-md z-20"
                   initial={{ y: -20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.5, type: 'spring' }}
@@ -175,7 +175,7 @@ export function ReservationTypeSelector({
               </motion.div>
 
               {/* Content */}
-              <div className="relative z-10">
+              <div className={cn("relative z-10", option.recommended && "pt-6")}>
                 <div className="flex items-start gap-4 mb-4">
                   <motion.div
                     className={cn(
