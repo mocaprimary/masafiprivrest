@@ -82,7 +82,7 @@ const translations: Record<Language, Record<string, string>> = {
     'order.status.served': 'Served',
     
     // General
-    'currency': 'AED',
+    'currency': 'د.إ',
     'loading': 'Loading...',
     'error': 'An error occurred',
     'success': 'Success!',
@@ -167,7 +167,7 @@ const translations: Record<Language, Record<string, string>> = {
     'order.status.served': 'تم التقديم',
     
     // General
-    'currency': 'درهم',
+    'currency': 'د.إ',
     'loading': 'جاري التحميل...',
     'error': 'حدث خطأ',
     'success': 'تم بنجاح!',
