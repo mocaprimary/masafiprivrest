@@ -8,8 +8,10 @@ import { MenuItemCard } from '@/components/MenuItemCard';
 import { MenuItemModal } from '@/components/MenuItemModal';
 import { Button } from '@/components/ui/button';
 import { menuItems, MenuItem } from '@/data/menuData';
-import { ShoppingBag, ArrowLeft, ArrowRight, Sparkles, Info } from 'lucide-react';
+import { ShoppingBag, ArrowLeft, ArrowRight, Sparkles, Info, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { HapticButton } from '@/components/ui/haptic-button';
+import { AnimatedCard } from '@/components/ui/animated-card';
 
 // Import menu images
 import bruschettaPomodoro from '@/assets/menu/bruschetta-pomodoro.jpg';
@@ -110,13 +112,15 @@ function PreorderReserveContent() {
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <div className="mb-6">
-          <button
+          <HapticButton
+            variant="ghost"
+            hapticIntensity="light"
             onClick={handleBack}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 p-0 h-auto"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Reservation Options
-          </button>
+          </HapticButton>
 
           <motion.div
             className="text-center"
@@ -127,8 +131,15 @@ function PreorderReserveContent() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-3"
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <Sparkles className="w-4 h-4 text-primary" />
+              <motion.span
+                animate={{ rotate: [0, 15, -15, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+              >
+                <Sparkles className="w-4 h-4 text-primary" />
+              </motion.span>
               <span className="text-sm text-primary font-medium">Pre-Order & Reserve</span>
             </motion.div>
             <h1 className="font-display text-2xl font-bold text-foreground mb-2">
@@ -141,20 +152,20 @@ function PreorderReserveContent() {
         </div>
 
         {/* Info Banner */}
-        <motion.div
-          className="glass-card rounded-xl p-4 mb-6 flex items-start gap-3"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+        <AnimatedCard className="p-4 mb-6 flex items-start gap-3" delay={0.2} hoverEffect>
+          <motion.div
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+          >
+            <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+          </motion.div>
           <div>
             <p className="text-sm font-medium text-foreground">How it works</p>
             <p className="text-xs text-muted-foreground mt-1">
               Add items to your order → Pay 50% deposit → Your food will be ready when you arrive
             </p>
           </div>
-        </motion.div>
+        </AnimatedCard>
 
         {/* Category Tabs */}
         <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm py-4 -mx-4 px-4">
@@ -186,50 +197,103 @@ function PreorderReserveContent() {
           exit={{ y: 100, opacity: 0 }}
         >
           <div className="container mx-auto max-w-lg">
-            <div className="glass-card rounded-xl p-4 border border-border/50">
+            <motion.div 
+              className="glass-card rounded-xl p-4 border border-border/50"
+              whileHover={{ y: -2, boxShadow: "0 12px 30px -10px hsl(var(--primary) / 0.2)" }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
               {totalItems > 0 ? (
                 <>
                   <div className="flex justify-between items-center mb-3">
-                    <div className="flex items-center gap-2">
-                      <ShoppingBag className="w-5 h-5 text-primary" />
+                    <motion.div 
+                      className="flex items-center gap-2"
+                      key={totalItems}
+                      initial={{ scale: 1.1 }}
+                      animate={{ scale: 1 }}
+                    >
+                      <motion.span
+                        animate={{ rotate: totalItems > 0 ? [0, -10, 10, 0] : 0 }}
+                        transition={{ duration: 0.4 }}
+                      >
+                        <ShoppingBag className="w-5 h-5 text-primary" />
+                      </motion.span>
                       <span className="font-medium text-foreground">{totalItems} items</span>
-                    </div>
+                    </motion.div>
                     <div className="text-right">
                       <p className="text-sm text-muted-foreground">Order Total</p>
-                      <p className="font-bold text-foreground">{subtotal} {t('currency')}</p>
+                      <motion.p 
+                        className="font-bold text-foreground"
+                        key={subtotal}
+                        initial={{ scale: 1.1 }}
+                        animate={{ scale: 1 }}
+                      >
+                        {subtotal} {t('currency')}
+                      </motion.p>
                     </div>
                   </div>
                   
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-primary/10 mb-3">
+                  <motion.div 
+                    className="flex justify-between items-center p-3 rounded-lg bg-primary/10 mb-3"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                  >
                     <span className="text-sm font-medium text-foreground">50% Deposit</span>
-                    <span className="font-bold gold-text">{depositAmount} {t('currency')}</span>
-                  </div>
+                    <motion.span 
+                      className="font-bold gold-text"
+                      key={depositAmount}
+                      initial={{ scale: 1.2 }}
+                      animate={{ scale: 1 }}
+                    >
+                      {depositAmount} {t('currency')}
+                    </motion.span>
+                  </motion.div>
 
-                  {subtotal < minOrderForPreorder && (
-                    <p className="text-xs text-amber-500 mb-3 text-center">
-                      Minimum order of {minOrderForPreorder} AED required for pre-order
-                    </p>
-                  )}
+                  <AnimatePresence>
+                    {subtotal < minOrderForPreorder && (
+                      <motion.p 
+                        className="text-xs text-amber-500 mb-3 text-center"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                      >
+                        Minimum order of {minOrderForPreorder} AED required for pre-order
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
 
-                  <Button
-                    variant="gold"
-                    size="lg"
-                    className="w-full"
+                  <HapticButton
+                    variant="chipActive"
+                    hapticIntensity="strong"
+                    className={`w-full h-12 text-base font-semibold rounded-xl ${
+                      subtotal >= minOrderForPreorder 
+                        ? 'bg-gradient-to-r from-primary to-amber shadow-lg shadow-primary/30' 
+                        : 'bg-muted/50 text-muted-foreground'
+                    }`}
                     onClick={handleContinue}
                     disabled={subtotal < minOrderForPreorder}
                   >
-                    Continue to Details
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
+                    <span>Continue to Details</span>
+                    <motion.span
+                      animate={subtotal >= minOrderForPreorder ? { x: [0, 4, 0] } : {}}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <ArrowRight className="w-4 h-4" />
+                    </motion.span>
+                  </HapticButton>
                 </>
               ) : (
-                <div className="text-center py-2">
+                <motion.div 
+                  className="text-center py-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
                   <p className="text-muted-foreground text-sm">
                     Add items to your pre-order to continue
                   </p>
-                </div>
+                </motion.div>
               )}
-            </div>
+            </motion.div>
           </div>
         </motion.div>
       </AnimatePresence>

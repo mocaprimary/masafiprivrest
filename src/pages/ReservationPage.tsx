@@ -14,12 +14,15 @@ import { z } from 'zod';
 import { QRCodeSVG } from 'qrcode.react';
 import { TableLayoutVisual } from '@/components/TableLayoutVisual';
 import { AnimatedTablePreview } from '@/components/AnimatedTablePreview';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Calendar as CalendarPicker } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format, addDays } from 'date-fns';
 import { ReservationTypeSelector, ReservationType } from '@/components/ReservationTypeSelector';
+import { AnimatedInput } from '@/components/ui/animated-input';
+import { HapticButton } from '@/components/ui/haptic-button';
+import { AnimatedCard, StepIndicator } from '@/components/ui/animated-card';
 
 const RESERVE_ONLY_DEPOSIT = 100; // AED - fixed deposit for reserve-only
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -541,30 +544,61 @@ function ReservationContent() {
               </motion.div>
 
               {/* Personal Details */}
-              <motion.div 
-                className="glass-card rounded-xl p-4 sm:p-6 space-y-3 sm:space-y-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
+              <AnimatedCard className="p-4 sm:p-6 space-y-3 sm:space-y-4" delay={0.4}>
                 <h3 className="font-display text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-4 flex items-center gap-2">
-                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] sm:text-xs text-primary font-bold">1</span>
+                  <StepIndicator step={1} isActive={!formData.fullName} isCompleted={!!formData.fullName && !!formData.phone} />
                   Personal Details
                 </h3>
-                <div>
-                  <Label htmlFor="fullName" className="text-sm">{t('reservation.fullName')} *</Label>
-                  <Input
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <Label htmlFor="fullName" className="text-sm flex items-center gap-1.5">
+                    {t('reservation.fullName')} *
+                    <AnimatePresence>
+                      {formData.fullName && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                          className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center"
+                        >
+                          <Check className="w-2.5 h-2.5 text-primary" />
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </Label>
+                  <AnimatedInput
                     id="fullName"
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                     className="input-field mt-1 h-11"
                     placeholder="John Doe"
                   />
-                </div>
+                </motion.div>
 
-                <div>
-                  <Label htmlFor="phone" className="text-sm">{t('reservation.phone')} *</Label>
-                  <Input
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.55 }}
+                >
+                  <Label htmlFor="phone" className="text-sm flex items-center gap-1.5">
+                    {t('reservation.phone')} *
+                    <AnimatePresence>
+                      {formData.phone && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                          className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center"
+                        >
+                          <Check className="w-2.5 h-2.5 text-primary" />
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </Label>
+                  <AnimatedInput
                     id="phone"
                     type="tel"
                     value={formData.phone}
@@ -572,11 +606,29 @@ function ReservationContent() {
                     className="input-field mt-1 h-11"
                     placeholder="+971 50 123 4567"
                   />
-                </div>
+                </motion.div>
 
-                <div>
-                  <Label htmlFor="email" className="text-sm">{t('reservation.email')}</Label>
-                  <Input
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.6 }}
+                >
+                  <Label htmlFor="email" className="text-sm flex items-center gap-1.5">
+                    {t('reservation.email')}
+                    <AnimatePresence>
+                      {formData.email && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                          className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center"
+                        >
+                          <Check className="w-2.5 h-2.5 text-primary" />
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </Label>
+                  <AnimatedInput
                     id="email"
                     type="email"
                     value={formData.email}
@@ -584,45 +636,56 @@ function ReservationContent() {
                     className="input-field mt-1 h-11"
                     placeholder="john@example.com"
                   />
-                </div>
-              </motion.div>
+                </motion.div>
+              </AnimatedCard>
 
               {/* Reservation Details */}
-              <motion.div 
-                className="glass-card rounded-xl p-4 sm:p-6 space-y-3 sm:space-y-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-              >
+              <AnimatedCard className="p-4 sm:p-6 space-y-3 sm:space-y-4" delay={0.5}>
                 <h3 className="font-display text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-4 flex items-center gap-2">
-                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] sm:text-xs text-primary font-bold">2</span>
+                  <StepIndicator step={2} isActive={!!formData.fullName && !!formData.phone && !formData.date} isCompleted={!!formData.date && !!formData.time} />
                   Reservation Details
                 </h3>
                 
-                {/* Guest selector - bigger touch targets */}
-                <div>
+                {/* Guest selector - bigger touch targets with haptic feedback */}
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.55 }}
+                >
                   <Label className="flex items-center gap-2 text-sm mb-2">
-                    <Users className="w-4 h-4 text-primary" />
+                    <motion.span
+                      animate={{ rotate: formData.guests > 1 ? [0, -10, 10, 0] : 0 }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <Users className="w-4 h-4 text-primary" />
+                    </motion.span>
                     {t('reservation.guests')} *
                   </Label>
                   <div className="flex flex-wrap items-center gap-2">
-                    {[1, 2, 3, 4, 5, 6].map((num) => (
-                      <motion.button
+                    {[1, 2, 3, 4, 5, 6].map((num, idx) => (
+                      <HapticButton
                         key={num}
                         type="button"
-                        whileTap={{ scale: 0.95 }}
+                        variant={formData.guests === num ? "chipActive" : "chip"}
+                        size="chip"
+                        hapticIntensity="medium"
                         onClick={() => setFormData({ ...formData, guests: num })}
                         className={cn(
-                          "w-11 h-11 sm:w-10 sm:h-10 rounded-full font-bold transition-all text-sm",
-                          formData.guests === num
-                            ? 'bg-primary text-primary-foreground shadow-lg'
-                            : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                          "w-11 h-11 sm:w-10 sm:h-10 rounded-full font-bold text-sm p-0",
+                          formData.guests === num && "shadow-lg shadow-primary/30"
                         )}
                       >
-                        {num}
-                      </motion.button>
+                        <motion.span
+                          key={`${num}-${formData.guests === num}`}
+                          initial={formData.guests === num ? { scale: 1.3 } : { scale: 1 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 500 }}
+                        >
+                          {num}
+                        </motion.span>
+                      </HapticButton>
                     ))}
-                    <Input
+                    <AnimatedInput
                       id="guests"
                       type="number"
                       min={7}
@@ -633,10 +696,14 @@ function ReservationContent() {
                       placeholder="7+"
                     />
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Date Picker */}
-                <div>
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.6 }}
+                >
                   <Label className="flex items-center gap-2 text-sm mb-2">
                     <CalendarIcon className="w-4 h-4 text-primary" />
                     {t('reservation.date')} *
@@ -655,11 +722,18 @@ function ReservationContent() {
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {formData.date ? format(new Date(formData.date), 'EEEE, MMMM d, yyyy') : 'Select date'}
-                        {formData.date && (
-                          <span className="ml-auto w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                            <Check className="w-3 h-3 text-primary-foreground" />
-                          </span>
-                        )}
+                        <AnimatePresence>
+                          {formData.date && (
+                            <motion.span 
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              exit={{ scale: 0 }}
+                              className="ml-auto w-5 h-5 rounded-full bg-primary flex items-center justify-center"
+                            >
+                              <Check className="w-3 h-3 text-primary-foreground" />
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 z-50" align="start" sideOffset={4}>
@@ -673,7 +747,7 @@ function ReservationContent() {
                     </PopoverContent>
                   </Popover>
                   
-                  {/* Quick date buttons */}
+                  {/* Quick date buttons with haptic feedback */}
                   <div className="flex flex-wrap gap-2 mt-2">
                     {[
                       { label: 'Today', date: new Date() },
@@ -684,24 +758,24 @@ function ReservationContent() {
                         const daysUntilSaturday = dayOfWeek === 0 ? 6 : 6 - dayOfWeek;
                         return addDays(today, daysUntilSaturday);
                       })() },
-                    ].map((option) => (
-                      <motion.button
+                    ].map((option, idx) => (
+                      <HapticButton
                         key={option.label}
                         type="button"
-                        whileTap={{ scale: 0.95 }}
+                        variant={formData.date === format(option.date, 'yyyy-MM-dd') ? "chipActive" : "chip"}
+                        size="chip"
+                        hapticIntensity="light"
                         onClick={() => setFormData({ ...formData, date: format(option.date, 'yyyy-MM-dd') })}
                         className={cn(
-                          "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                          formData.date === format(option.date, 'yyyy-MM-dd')
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted/70 text-muted-foreground hover:bg-muted"
+                          "px-3 py-1.5 text-xs font-medium",
+                          formData.date === format(option.date, 'yyyy-MM-dd') && "shadow-md shadow-primary/20"
                         )}
                       >
                         {option.label}
-                      </motion.button>
+                      </HapticButton>
                     ))}
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Time Picker */}
                 <div>
@@ -884,7 +958,7 @@ function ReservationContent() {
                     placeholder="Any dietary requirements or special occasions?"
                   />
                 </div>
-              </motion.div>
+              </AnimatedCard>
 
               {/* Policy - Collapsible style on mobile */}
               <motion.div 
