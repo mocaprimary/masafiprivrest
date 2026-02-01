@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useLanguage, LanguageProvider } from '@/contexts/LanguageContext';
-import { CartProvider } from '@/contexts/CartContext';
+import { CartProvider, useCart } from '@/contexts/CartContext';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar as CalendarIcon, Clock, Users, CreditCard, Shield, ArrowLeft, Check, Table, Sparkles } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Calendar as CalendarIcon, Clock, Users, CreditCard, Shield, ArrowLeft, Check, Table, Sparkles, ShoppingBag } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
@@ -19,8 +19,9 @@ import { cn } from '@/lib/utils';
 import { Calendar as CalendarPicker } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format, addDays } from 'date-fns';
+import { ReservationTypeSelector, ReservationType } from '@/components/ReservationTypeSelector';
 
-const DEPOSIT_AMOUNT = 100; // AED - configurable deposit amount
+const RESERVE_ONLY_DEPOSIT = 100; // AED - fixed deposit for reserve-only
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 // Client-side validation schema
@@ -47,7 +48,20 @@ interface ReservationResponse {
 
 function ReservationContent() {
   const { t } = useLanguage();
-  const [step, setStep] = useState<'form' | 'table' | 'payment' | 'success'>('form');
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { subtotal, clearCart, items } = useCart();
+  
+  // Check if coming from preorder flow
+  const isPreorderFlow = searchParams.get('type') === 'preorder';
+  
+  const [step, setStep] = useState<'type' | 'form' | 'table' | 'payment' | 'success'>(() => {
+    // Skip type selection if coming from preorder flow
+    return isPreorderFlow ? 'form' : 'type';
+  });
+  const [reservationType, setReservationType] = useState<ReservationType | null>(() => {
+    return isPreorderFlow ? 'preorder' : null;
+  });
   const [reservationNumber, setReservationNumber] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTable, setSelectedTable] = useState<{ id: string; table_number: number } | null>(null);
@@ -60,6 +74,14 @@ function ReservationContent() {
     time: '',
     requests: '',
   });
+
+  // Calculate deposit based on type
+  const getDepositAmount = () => {
+    if (reservationType === 'preorder') {
+      return Math.ceil(subtotal * 0.5); // 50% of cart total
+    }
+    return RESERVE_ONLY_DEPOSIT; // 100 AED fixed
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,7 +132,7 @@ function ReservationContent() {
           date: formData.date,
           time: formData.time,
           specialRequests: formData.requests.trim() || undefined,
-          depositAmount: DEPOSIT_AMOUNT,
+          depositAmount: getDepositAmount(),
           tableId: selectedTable?.id,
         }),
       });
@@ -282,17 +304,43 @@ function ReservationContent() {
           <div className="text-center mb-8">
             <CreditCard className="w-12 h-12 mx-auto text-primary mb-4" />
             <h1 className="font-display text-2xl font-bold text-foreground mb-2">
-              {t('reservation.deposit')}
+              {reservationType === 'preorder' ? 'Pre-Order Deposit' : t('reservation.deposit')}
             </h1>
             <p className="text-muted-foreground">
-              {t('reservation.depositNote')}
+              {reservationType === 'preorder' 
+                ? 'Pay 50% now, the rest when you arrive'
+                : t('reservation.depositNote')}
             </p>
           </div>
 
+          {/* Show preorder items if applicable */}
+          {reservationType === 'preorder' && items.length > 0 && (
+            <div className="glass-card rounded-xl p-4 mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <ShoppingBag className="w-4 h-4 text-primary" />
+                <span className="font-medium text-foreground">Your Pre-Order</span>
+              </div>
+              <div className="space-y-2 mb-3 max-h-40 overflow-y-auto">
+                {items.map((item) => (
+                  <div key={item.id} className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{item.quantity}x {item.name}</span>
+                    <span className="text-foreground">{item.price * item.quantity} AED</span>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-border pt-2 flex justify-between">
+                <span className="text-sm text-muted-foreground">Order Total</span>
+                <span className="font-medium text-foreground">{subtotal} AED</span>
+              </div>
+            </div>
+          )}
+
           <div className="glass-card rounded-xl p-6 mb-6">
             <div className="flex justify-between items-center mb-4">
-              <span className="text-muted-foreground">Security Deposit</span>
-              <span className="text-xl font-bold gold-text">{DEPOSIT_AMOUNT} {t('currency')}</span>
+              <span className="text-muted-foreground">
+                {reservationType === 'preorder' ? '50% Deposit' : 'Security Deposit'}
+              </span>
+              <span className="text-xl font-bold gold-text">{getDepositAmount()} {t('currency')}</span>
             </div>
             
             <div className="space-y-4">
@@ -326,8 +374,49 @@ function ReservationContent() {
           </div>
 
           <Button variant="gold" size="xl" className="w-full" onClick={handlePayment} disabled={isSubmitting}>
-            {isSubmitting ? 'Processing...' : `Pay ${DEPOSIT_AMOUNT} ${t('currency')} Deposit`}
+            {isSubmitting ? 'Processing...' : `Pay ${getDepositAmount()} ${t('currency')} Deposit`}
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Type selection step
+  if (step === 'type') {
+    return (
+      <div className="min-h-screen bg-background pt-16 sm:pt-20 pb-6 sm:pb-8 overflow-hidden">
+        {/* Background decorations */}
+        <div className="hidden sm:block fixed inset-0 pointer-events-none overflow-hidden">
+          <motion.div
+            className="absolute top-20 -left-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl"
+            animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-20 -right-20 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl"
+            animate={{ x: [0, -20, 0], y: [0, 30, 0] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </div>
+
+        <div className="container mx-auto px-3 sm:px-4 max-w-2xl relative">
+          <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 sm:mb-6 transition-colors text-sm">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Menu
+          </Link>
+
+          <ReservationTypeSelector
+            selectedType={reservationType}
+            onSelect={setReservationType}
+            onContinue={() => {
+              if (reservationType === 'preorder') {
+                // Redirect to preorder menu browsing page
+                navigate('/preorder-reserve');
+              } else {
+                setStep('form');
+              }
+            }}
+          />
         </div>
       </div>
     );
@@ -356,10 +445,20 @@ function ReservationContent() {
       </div>
 
       <div className="container mx-auto px-3 sm:px-4 max-w-4xl relative">
-        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 sm:mb-6 transition-colors text-sm">
+        <button
+          onClick={() => {
+            if (isPreorderFlow) {
+              // Go back to preorder menu
+              navigate('/preorder-reserve');
+            } else {
+              setStep('type');
+            }
+          }}
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 sm:mb-6 transition-colors text-sm"
+        >
           <ArrowLeft className="w-4 h-4" />
-          Back to Menu
-        </Link>
+          {isPreorderFlow ? 'Back to Menu' : 'Change Reservation Type'}
+        </button>
 
         {/* Header - Compact on mobile */}
         <motion.div 
@@ -375,7 +474,9 @@ function ReservationContent() {
             transition={{ delay: 0.2 }}
           >
             <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
-            <span className="text-xs sm:text-sm text-primary font-medium">Reserve Your Experience</span>
+            <span className="text-xs sm:text-sm text-primary font-medium">
+              {reservationType === 'preorder' ? 'Pre-Order & Reserve' : 'Reserve Your Table'}
+            </span>
           </motion.div>
           <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1 sm:mb-2">
             {t('reservation.title')}
@@ -825,8 +926,13 @@ function ReservationContent() {
               >
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-xs sm:text-sm text-muted-foreground">{t('reservation.deposit')}</p>
-                    <p className="text-xl sm:text-2xl font-bold gold-text">{DEPOSIT_AMOUNT} {t('currency')}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      {reservationType === 'preorder' ? '50% Deposit' : t('reservation.deposit')}
+                    </p>
+                    <p className="text-xl sm:text-2xl font-bold gold-text">{getDepositAmount()} {t('currency')}</p>
+                    {reservationType === 'preorder' && subtotal > 0 && (
+                      <p className="text-xs text-muted-foreground">Order: {subtotal} AED</p>
+                    )}
                   </div>
                   <Button type="submit" variant="gold" size="lg" className="shadow-lg h-12 px-6 sm:px-8 text-sm sm:text-base">
                     {t('reservation.confirm')}

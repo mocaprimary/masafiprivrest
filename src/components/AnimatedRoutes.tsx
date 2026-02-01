@@ -3,6 +3,7 @@ import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
 import Index from "@/pages/Index";
 import ReservationPage from "@/pages/ReservationPage";
+import PreorderReservePage from "@/pages/PreorderReservePage";
 import OrderPage from "@/pages/OrderPage";
 import CartPage from "@/pages/CartPage";
 import CheckinPage from "@/pages/CheckinPage";
@@ -98,6 +99,14 @@ export function AnimatedRoutes() {
           element={
             <PageTransition>
               <PreorderPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/preorder-reserve"
+          element={
+            <PageTransition>
+              <PreorderReservePage />
             </PageTransition>
           }
         />
