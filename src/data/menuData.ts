@@ -708,7 +708,7 @@ export const menuItems: MenuItem[] = [
     nameAr: 'بانا كوتا',
     description: 'Italian cream dessert with vanilla and berry sauce',
     descriptionAr: 'حلوى كريمة إيطالية بالفانيليا وصلصة التوت',
-    price: 32,
+    price: 24,
     category: 'desserts',
     image: '/placeholder.svg',
     ingredients: ['Cream', 'Vanilla', 'Berry sauce'],
