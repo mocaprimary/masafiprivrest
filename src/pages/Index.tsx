@@ -188,17 +188,17 @@ function MenuContent() {
         <HeroSection />
         
         {/* Menu Section with enhanced styling */}
-        <section className="container mx-auto px-4 py-12">
-          {/* Section Header */}
+        <section className="container mx-auto px-4 md:px-8 py-20">
+          {/* Section Header — editorial left-aligned */}
           <motion.div 
-            className="text-center mb-10"
+            className="mb-14"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
             <motion.span 
-              className="inline-block text-primary text-sm uppercase tracking-[0.3em] mb-3"
+              className="text-primary text-xs uppercase tracking-[0.3em] mb-3 block"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
@@ -207,7 +207,7 @@ function MenuContent() {
               {t('discoverMenu')}
             </motion.span>
             <motion.h2 
-              className="font-display text-4xl md:text-5xl font-bold gold-text mb-4"
+              className="font-display text-4xl md:text-6xl font-bold text-foreground mb-4"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -216,20 +216,16 @@ function MenuContent() {
               {t('ourMenu')}
             </motion.h2>
             <motion.div 
-              className="flex justify-center items-center gap-3"
-              initial={{ scaleX: 0 }}
+              className="w-16 h-0.5 bg-primary"
+              initial={{ scaleX: 0, originX: 0 }}
               whileInView={{ scaleX: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.5, duration: 0.8 }}
-            >
-              <div className="w-12 h-px bg-gradient-to-r from-transparent to-primary/50" />
-              <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-              <div className="w-12 h-px bg-gradient-to-l from-transparent to-primary/50" />
-            </motion.div>
+            />
           </motion.div>
 
           {/* Sticky Category Tabs */}
-          <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-md py-4 -mx-4 px-4 border-b border-border/30">
+          <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-xl py-4 -mx-4 px-4 border-b border-border/20">
             <CategoryTabs
               activeCategory={activeCategory}
               onCategoryChange={setActiveCategory}
@@ -237,7 +233,7 @@ function MenuContent() {
           </div>
 
           <motion.div 
-            className="mt-8"
+            className="mt-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
