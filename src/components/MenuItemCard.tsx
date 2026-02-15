@@ -19,25 +19,27 @@ export function MenuItemCard({ item, onClick, index }: MenuItemCardProps) {
   return (
     <motion.div
       onClick={onClick}
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ 
-        duration: 0.6, 
-        delay: (index % 4) * 0.08,
-        ease: [0.16, 1, 0.3, 1]
+        duration: 0.5, 
+        delay: (index % 4) * 0.1,
+        ease: [0.25, 0.46, 0.45, 0.94]
       }}
       whileHover={{ 
-        y: -4,
-        transition: { duration: 0.4, ease: "easeOut" }
+        y: -8,
+        transition: { duration: 0.3, ease: "easeOut" }
       }}
-      whileTap={{ scale: 0.99 }}
+      whileTap={{ scale: 0.98 }}
       className="menu-item-card group cursor-pointer"
     >
-      {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden">
+        {/* Image loading skeleton */}
         {!imageLoaded && (
-          <div className="absolute inset-0 bg-muted animate-pulse" />
+          <div className="absolute inset-0 bg-muted animate-pulse">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
+          </div>
         )}
         <motion.img
           src={item.image}
@@ -46,66 +48,108 @@ export function MenuItemCard({ item, onClick, index }: MenuItemCardProps) {
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
           onLoad={() => setImageLoaded(true)}
-          whileHover={{ scale: 1.05 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
+          whileHover={{ scale: 1.1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
         />
         
-        {/* Subtle bottom gradient */}
-        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-card to-transparent" />
+        {/* Gradient overlay on hover */}
+        <motion.div 
+          className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent"
+          initial={{ opacity: 0 }}
+          whileHover={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        />
         
         {!item.available && (
-          <div className="absolute inset-0 bg-background/80 flex items-center justify-center backdrop-blur-sm">
-            <span className="text-muted-foreground font-medium text-xs uppercase tracking-widest">
+          <motion.div 
+            className="absolute inset-0 bg-background/80 flex items-center justify-center backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <span className="text-muted-foreground font-medium px-4 py-2 bg-background/50 rounded-full">
               Sold Out
             </span>
-          </div>
+          </motion.div>
         )}
         
-        {/* Dietary badges — minimal, top-right */}
-        <div className="absolute top-3 right-3 flex gap-1.5">
+        {/* Dietary badges with stagger animation */}
+        <div className="absolute top-2 right-2 flex gap-1.5">
           {item.isVegan && (
-            <span className="w-7 h-7 rounded-full bg-success/20 backdrop-blur-md flex items-center justify-center border border-success/30">
-              <Leaf className="w-3.5 h-3.5 text-success" />
-            </span>
+            <motion.span 
+              className="badge-vegan backdrop-blur-sm"
+              initial={{ opacity: 0, scale: 0 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 300 }}
+            >
+              <Leaf className="w-3 h-3" />
+            </motion.span>
           )}
           {item.isSpicy && (
-            <span className="w-7 h-7 rounded-full bg-destructive/20 backdrop-blur-md flex items-center justify-center border border-destructive/30">
-              <Flame className="w-3.5 h-3.5 text-destructive" />
-            </span>
+            <motion.span 
+              className="bg-destructive/30 text-destructive-foreground backdrop-blur-sm inline-flex items-center px-2 py-0.5 rounded-full text-xs"
+              initial={{ opacity: 0, scale: 0 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.35, type: "spring", stiffness: 300 }}
+            >
+              <Flame className="w-3 h-3" />
+            </motion.span>
           )}
           {item.isGlutenFree && (
-            <span className="w-7 h-7 rounded-full bg-primary/20 backdrop-blur-md flex items-center justify-center border border-primary/30">
-              <WheatOff className="w-3.5 h-3.5 text-primary" />
-            </span>
+            <motion.span 
+              className="bg-amber/30 text-foreground backdrop-blur-sm inline-flex items-center px-2 py-0.5 rounded-full text-xs"
+              initial={{ opacity: 0, scale: 0 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, type: "spring", stiffness: 300 }}
+            >
+              <WheatOff className="w-3 h-3" />
+            </motion.span>
           )}
         </div>
       </div>
       
-      {/* Content */}
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-3 mb-2">
-          <h3 className="font-display text-lg font-bold text-foreground leading-snug group-hover:text-primary transition-colors duration-500">
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <h3 className="font-display text-lg font-semibold text-foreground leading-tight group-hover:text-primary transition-colors duration-300">
             {name}
           </h3>
-          <span className="text-primary font-semibold whitespace-nowrap text-sm">
+          <motion.span 
+            className="gold-text font-semibold whitespace-nowrap"
+            whileHover={{ scale: 1.05 }}
+          >
             {item.price} {t('currency')}
-          </span>
+          </motion.span>
         </div>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-sm text-muted-foreground line-clamp-2 group-hover:text-foreground/70 transition-colors duration-300">
           {description}
         </p>
         
         {item.allergens.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-3 pt-3 border-t border-border/30">
-            {item.allergens.slice(0, 3).map((allergen) => (
-              <span key={allergen} className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          <motion.div 
+            className="flex flex-wrap gap-1 mt-3"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+          >
+            {item.allergens.slice(0, 2).map((allergen, i) => (
+              <motion.span 
+                key={allergen} 
+                className="badge-allergen"
+                initial={{ opacity: 0, x: -10 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.25 + i * 0.05 }}
+              >
                 {allergen}
-              </span>
+              </motion.span>
             ))}
-            {item.allergens.length > 3 && (
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">+{item.allergens.length - 3}</span>
+            {item.allergens.length > 2 && (
+              <span className="badge-allergen">+{item.allergens.length - 2}</span>
             )}
-          </div>
+          </motion.div>
         )}
       </div>
     </motion.div>
