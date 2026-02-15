@@ -187,49 +187,31 @@ function MenuContent() {
       <main className="pt-16 pb-32">
         <HeroSection />
         
-        {/* Menu Section with enhanced styling */}
-        <section className="container mx-auto px-4 py-12">
+        {/* Menu Section */}
+        <section className="container mx-auto px-4 py-16">
           {/* Section Header */}
           <motion.div 
-            className="text-center mb-10"
-            initial={{ opacity: 0, y: 30 }}
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
           >
-            <motion.span 
-              className="inline-block text-primary text-sm uppercase tracking-[0.3em] mb-3"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-            >
+            <span className="inline-block text-primary text-sm uppercase tracking-[0.3em] mb-3 font-medium">
               {t('discoverMenu')}
-            </motion.span>
-            <motion.h2 
-              className="font-display text-4xl md:text-5xl font-bold gold-text mb-4"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-            >
+            </span>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-5">
               {t('ourMenu')}
-            </motion.h2>
-            <motion.div 
-              className="flex justify-center items-center gap-3"
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5, duration: 0.8 }}
-            >
-              <div className="w-12 h-px bg-gradient-to-r from-transparent to-primary/50" />
+            </h2>
+            <div className="flex justify-center items-center gap-3">
+              <div className="w-12 h-px bg-gradient-to-r from-transparent to-primary/40" />
               <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-              <div className="w-12 h-px bg-gradient-to-l from-transparent to-primary/50" />
-            </motion.div>
+              <div className="w-12 h-px bg-gradient-to-l from-transparent to-primary/40" />
+            </div>
           </motion.div>
 
           {/* Sticky Category Tabs */}
-          <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-md py-4 -mx-4 px-4 border-b border-border/30">
+          <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-md py-3 -mx-4 px-4 border-b border-border/20">
             <CategoryTabs
               activeCategory={activeCategory}
               onCategoryChange={setActiveCategory}
