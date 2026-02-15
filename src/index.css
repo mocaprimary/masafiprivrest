@@ -6,110 +6,110 @@
 
 @layer base {
   :root {
-    /* Mediterranean Warm Palette */
-    --background: 34 20% 72%;
-    --foreground: 30 10% 15%;
+    /* Warm Cream & Coral Palette */
+    --background: 36 30% 92%;
+    --foreground: 20 12% 15%;
 
-    --card: 34 18% 80%;
-    --card-foreground: 30 10% 15%;
+    --card: 36 25% 96%;
+    --card-foreground: 20 12% 15%;
 
-    --popover: 34 20% 78%;
-    --popover-foreground: 30 10% 15%;
+    --popover: 36 28% 95%;
+    --popover-foreground: 20 12% 15%;
 
-    /* Burnt Orange / Terra Cotta Primary */
-    --primary: 16 68% 47%;
-    --primary-foreground: 34 30% 95%;
+    /* Coral Red Primary */
+    --primary: 8 72% 52%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Warm Tan Secondary */
-    --secondary: 34 15% 68%;
-    --secondary-foreground: 30 10% 18%;
+    /* Warm Beige Secondary */
+    --secondary: 36 20% 86%;
+    --secondary-foreground: 20 12% 18%;
 
-    --muted: 34 12% 65%;
-    --muted-foreground: 30 8% 42%;
+    --muted: 36 15% 82%;
+    --muted-foreground: 20 8% 45%;
 
-    /* Golden Yellow Accent */
-    --accent: 42 80% 52%;
-    --accent-foreground: 30 10% 12%;
+    /* Golden Amber Accent */
+    --accent: 38 75% 50%;
+    --accent-foreground: 20 12% 12%;
 
     --destructive: 0 65% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Success - Olive */
-    --success: 145 35% 38%;
+    /* Success - Olive Green */
+    --success: 140 35% 38%;
     --success-foreground: 0 0% 100%;
 
-    --border: 30 15% 60%;
-    --input: 34 18% 76%;
-    --ring: 16 68% 47%;
+    --border: 30 18% 82%;
+    --input: 36 22% 90%;
+    --ring: 8 72% 52%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --gold: 42 80% 52%;
-    --gold-light: 42 70% 65%;
-    --gold-dark: 42 75% 40%;
-    --amber: 16 68% 47%;
-    --sand: 34 25% 82%;
-    --desert: 34 18% 74%;
-    --charcoal: 30 10% 15%;
-    --charcoal-deep: 30 12% 10%;
+    --gold: 38 75% 50%;
+    --gold-light: 38 65% 65%;
+    --gold-dark: 38 70% 40%;
+    --amber: 8 72% 52%;
+    --sand: 36 30% 88%;
+    --desert: 36 22% 90%;
+    --charcoal: 20 12% 15%;
+    --charcoal-deep: 20 15% 10%;
 
     /* Gradients */
-    --gradient-gold: linear-gradient(135deg, hsl(16 68% 47%), hsl(16 60% 38%));
-    --gradient-dark: linear-gradient(180deg, hsl(30 10% 15%), hsl(30 12% 10%));
-    --gradient-shimmer: linear-gradient(90deg, transparent, hsl(42 80% 52% / 0.2), transparent);
+    --gradient-gold: linear-gradient(135deg, hsl(8 72% 52%), hsl(8 65% 44%));
+    --gradient-dark: linear-gradient(180deg, hsl(20 12% 15%), hsl(20 15% 10%));
+    --gradient-shimmer: linear-gradient(90deg, transparent, hsl(38 75% 50% / 0.2), transparent);
 
     /* Shadows */
-    --shadow-gold: 0 4px 30px hsl(16 68% 47% / 0.25);
-    --shadow-card: 0 4px 20px hsl(30 15% 40% / 0.15);
-    --shadow-elevated: 0 12px 40px hsl(30 15% 40% / 0.2);
+    --shadow-gold: 0 4px 30px hsl(8 72% 52% / 0.2);
+    --shadow-card: 0 4px 20px hsl(20 12% 15% / 0.08);
+    --shadow-elevated: 0 12px 40px hsl(20 12% 15% / 0.12);
 
     /* Sidebar */
-    --sidebar-background: 30 10% 15%;
-    --sidebar-foreground: 34 20% 82%;
-    --sidebar-primary: 16 68% 47%;
-    --sidebar-primary-foreground: 34 30% 95%;
-    --sidebar-accent: 30 12% 22%;
-    --sidebar-accent-foreground: 34 20% 82%;
-    --sidebar-border: 30 10% 25%;
-    --sidebar-ring: 16 68% 47%;
+    --sidebar-background: 20 12% 15%;
+    --sidebar-foreground: 36 25% 88%;
+    --sidebar-primary: 8 72% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 20 10% 22%;
+    --sidebar-accent-foreground: 36 25% 88%;
+    --sidebar-border: 20 10% 25%;
+    --sidebar-ring: 8 72% 52%;
   }
 
   .light {
-    --background: 34 25% 90%;
-    --foreground: 30 10% 15%;
+    --background: 36 35% 95%;
+    --foreground: 20 12% 12%;
 
-    --card: 34 20% 95%;
-    --card-foreground: 30 10% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 12% 12%;
 
-    --popover: 34 20% 95%;
-    --popover-foreground: 30 10% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 12% 12%;
 
-    --primary: 16 65% 45%;
-    --primary-foreground: 34 30% 95%;
+    --primary: 8 70% 50%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 34 15% 85%;
-    --secondary-foreground: 30 12% 20%;
+    --secondary: 36 18% 90%;
+    --secondary-foreground: 20 14% 18%;
 
-    --muted: 34 12% 82%;
-    --muted-foreground: 30 8% 50%;
+    --muted: 36 12% 86%;
+    --muted-foreground: 20 8% 50%;
 
-    --accent: 42 75% 48%;
-    --accent-foreground: 30 10% 12%;
+    --accent: 38 70% 48%;
+    --accent-foreground: 20 12% 12%;
 
     --destructive: 0 68% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 145 32% 34%;
+    --success: 140 32% 34%;
     --success-foreground: 0 0% 100%;
 
-    --border: 34 15% 78%;
-    --input: 34 18% 88%;
-    --ring: 16 65% 45%;
+    --border: 36 18% 84%;
+    --input: 36 20% 92%;
+    --ring: 8 70% 50%;
 
-    --shadow-gold: 0 4px 30px hsl(16 65% 45% / 0.2);
-    --shadow-card: 0 4px 20px hsl(30 10% 15% / 0.06);
-    --shadow-elevated: 0 12px 40px hsl(30 10% 15% / 0.1);
+    --shadow-gold: 0 4px 30px hsl(8 70% 50% / 0.15);
+    --shadow-card: 0 4px 20px hsl(20 12% 12% / 0.05);
+    --shadow-elevated: 0 12px 40px hsl(20 12% 12% / 0.08);
   }
 }
 
@@ -364,37 +364,37 @@
 
 @keyframes pulseGold {
   0%, 100% { 
-    box-shadow: 0 0 0 0 hsl(16 68% 47% / 0.4);
+    box-shadow: 0 0 0 0 hsl(8 72% 52% / 0.4);
   }
   50% { 
-    box-shadow: 0 0 0 10px hsl(16 68% 47% / 0);
+    box-shadow: 0 0 0 10px hsl(8 72% 52% / 0);
   }
 }
 
 @keyframes highlightChange {
   0% { 
-    box-shadow: 0 0 0 4px hsl(16 68% 47% / 0.8), 0 0 20px hsl(16 68% 47% / 0.4);
+    box-shadow: 0 0 0 4px hsl(8 72% 52% / 0.8), 0 0 20px hsl(8 72% 52% / 0.4);
     transform: scale(1.02);
   }
   30% {
-    box-shadow: 0 0 0 8px hsl(16 68% 47% / 0.4), 0 0 30px hsl(16 68% 47% / 0.3);
+    box-shadow: 0 0 0 8px hsl(8 72% 52% / 0.4), 0 0 30px hsl(8 72% 52% / 0.3);
     transform: scale(1.05);
   }
   100% { 
-    box-shadow: 0 0 0 0 hsl(16 68% 47% / 0);
+    box-shadow: 0 0 0 0 hsl(8 72% 52% / 0);
     transform: scale(1);
   }
 }
 
 @keyframes ringPulse {
   0% {
-    box-shadow: 0 0 0 0 hsl(145 35% 38% / 0.7);
+    box-shadow: 0 0 0 0 hsl(140 35% 38% / 0.7);
   }
   50% {
-    box-shadow: 0 0 0 12px hsl(145 35% 38% / 0);
+    box-shadow: 0 0 0 12px hsl(140 35% 38% / 0);
   }
   100% {
-    box-shadow: 0 0 0 0 hsl(145 35% 38% / 0);
+    box-shadow: 0 0 0 0 hsl(140 35% 38% / 0);
   }
 }
 
