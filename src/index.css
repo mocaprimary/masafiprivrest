@@ -6,110 +6,110 @@
 
 @layer base {
   :root {
-    /* Midnight Navy & Copper Palette */
-    --background: 220 35% 8%;
-    --foreground: 30 20% 93%;
+    /* Deep Emerald & Vibrant Amber Palette */
+    --background: 160 40% 5%;
+    --foreground: 40 30% 95%;
 
-    --card: 220 30% 12%;
-    --card-foreground: 30 20% 93%;
+    --card: 160 35% 9%;
+    --card-foreground: 40 30% 95%;
 
-    --popover: 220 32% 10%;
-    --popover-foreground: 30 20% 93%;
+    --popover: 160 38% 7%;
+    --popover-foreground: 40 30% 95%;
 
-    /* Copper Primary */
-    --primary: 25 70% 55%;
-    --primary-foreground: 220 35% 8%;
+    /* Vibrant Amber Primary */
+    --primary: 35 95% 55%;
+    --primary-foreground: 160 40% 5%;
 
-    /* Navy Secondary */
-    --secondary: 220 25% 18%;
-    --secondary-foreground: 30 15% 88%;
+    /* Emerald Secondary */
+    --secondary: 160 30% 15%;
+    --secondary-foreground: 40 20% 90%;
 
-    --muted: 220 20% 20%;
-    --muted-foreground: 220 12% 55%;
+    --muted: 160 22% 17%;
+    --muted-foreground: 160 12% 52%;
 
-    /* Accent - Bronze */
-    --accent: 32 55% 48%;
-    --accent-foreground: 30 20% 93%;
+    /* Accent - Warm Coral */
+    --accent: 15 85% 58%;
+    --accent-foreground: 40 30% 95%;
 
-    --destructive: 0 65% 50%;
-    --destructive-foreground: 30 20% 93%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 40 30% 95%;
 
-    /* Success - Sage */
-    --success: 155 45% 40%;
-    --success-foreground: 30 20% 93%;
+    /* Success - Bright Mint */
+    --success: 155 70% 45%;
+    --success-foreground: 160 40% 5%;
 
-    --border: 220 18% 20%;
-    --input: 220 25% 18%;
-    --ring: 25 70% 55%;
+    --border: 160 20% 16%;
+    --input: 160 30% 14%;
+    --ring: 35 95% 55%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --gold: 25 70% 55%;
-    --gold-light: 30 60% 68%;
-    --gold-dark: 20 75% 38%;
-    --amber: 32 75% 50%;
-    --sand: 35 25% 82%;
-    --desert: 220 30% 22%;
-    --charcoal: 220 30% 12%;
-    --charcoal-deep: 220 35% 6%;
+    --gold: 35 95% 55%;
+    --gold-light: 40 85% 68%;
+    --gold-dark: 30 90% 40%;
+    --amber: 20 90% 52%;
+    --sand: 38 35% 82%;
+    --desert: 160 35% 18%;
+    --charcoal: 160 35% 9%;
+    --charcoal-deep: 160 40% 3%;
 
     /* Gradients */
-    --gradient-gold: linear-gradient(135deg, hsl(25 70% 55%), hsl(32 75% 50%));
-    --gradient-dark: linear-gradient(180deg, hsl(220 30% 12%), hsl(220 35% 8%));
-    --gradient-shimmer: linear-gradient(90deg, transparent, hsl(25 70% 55% / 0.1), transparent);
+    --gradient-gold: linear-gradient(135deg, hsl(35 95% 55%), hsl(15 85% 58%));
+    --gradient-dark: linear-gradient(180deg, hsl(160 35% 9%), hsl(160 40% 5%));
+    --gradient-shimmer: linear-gradient(90deg, transparent, hsl(35 95% 55% / 0.15), transparent);
 
     /* Shadows */
-    --shadow-gold: 0 4px 30px hsl(25 70% 55% / 0.2);
-    --shadow-card: 0 4px 20px hsl(220 40% 3% / 0.4);
-    --shadow-elevated: 0 12px 40px hsl(220 40% 3% / 0.5);
+    --shadow-gold: 0 4px 30px hsl(35 95% 55% / 0.25);
+    --shadow-card: 0 4px 20px hsl(160 50% 2% / 0.5);
+    --shadow-elevated: 0 12px 40px hsl(160 50% 2% / 0.6);
 
     /* Sidebar */
-    --sidebar-background: 220 32% 10%;
-    --sidebar-foreground: 30 15% 88%;
-    --sidebar-primary: 25 70% 55%;
-    --sidebar-primary-foreground: 220 35% 8%;
-    --sidebar-accent: 220 25% 18%;
-    --sidebar-accent-foreground: 30 15% 88%;
-    --sidebar-border: 220 18% 20%;
-    --sidebar-ring: 25 70% 55%;
+    --sidebar-background: 160 38% 7%;
+    --sidebar-foreground: 40 20% 90%;
+    --sidebar-primary: 35 95% 55%;
+    --sidebar-primary-foreground: 160 40% 5%;
+    --sidebar-accent: 160 30% 15%;
+    --sidebar-accent-foreground: 40 20% 90%;
+    --sidebar-border: 160 20% 16%;
+    --sidebar-ring: 35 95% 55%;
   }
 
   .light {
-    --background: 220 15% 96%;
-    --foreground: 220 25% 12%;
+    --background: 140 18% 96%;
+    --foreground: 160 30% 10%;
 
-    --card: 220 10% 100%;
-    --card-foreground: 220 25% 12%;
+    --card: 140 12% 100%;
+    --card-foreground: 160 30% 10%;
 
-    --popover: 220 10% 100%;
-    --popover-foreground: 220 25% 12%;
+    --popover: 140 12% 100%;
+    --popover-foreground: 160 30% 10%;
 
-    --primary: 25 65% 45%;
-    --primary-foreground: 220 10% 98%;
+    --primary: 35 90% 48%;
+    --primary-foreground: 140 12% 98%;
 
-    --secondary: 220 12% 92%;
-    --secondary-foreground: 220 25% 18%;
+    --secondary: 140 15% 92%;
+    --secondary-foreground: 160 25% 18%;
 
-    --muted: 220 10% 90%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 140 10% 90%;
+    --muted-foreground: 160 10% 42%;
 
-    --accent: 32 50% 48%;
-    --accent-foreground: 220 10% 98%;
+    --accent: 15 75% 52%;
+    --accent-foreground: 140 12% 98%;
 
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 220 10% 98%;
+    --destructive: 0 75% 52%;
+    --destructive-foreground: 140 12% 98%;
 
-    --success: 155 50% 35%;
-    --success-foreground: 220 10% 98%;
+    --success: 155 60% 38%;
+    --success-foreground: 140 12% 98%;
 
-    --border: 220 12% 88%;
-    --input: 220 12% 90%;
-    --ring: 25 65% 45%;
+    --border: 140 14% 87%;
+    --input: 140 14% 90%;
+    --ring: 35 90% 48%;
 
-    --shadow-gold: 0 4px 30px hsl(25 65% 45% / 0.15);
-    --shadow-card: 0 4px 20px hsl(220 25% 12% / 0.08);
-    --shadow-elevated: 0 12px 40px hsl(220 25% 12% / 0.12);
+    --shadow-gold: 0 4px 30px hsl(35 90% 48% / 0.18);
+    --shadow-card: 0 4px 20px hsl(160 30% 10% / 0.08);
+    --shadow-elevated: 0 12px 40px hsl(160 30% 10% / 0.14);
   }
 }
 
@@ -364,24 +364,24 @@
 
 @keyframes pulseGold {
   0%, 100% { 
-    box-shadow: 0 0 0 0 hsl(25 70% 55% / 0.4);
+    box-shadow: 0 0 0 0 hsl(35 95% 55% / 0.4);
   }
   50% { 
-    box-shadow: 0 0 0 10px hsl(25 70% 55% / 0);
+    box-shadow: 0 0 0 10px hsl(35 95% 55% / 0);
   }
 }
 
 @keyframes highlightChange {
   0% { 
-    box-shadow: 0 0 0 4px hsl(25 70% 55% / 0.8), 0 0 20px hsl(25 70% 55% / 0.4);
+    box-shadow: 0 0 0 4px hsl(35 95% 55% / 0.8), 0 0 20px hsl(35 95% 55% / 0.4);
     transform: scale(1.02);
   }
   30% {
-    box-shadow: 0 0 0 8px hsl(25 70% 55% / 0.4), 0 0 30px hsl(25 70% 55% / 0.3);
+    box-shadow: 0 0 0 8px hsl(35 95% 55% / 0.4), 0 0 30px hsl(35 95% 55% / 0.3);
     transform: scale(1.05);
   }
   100% { 
-    box-shadow: 0 0 0 0 hsl(25 70% 55% / 0);
+    box-shadow: 0 0 0 0 hsl(35 95% 55% / 0);
     transform: scale(1);
   }
 }
