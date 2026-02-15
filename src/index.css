@@ -6,110 +6,110 @@
 
 @layer base {
   :root {
-    /* Luxury Desert Palette */
-    --background: 30 10% 8%;
-    --foreground: 40 20% 95%;
+    /* Deep Teal & Warm Gold Palette */
+    --background: 180 25% 7%;
+    --foreground: 45 25% 95%;
 
-    --card: 30 12% 12%;
-    --card-foreground: 40 20% 95%;
+    --card: 180 20% 11%;
+    --card-foreground: 45 25% 95%;
 
-    --popover: 30 12% 10%;
-    --popover-foreground: 40 20% 95%;
+    --popover: 180 22% 9%;
+    --popover-foreground: 45 25% 95%;
 
-    /* Gold/Amber Primary */
-    --primary: 38 70% 50%;
-    --primary-foreground: 30 10% 8%;
+    /* Warm Gold Primary */
+    --primary: 42 75% 52%;
+    --primary-foreground: 180 25% 7%;
 
-    /* Warm Secondary */
-    --secondary: 30 15% 18%;
-    --secondary-foreground: 40 20% 90%;
+    /* Teal Secondary */
+    --secondary: 180 18% 16%;
+    --secondary-foreground: 45 20% 90%;
 
-    --muted: 30 10% 20%;
-    --muted-foreground: 30 10% 60%;
+    --muted: 180 15% 18%;
+    --muted-foreground: 180 10% 55%;
 
-    /* Accent - Rose Gold */
-    --accent: 15 50% 55%;
-    --accent-foreground: 40 20% 95%;
+    /* Accent - Warm Amber */
+    --accent: 28 60% 55%;
+    --accent-foreground: 45 25% 95%;
 
     --destructive: 0 65% 50%;
-    --destructive-foreground: 40 20% 95%;
+    --destructive-foreground: 45 25% 95%;
 
-    /* Success - Emerald */
-    --success: 160 60% 40%;
-    --success-foreground: 40 20% 95%;
+    /* Success - Mint */
+    --success: 160 55% 42%;
+    --success-foreground: 45 25% 95%;
 
-    --border: 30 15% 20%;
-    --input: 30 15% 18%;
-    --ring: 38 70% 50%;
+    --border: 180 15% 18%;
+    --input: 180 18% 16%;
+    --ring: 42 75% 52%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --gold: 38 70% 50%;
-    --gold-light: 40 65% 65%;
-    --gold-dark: 35 75% 35%;
-    --amber: 30 80% 45%;
-    --sand: 35 30% 85%;
-    --desert: 25 40% 25%;
-    --charcoal: 30 10% 12%;
-    --charcoal-deep: 30 10% 6%;
+    --gold: 42 75% 52%;
+    --gold-light: 45 65% 65%;
+    --gold-dark: 38 78% 38%;
+    --amber: 28 80% 48%;
+    --sand: 40 30% 85%;
+    --desert: 180 30% 20%;
+    --charcoal: 180 20% 11%;
+    --charcoal-deep: 180 25% 5%;
 
     /* Gradients */
-    --gradient-gold: linear-gradient(135deg, hsl(38 70% 50%), hsl(25 80% 45%));
-    --gradient-dark: linear-gradient(180deg, hsl(30 12% 12%), hsl(30 10% 8%));
-    --gradient-shimmer: linear-gradient(90deg, transparent, hsl(38 70% 50% / 0.1), transparent);
+    --gradient-gold: linear-gradient(135deg, hsl(42 75% 52%), hsl(28 80% 48%));
+    --gradient-dark: linear-gradient(180deg, hsl(180 20% 11%), hsl(180 25% 7%));
+    --gradient-shimmer: linear-gradient(90deg, transparent, hsl(42 75% 52% / 0.1), transparent);
 
     /* Shadows */
-    --shadow-gold: 0 4px 30px hsl(38 70% 50% / 0.15);
-    --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.3);
-    --shadow-elevated: 0 12px 40px hsl(0 0% 0% / 0.4);
+    --shadow-gold: 0 4px 30px hsl(42 75% 52% / 0.18);
+    --shadow-card: 0 4px 20px hsl(180 30% 3% / 0.35);
+    --shadow-elevated: 0 12px 40px hsl(180 30% 3% / 0.45);
 
     /* Sidebar */
-    --sidebar-background: 30 12% 10%;
-    --sidebar-foreground: 40 20% 90%;
-    --sidebar-primary: 38 70% 50%;
-    --sidebar-primary-foreground: 30 10% 8%;
-    --sidebar-accent: 30 15% 18%;
-    --sidebar-accent-foreground: 40 20% 90%;
-    --sidebar-border: 30 15% 20%;
-    --sidebar-ring: 38 70% 50%;
+    --sidebar-background: 180 22% 9%;
+    --sidebar-foreground: 45 20% 90%;
+    --sidebar-primary: 42 75% 52%;
+    --sidebar-primary-foreground: 180 25% 7%;
+    --sidebar-accent: 180 18% 16%;
+    --sidebar-accent-foreground: 45 20% 90%;
+    --sidebar-border: 180 15% 18%;
+    --sidebar-ring: 42 75% 52%;
   }
 
   .light {
-    --background: 40 30% 97%;
-    --foreground: 30 20% 10%;
+    --background: 170 20% 96%;
+    --foreground: 180 20% 10%;
 
-    --card: 40 25% 100%;
-    --card-foreground: 30 20% 10%;
+    --card: 170 15% 100%;
+    --card-foreground: 180 20% 10%;
 
-    --popover: 40 25% 100%;
-    --popover-foreground: 30 20% 10%;
+    --popover: 170 15% 100%;
+    --popover-foreground: 180 20% 10%;
 
-    --primary: 35 75% 40%;
-    --primary-foreground: 40 30% 98%;
+    --primary: 42 75% 42%;
+    --primary-foreground: 170 20% 98%;
 
-    --secondary: 35 20% 92%;
-    --secondary-foreground: 30 20% 15%;
+    --secondary: 170 15% 92%;
+    --secondary-foreground: 180 20% 15%;
 
-    --muted: 35 15% 90%;
-    --muted-foreground: 30 10% 45%;
+    --muted: 170 12% 90%;
+    --muted-foreground: 180 10% 45%;
 
-    --accent: 15 45% 50%;
-    --accent-foreground: 40 30% 98%;
+    --accent: 28 50% 50%;
+    --accent-foreground: 170 20% 98%;
 
     --destructive: 0 70% 50%;
-    --destructive-foreground: 40 30% 98%;
+    --destructive-foreground: 170 20% 98%;
 
     --success: 160 55% 35%;
-    --success-foreground: 40 30% 98%;
+    --success-foreground: 170 20% 98%;
 
-    --border: 35 20% 88%;
-    --input: 35 20% 90%;
-    --ring: 35 75% 40%;
+    --border: 170 15% 88%;
+    --input: 170 15% 90%;
+    --ring: 42 75% 42%;
 
-    --shadow-gold: 0 4px 30px hsl(35 75% 40% / 0.15);
-    --shadow-card: 0 4px 20px hsl(30 20% 10% / 0.08);
-    --shadow-elevated: 0 12px 40px hsl(30 20% 10% / 0.12);
+    --shadow-gold: 0 4px 30px hsl(42 75% 42% / 0.15);
+    --shadow-card: 0 4px 20px hsl(180 20% 10% / 0.08);
+    --shadow-elevated: 0 12px 40px hsl(180 20% 10% / 0.12);
   }
 }
 
@@ -364,24 +364,24 @@
 
 @keyframes pulseGold {
   0%, 100% { 
-    box-shadow: 0 0 0 0 hsl(38 70% 50% / 0.4);
+    box-shadow: 0 0 0 0 hsl(42 75% 52% / 0.4);
   }
   50% { 
-    box-shadow: 0 0 0 10px hsl(38 70% 50% / 0);
+    box-shadow: 0 0 0 10px hsl(42 75% 52% / 0);
   }
 }
 
 @keyframes highlightChange {
   0% { 
-    box-shadow: 0 0 0 4px hsl(38 70% 50% / 0.8), 0 0 20px hsl(38 70% 50% / 0.4);
+    box-shadow: 0 0 0 4px hsl(42 75% 52% / 0.8), 0 0 20px hsl(42 75% 52% / 0.4);
     transform: scale(1.02);
   }
   30% {
-    box-shadow: 0 0 0 8px hsl(38 70% 50% / 0.4), 0 0 30px hsl(38 70% 50% / 0.3);
+    box-shadow: 0 0 0 8px hsl(42 75% 52% / 0.4), 0 0 30px hsl(42 75% 52% / 0.3);
     transform: scale(1.05);
   }
   100% { 
-    box-shadow: 0 0 0 0 hsl(38 70% 50% / 0);
+    box-shadow: 0 0 0 0 hsl(42 75% 52% / 0);
     transform: scale(1);
   }
 }
