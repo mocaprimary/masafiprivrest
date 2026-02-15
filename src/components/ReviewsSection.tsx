@@ -53,7 +53,7 @@ function StarRating({ rating }: { rating: number }) {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-4 h-4 ${
+          className={`w-3.5 h-3.5 ${
             star <= rating
               ? 'fill-primary text-primary'
               : 'fill-muted text-muted'
@@ -70,116 +70,76 @@ function ReviewCard({ review, index }: { review: Review; index: number }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.6, delay: index * 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
-      viewport={{ once: true, margin: "-50px" }}
-      whileHover={{ y: -5, transition: { duration: 0.3 } }}
-      className="bg-card border border-border/50 rounded-xl p-6 relative group"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      viewport={{ once: true, margin: "-40px" }}
+      className="bg-card rounded-2xl p-6 border border-border/40 shadow-card hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 relative"
     >
-      <motion.div
-        initial={{ opacity: 0, rotate: -20 }}
-        whileInView={{ opacity: 1, rotate: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: index * 0.15 + 0.3, type: "spring", stiffness: 200 }}
-      >
-        <Quote className="absolute top-4 right-4 w-8 h-8 text-primary/20 group-hover:text-primary/40 transition-colors" />
-      </motion.div>
+      <Quote className="absolute top-5 right-5 w-7 h-7 text-primary/10" />
       
       <div className="flex items-center gap-3 mb-4">
-        <motion.div 
-          className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center"
-          initial={{ scale: 0 }}
-          whileInView={{ scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: index * 0.15 + 0.2, type: "spring", stiffness: 300 }}
-        >
-          <span className="text-primary font-semibold text-sm">
+        <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20">
+          <span className="text-primary font-bold text-sm">
             {review.name.charAt(0)}
           </span>
-        </motion.div>
+        </div>
         <div>
-          <h4 className="font-medium text-foreground">{review.name}</h4>
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.15 + 0.25 }}
-          >
-            <StarRating rating={review.rating} />
-          </motion.div>
+          <h4 className="font-semibold text-foreground text-sm">{review.name}</h4>
+          <StarRating rating={review.rating} />
         </div>
       </div>
       
-      <motion.p 
-        className="text-muted-foreground text-sm leading-relaxed"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ delay: index * 0.15 + 0.35 }}
-      >
+      <p className="text-muted-foreground text-sm leading-relaxed">
         "{comment}"
-      </motion.p>
+      </p>
     </motion.div>
   );
 }
 
 export function ReviewsSection() {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   
   const averageRating = reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
 
   return (
-    <section className="py-16 bg-card/50">
+    <section className="py-20">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mb-14"
         >
-          <p className="text-muted-foreground text-sm uppercase tracking-[0.2em] mb-2">
+          <p className="text-primary text-sm uppercase tracking-[0.3em] mb-3 font-medium">
             {language === 'ar' ? 'آراء الضيوف' : 'Guest Reviews'}
           </p>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-6">
             {language === 'ar' ? 'ماذا يقول ضيوفنا' : 'What Our Guests Say'}
           </h2>
           
-          <motion.div 
-            className="flex items-center justify-center gap-2"
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
-          >
+          <div className="flex items-center justify-center gap-3">
             <div className="flex gap-0.5">
-              {[1, 2, 3, 4, 5].map((star, i) => (
-                <motion.div
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
                   key={star}
-                  initial={{ opacity: 0, scale: 0, rotate: -180 }}
-                  whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.4 + i * 0.1, type: "spring", stiffness: 200 }}
-                >
-                  <Star
-                    className={`w-5 h-5 ${
-                      star <= Math.round(averageRating)
-                        ? 'fill-primary text-primary'
-                        : 'fill-muted text-muted'
-                    }`}
-                  />
-                </motion.div>
+                  className={`w-5 h-5 ${
+                    star <= Math.round(averageRating)
+                      ? 'fill-primary text-primary'
+                      : 'fill-muted text-muted'
+                  }`}
+                />
               ))}
             </div>
-            <span className="text-foreground font-semibold">{averageRating.toFixed(1)}</span>
+            <span className="text-foreground font-bold text-lg">{averageRating.toFixed(1)}</span>
             <span className="text-muted-foreground text-sm">
               ({reviews.length} {language === 'ar' ? 'تقييمات' : 'reviews'})
             </span>
-          </motion.div>
+          </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {reviews.map((review, index) => (
             <ReviewCard key={review.id} review={review} index={index} />
           ))}
