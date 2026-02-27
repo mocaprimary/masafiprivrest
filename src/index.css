@@ -6,14 +6,14 @@
 
 @layer base {
   :root {
-    /* Warm Cream & Coral Palette */
-    --background: 36 30% 92%;
+    /* Warm Sandy Beige Palette */
+    --background: 34 22% 82%;
     --foreground: 20 12% 15%;
 
-    --card: 36 25% 96%;
+    --card: 34 20% 88%;
     --card-foreground: 20 12% 15%;
 
-    --popover: 36 28% 95%;
+    --popover: 34 22% 86%;
     --popover-foreground: 20 12% 15%;
 
     /* Coral Red Primary */
@@ -21,11 +21,11 @@
     --primary-foreground: 0 0% 100%;
 
     /* Warm Beige Secondary */
-    --secondary: 36 20% 86%;
+    --secondary: 34 18% 78%;
     --secondary-foreground: 20 12% 18%;
 
-    --muted: 36 15% 82%;
-    --muted-foreground: 20 8% 45%;
+    --muted: 34 14% 72%;
+    --muted-foreground: 20 8% 42%;
 
     /* Golden Amber Accent */
     --accent: 38 75% 50%;
@@ -38,8 +38,8 @@
     --success: 140 35% 38%;
     --success-foreground: 0 0% 100%;
 
-    --border: 30 18% 82%;
-    --input: 36 22% 90%;
+    --border: 30 16% 74%;
+    --input: 34 20% 84%;
     --ring: 8 72% 52%;
 
     --radius: 0.75rem;
@@ -49,8 +49,8 @@
     --gold-light: 38 65% 65%;
     --gold-dark: 38 70% 40%;
     --amber: 8 72% 52%;
-    --sand: 36 30% 88%;
-    --desert: 36 22% 90%;
+    --sand: 34 22% 80%;
+    --desert: 34 20% 84%;
     --charcoal: 20 12% 15%;
     --charcoal-deep: 20 15% 10%;
 
@@ -76,23 +76,23 @@
   }
 
   .light {
-    --background: 36 35% 95%;
+    --background: 34 25% 85%;
     --foreground: 20 12% 12%;
 
-    --card: 0 0% 100%;
+    --card: 34 22% 90%;
     --card-foreground: 20 12% 12%;
 
-    --popover: 0 0% 100%;
+    --popover: 34 22% 88%;
     --popover-foreground: 20 12% 12%;
 
     --primary: 8 70% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 36 18% 90%;
+    --secondary: 34 16% 80%;
     --secondary-foreground: 20 14% 18%;
 
-    --muted: 36 12% 86%;
-    --muted-foreground: 20 8% 50%;
+    --muted: 34 12% 76%;
+    --muted-foreground: 20 8% 46%;
 
     --accent: 38 70% 48%;
     --accent-foreground: 20 12% 12%;
@@ -103,8 +103,8 @@
     --success: 140 32% 34%;
     --success-foreground: 0 0% 100%;
 
-    --border: 36 18% 84%;
-    --input: 36 20% 92%;
+    --border: 34 16% 76%;
+    --input: 34 18% 84%;
     --ring: 8 70% 50%;
 
     --shadow-gold: 0 4px 30px hsl(8 70% 50% / 0.15);
